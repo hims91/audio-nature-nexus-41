@@ -45,5 +45,23 @@ export const portfolioItems: PortfolioItem[] = [
     description: "Restored and remastered a collection of rare vintage recordings from the 1940s, preserving their authentic character.",
     imageUrl: "https://images.unsplash.com/photo-1465379944081-7f47de8d74ac",
     audioUrl: "https://example.com/audio4.mp3"
+  },
+  {
+    id: 5,
+    title: "Summer Festival Tour",
+    client: "Folk Rock Band",
+    category: "Live Event Work",
+    description: "Provided FOH mixing and live recording services for a 15-city summer festival tour, capturing the energy of each performance.",
+    imageUrl: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81",
+    audioUrl: "https://example.com/audio5.mp3"
+  },
+  {
+    id: 6,
+    title: "Jazz Club Residency",
+    client: "Downtown Jazz Ensemble",
+    category: "Live Event Work",
+    description: "Handled sound reinforcement and multi-track recording for a 6-week jazz club residency, balancing acoustic instruments in an intimate space.",
+    imageUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d",
+    audioUrl: "https://example.com/audio6.mp3"
   }
 ];

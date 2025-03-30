@@ -42,6 +42,12 @@ const Navbar: React.FC = () => {
               Services
             </button>
             <button 
+              onClick={() => scrollToSection("live-events")}
+              className="text-nature-bark hover:text-nature-forest transition-colors"
+            >
+              Live Events
+            </button>
+            <button 
               onClick={() => scrollToSection("portfolio")}
               className="text-nature-bark hover:text-nature-forest transition-colors"
             >
@@ -86,6 +92,12 @@ const Navbar: React.FC = () => {
               className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors"
             >
               Services
+            </button>
+            <button 
+              onClick={() => scrollToSection("live-events")}
+              className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors"
+            >
+              Live Events
             </button>
             <button 
               onClick={() => scrollToSection("portfolio")}
