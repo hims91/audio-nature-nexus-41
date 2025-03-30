@@ -20,11 +20,11 @@ const Footer: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Headphones className="h-8 w-8 text-nature-cream" />
-              <span className="text-xl font-bold">NatureSound Studio</span>
+              <span className="text-xl font-bold">Terra Echo Studio</span>
             </div>
             
             <p className="text-sm text-nature-cream/80">
-              Professional audio engineering and sound design services inspired by the natural world.
+              Bridging the gap between natural acoustics and modern sound design.
             </p>
           </div>
           
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-nature-cream/70 mb-4 md:mb-0">
-            &copy; {currentYear} NatureSound Studio. All rights reserved.
+            &copy; {currentYear} Terra Echo Studio. All rights reserved.
           </p>
           
           <div className="flex space-x-4">

@@ -36,28 +36,28 @@ const About: React.FC = () => {
               <Card className="bg-white/70 border-nature-moss/30">
                 <CardContent className="p-6">
                   <h4 className="text-xl font-semibold text-nature-forest mb-2">Education</h4>
-                  <p className="text-nature-bark">Master's in Audio Engineering from Berklee College of Music</p>
+                  <p className="text-nature-bark">Bachelor's Degree of Science in Audio Engineering</p>
                 </CardContent>
               </Card>
               
               <Card className="bg-white/70 border-nature-moss/30">
                 <CardContent className="p-6">
                   <h4 className="text-xl font-semibold text-nature-forest mb-2">Experience</h4>
-                  <p className="text-nature-bark">Worked with Grammy-winning artists and major film productions</p>
+                  <p className="text-nature-bark">Worked with many artists, bands, podcasts, short films, and commercials</p>
                 </CardContent>
               </Card>
               
               <Card className="bg-white/70 border-nature-moss/30">
                 <CardContent className="p-6">
                   <h4 className="text-xl font-semibold text-nature-forest mb-2">Specialties</h4>
-                  <p className="text-nature-bark">Nature-inspired sound design and organic audio processing</p>
+                  <p className="text-nature-bark">Top-notch sound with extreme attention to detail</p>
                 </CardContent>
               </Card>
               
               <Card className="bg-white/70 border-nature-moss/30">
                 <CardContent className="p-6">
                   <h4 className="text-xl font-semibold text-nature-forest mb-2">Approach</h4>
-                  <p className="text-nature-bark">Blending traditional techniques with modern innovation</p>
+                  <p className="text-nature-bark">Blending natural and live recorded sound with the warmth of electronic elements</p>
                 </CardContent>
               </Card>
             </div>

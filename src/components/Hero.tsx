@@ -17,7 +17,7 @@ const Hero: React.FC = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
         style={{ 
-          backgroundImage: `url(https://images.unsplash.com/photo-1605810230434-7631ac76ec81)`,
+          backgroundImage: `url(https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxzZWFyY2h8Mnx8dHJlZSUyMHNwZWFrZXJzfHwwfHx8fDE2MjE5Mzg0MzZ8MA&ixlib=rb-4.0.3&q=80&w=1080)`,
           filter: 'brightness(0.7)'
         }}
       >
@@ -42,11 +42,11 @@ const Hero: React.FC = () => {
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-md">
-            Where Nature Meets Sound
+            Terra Echo Studio
           </h1>
           
           <p className="text-xl md:text-2xl text-nature-cream mb-10 drop-shadow-md">
-            Professional audio engineering and sound design services inspired by the natural world
+            Bridging the gap between natural acoustics and modern sound design
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
