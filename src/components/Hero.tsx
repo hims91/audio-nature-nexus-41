@@ -46,7 +46,7 @@ const Hero: React.FC = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-nature-cream mb-10 drop-shadow-md">
-            Bridging the gap between natural acoustics and modern sound design
+            Authentic Audio, Naturally Engineered.
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">

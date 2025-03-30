@@ -24,7 +24,7 @@ const Footer: React.FC = () => {
             </div>
             
             <p className="text-sm text-nature-cream/80">
-              Bridging the gap between natural acoustics and modern sound design.
+              Authentic Audio, Naturally Engineered.
             </p>
           </div>
           
