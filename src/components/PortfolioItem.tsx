@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PortfolioItem as PortfolioItemType } from "@/data/portfolio";
 import AudioPlayer from "./AudioPlayer";
+import VideoPlayer from "./VideoPlayer";
 
 interface PortfolioItemProps {
   item: PortfolioItemType;
@@ -31,6 +32,7 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
         <p className="mb-4 text-nature-bark">{item.description}</p>
         
         <AudioPlayer audioUrl={item.audioUrl} />
+        <VideoPlayer videoUrl={item.videoUrl} />
       </CardContent>
     </Card>
   );
