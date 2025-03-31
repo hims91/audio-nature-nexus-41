@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -8,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Music, Video, Upload, Save, FileVideo, Music2 } from "lucide-react";
+import { Music, Video, Upload, Save, FileVideo, Music2, Trash2, PlusCircle, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { portfolioItems, PortfolioItem } from "@/data/portfolio";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const ManagePortfolio: React.FC = () => {
   const navigate = useNavigate();
@@ -23,19 +23,34 @@ const ManagePortfolio: React.FC = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoFileName, setVideoFileName] = useState("");
   
+  const [newLinkTitle, setNewLinkTitle] = useState("");
+  const [newLinkUrl, setNewLinkUrl] = useState("");
+  const [newLinkIcon, setNewLinkIcon] = useState("link");
+  
+  const iconOptions = [
+    { value: "link", label: "Generic Link" },
+    { value: "youtube", label: "YouTube" },
+    { value: "instagram", label: "Instagram" },
+    { value: "facebook", label: "Facebook" },
+    { value: "twitter", label: "Twitter" },
+    { value: "linkedin", label: "LinkedIn" }
+  ];
+  
   const handleSelectItem = (item: PortfolioItem) => {
     setCurrentItem(item);
     setAudioFileName("");
     setAudioFile(null);
     setVideoFileName("");
     setVideoFile(null);
+    setNewLinkTitle("");
+    setNewLinkUrl("");
+    setNewLinkIcon("link");
   };
   
   const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      // Check if file is audio
       if (!file.type.startsWith('audio/')) {
         toast({
           title: "Invalid file type",
@@ -54,7 +69,6 @@ const ManagePortfolio: React.FC = () => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      // Check if file is video
       if (!file.type.startsWith('video/')) {
         toast({
           title: "Invalid file type",
@@ -69,22 +83,68 @@ const ManagePortfolio: React.FC = () => {
     }
   };
   
+  const handleAddLink = () => {
+    if (!currentItem) return;
+    if (!newLinkTitle || !newLinkUrl) {
+      toast({
+        title: "Missing information",
+        description: "Please provide both a title and URL for the link",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const newLink = {
+      title: newLinkTitle,
+      url: newLinkUrl,
+      icon: newLinkIcon
+    };
+    
+    const updatedOtherLinks = currentItem.otherLinks ? [...currentItem.otherLinks, newLink] : [newLink];
+    
+    setCurrentItem({
+      ...currentItem,
+      otherLinks: updatedOtherLinks
+    });
+    
+    setNewLinkTitle("");
+    setNewLinkUrl("");
+    setNewLinkIcon("link");
+    
+    toast({
+      title: "Link added",
+      description: `Added link to ${newLinkTitle}`,
+    });
+  };
+  
+  const handleRemoveLink = (index: number) => {
+    if (!currentItem || !currentItem.otherLinks) return;
+    
+    const updatedLinks = [...currentItem.otherLinks];
+    updatedLinks.splice(index, 1);
+    
+    setCurrentItem({
+      ...currentItem,
+      otherLinks: updatedLinks
+    });
+    
+    toast({
+      title: "Link removed",
+      description: "The link has been removed",
+    });
+  };
+  
   const handleUpdateItem = () => {
     if (!currentItem) return;
     
     let updatedAudioUrl = currentItem.audioUrl;
     let updatedVideoUrl = currentItem.videoUrl || "";
     
-    // In a real application, this would upload the file to a server
-    // For now, we'll simulate the update with a toast notification
-    
     if (audioFile) {
-      // In a real app, you'd upload the file to a server and get the URL back
       updatedAudioUrl = `/audio/${audioFileName}`;
     }
     
     if (videoFile) {
-      // In a real app, you'd upload the file to a server and get the URL back
       updatedVideoUrl = `/videos/${videoFileName}`;
     }
     
@@ -108,8 +168,6 @@ const ManagePortfolio: React.FC = () => {
       ].filter(Boolean).join(", ") || "Updated details",
     });
     
-    // In a real application, we would save this to a database
-    // Instructions for the user
     if (audioFile || videoFile) {
       toast({
         title: "Manual file upload required",
@@ -208,7 +266,7 @@ const ManagePortfolio: React.FC = () => {
                       </div>
                       
                       <Tabs defaultValue="audio" className="w-full mt-6">
-                        <TabsList className="grid w-full grid-cols-2">
+                        <TabsList className="grid w-full grid-cols-3">
                           <TabsTrigger value="audio" className="flex items-center">
                             <Music2 className="mr-2 h-4 w-4" />
                             Audio
@@ -216,6 +274,10 @@ const ManagePortfolio: React.FC = () => {
                           <TabsTrigger value="video" className="flex items-center">
                             <FileVideo className="mr-2 h-4 w-4" />
                             Video
+                          </TabsTrigger>
+                          <TabsTrigger value="links" className="flex items-center">
+                            <LinkIcon className="mr-2 h-4 w-4" />
+                            Links
                           </TabsTrigger>
                         </TabsList>
                         
@@ -288,6 +350,102 @@ const ManagePortfolio: React.FC = () => {
                                 />
                               </div>
                             )}
+                          </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="links" className="mt-4">
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="spotifyUrl">Spotify Link</Label>
+                              <Input 
+                                id="spotifyUrl" 
+                                placeholder="https://open.spotify.com/..."
+                                value={currentItem.spotifyUrl || ""}
+                                onChange={(e) => setCurrentItem({...currentItem, spotifyUrl: e.target.value})}
+                              />
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Add a link to the Spotify album, track, or playlist
+                              </p>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-sm font-medium mb-2">Other Links</h3>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+                                <Input 
+                                  placeholder="Link title" 
+                                  value={newLinkTitle}
+                                  onChange={(e) => setNewLinkTitle(e.target.value)}
+                                />
+                                <Input 
+                                  placeholder="URL (https://...)" 
+                                  value={newLinkUrl}
+                                  onChange={(e) => setNewLinkUrl(e.target.value)}
+                                />
+                                <div className="flex gap-2">
+                                  <Select 
+                                    value={newLinkIcon} 
+                                    onValueChange={setNewLinkIcon}
+                                  >
+                                    <SelectTrigger className="w-full">
+                                      <SelectValue placeholder="Icon" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {iconOptions.map(option => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                          {option.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <Button 
+                                    type="button" 
+                                    size="icon" 
+                                    onClick={handleAddLink}
+                                    className="bg-nature-forest hover:bg-nature-leaf"
+                                  >
+                                    <PlusCircle className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              
+                              {currentItem.otherLinks && currentItem.otherLinks.length > 0 ? (
+                                <div className="space-y-2">
+                                  {currentItem.otherLinks.map((link, index) => (
+                                    <div key={index} className="flex items-center justify-between border p-2 rounded">
+                                      <div className="flex items-center">
+                                        <div className="bg-nature-stone p-1 rounded mr-2">
+                                          {(() => {
+                                            switch(link.icon) {
+                                              case 'youtube': return <Music className="h-4 w-4 text-white" />;
+                                              case 'instagram': return <Music className="h-4 w-4 text-white" />;
+                                              case 'facebook': return <Music className="h-4 w-4 text-white" />;
+                                              case 'twitter': return <Music className="h-4 w-4 text-white" />;
+                                              case 'linkedin': return <Music className="h-4 w-4 text-white" />;
+                                              default: return <LinkIcon className="h-4 w-4 text-white" />;
+                                            }
+                                          })()}
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-medium">{link.title}</p>
+                                          <p className="text-xs text-nature-bark truncate">{link.url}</p>
+                                        </div>
+                                      </div>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        onClick={() => handleRemoveLink(index)}
+                                        className="text-red-500 hover:text-red-700"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-sm text-muted-foreground italic">No additional links added yet</p>
+                              )}
+                            </div>
                           </div>
                         </TabsContent>
                       </Tabs>
