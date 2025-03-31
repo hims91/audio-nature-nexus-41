@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 
 const Contact: React.FC = () => {
   const [name, setName] = useState("");
@@ -129,7 +129,7 @@ const Contact: React.FC = () => {
                 <Mail className="h-6 w-6 text-nature-cream mt-1" />
                 <div>
                   <h4 className="font-medium mb-1">Email</h4>
-                  <p className="text-nature-cream/90">contact@naturalsoundstudio.com</p>
+                  <p className="text-nature-cream/90">willhall.sound@gmail.com</p>
                 </div>
               </div>
               
@@ -137,18 +137,7 @@ const Contact: React.FC = () => {
                 <Phone className="h-6 w-6 text-nature-cream mt-1" />
                 <div>
                   <h4 className="font-medium mb-1">Phone</h4>
-                  <p className="text-nature-cream/90">(555) 123-4567</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <MapPin className="h-6 w-6 text-nature-cream mt-1" />
-                <div>
-                  <h4 className="font-medium mb-1">Studio Location</h4>
-                  <p className="text-nature-cream/90">
-                    123 Forest Avenue<br />
-                    Portland, OR 97205
-                  </p>
+                  <p className="text-nature-cream/90">(828) 773-1570</p>
                 </div>
               </div>
               

@@ -25,41 +25,55 @@ const About: React.FC = () => {
           {/* Content Side */}
           <div className="space-y-6">
             <h3 className="text-2xl md:text-3xl font-semibold text-nature-forest">
-              Audio Engineering & Sound Design with a Natural Touch
+              Hi, I'm Will Hall
             </h3>
             
             <p className="text-lg text-nature-bark">
-              With over 10 years of experience in audio engineering and sound design, I bring a unique perspective inspired by the natural world to every project. My approach blends technical precision with organic creativity.
+              I'm an audio engineer and sound designer obsessed with the power of sonic storytelling. 
+              With a passion for blending natural soundscapes with modern production techniques, I 
+              specialize in crafting immersive audio experiences. I bring a deep love for sound and 
+              a detail-driven approach to every project.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
               <Card className="bg-white/70 border-nature-moss/30">
                 <CardContent className="p-6">
                   <h4 className="text-xl font-semibold text-nature-forest mb-2">Education</h4>
-                  <p className="text-nature-bark">Bachelor's Degree of Science in Audio Engineering</p>
+                  <p className="text-nature-bark">I earned my Bachelor of Science in Audio Engineering from Belmont University, with a minor in Music Business. Alongside my formal education, I am Dante Level 3 certified, equipping me with advanced expertise in audio networking and signal flow.</p>
                 </CardContent>
               </Card>
               
               <Card className="bg-white/70 border-nature-moss/30">
                 <CardContent className="p-6">
                   <h4 className="text-xl font-semibold text-nature-forest mb-2">Experience</h4>
-                  <p className="text-nature-bark">Worked with many artists, bands, podcasts, short films, and commercials</p>
+                  <p className="text-nature-bark">With over seven years of freelance experience, I've worked on short films, commercials, 150+ podcast episodes, and countless band projects—from tracking and mixing to mastering and post-production. I've had the privilege of collaborating with talented artists/Creators like Spookie, Nashville Tour Stop, and Grace Pelle, helping shape their sonic identity.</p>
                 </CardContent>
               </Card>
               
               <Card className="bg-white/70 border-nature-moss/30">
                 <CardContent className="p-6">
                   <h4 className="text-xl font-semibold text-nature-forest mb-2">Specialties</h4>
-                  <p className="text-nature-bark">Top-notch sound with extreme attention to detail</p>
+                  <p className="text-nature-bark">My expertise spans music editing, mixing, mastering, sound design, podcast editing, sound for picture, and audio restoration. Whether fine-tuning a track for release or bringing a film's soundscape to life, I focus on clarity, depth, and emotional impact.</p>
                 </CardContent>
               </Card>
               
               <Card className="bg-white/70 border-nature-moss/30">
                 <CardContent className="p-6">
                   <h4 className="text-xl font-semibold text-nature-forest mb-2">Approach</h4>
-                  <p className="text-nature-bark">Blending natural and live recorded sound with the warmth of electronic elements</p>
+                  <p className="text-nature-bark">I believe that sound should feel organic, immersive, and emotionally resonant. My approach blends natural and live-recorded elements with the warmth of electronic production, creating textures that feel both timeless and modern. By carefully sculpting sonic landscapes, I ensure every project has depth, clarity, and a unique signature.</p>
                 </CardContent>
               </Card>
+            </div>
+            
+            {/* Philosophy Section */}
+            <div className="mt-8 bg-white/70 border-nature-moss/30 rounded-lg p-6 shadow-sm">
+              <h4 className="text-xl font-semibold text-nature-forest mb-3">My Philosophy on Sound</h4>
+              <p className="text-nature-bark">
+                Sound is more than just vibration—it's emotion, movement, and memory. A single note can 
+                transport you, a well-placed sound can shift a mood, and a carefully crafted mix can make 
+                the intangible feel real. I strive to create sonic landscapes that don't just sound good 
+                but feel alive.
+              </p>
             </div>
           </div>
         </div>

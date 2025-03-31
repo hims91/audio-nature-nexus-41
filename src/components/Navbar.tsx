@@ -24,7 +24,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Headphones className="h-8 w-8 text-nature-forest" />
-            <span className="text-xl font-bold text-nature-forest">Terra Echo Studio</span>
+            <span className="text-xl font-bold text-nature-forest">Will Hall Sound Studios</span>
           </div>
           
           {/* Desktop Navigation */}

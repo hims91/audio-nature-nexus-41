@@ -42,7 +42,7 @@ const Hero: React.FC = () => {
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-md">
-            Terra Echo Studio
+            Will Hall Sound Studios
           </h1>
           
           <p className="text-xl md:text-2xl text-nature-cream mb-10 drop-shadow-md">

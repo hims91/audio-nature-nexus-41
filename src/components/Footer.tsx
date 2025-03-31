@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Headphones className="h-8 w-8 text-nature-cream" />
-              <span className="text-xl font-bold">Terra Echo Studio</span>
+              <span className="text-xl font-bold">Will Hall Sound Studios</span>
             </div>
             
             <p className="text-sm text-nature-cream/80">
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-nature-cream/70 mb-4 md:mb-0">
-            &copy; {currentYear} Terra Echo Studio. All rights reserved.
+            &copy; {currentYear} Will Hall Sound Studios. All rights reserved.
           </p>
           
           <div className="flex space-x-4">
