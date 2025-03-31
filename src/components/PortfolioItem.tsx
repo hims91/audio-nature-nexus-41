@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { PortfolioItem as PortfolioItemType } from "@/data/portfolio";
 import AudioPlayer from "./AudioPlayer";
 import VideoPlayer from "./VideoPlayer";
+import { FileVideo, Music } from "lucide-react";
 
 interface PortfolioItemProps {
   item: PortfolioItemType;
@@ -31,8 +32,25 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
         <p className="text-sm text-nature-stone/80 mb-3">Client: {item.client}</p>
         <p className="mb-4 text-nature-bark">{item.description}</p>
         
-        <AudioPlayer audioUrl={item.audioUrl} />
-        <VideoPlayer videoUrl={item.videoUrl} />
+        {item.audioUrl && (
+          <div className="mb-3">
+            <div className="flex items-center mb-2 text-nature-forest">
+              <Music className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">Audio Sample</span>
+            </div>
+            <AudioPlayer audioUrl={item.audioUrl} />
+          </div>
+        )}
+        
+        {item.videoUrl && (
+          <div className="mt-4">
+            <div className="flex items-center mb-2 text-nature-forest">
+              <FileVideo className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">Video Preview</span>
+            </div>
+            <VideoPlayer videoUrl={item.videoUrl} />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

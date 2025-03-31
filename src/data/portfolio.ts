@@ -43,13 +43,13 @@ export const portfolioItems: PortfolioItem[] = [
   },
   {
     id: 4,
-    title: "Vintage Vinyl Restoration",
-    client: "Heritage Music Collection",
-    category: "Audio Restoration",
-    description: "Restored and remastered a collection of rare vintage recordings from the 1940s, preserving their authentic character.",
-    imageUrl: "https://images.unsplash.com/photo-1465379944081-7f47de8d74ac",
+    title: "Cinematic Short Film",
+    client: "Independent Filmmaker",
+    category: "Sound for Picture",
+    description: "Complete sound design, foley, and final mix for an award-winning short film, creating an immersive sonic landscape.",
+    imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728",
     audioUrl: "/audio/demo4.mp3",
-    videoUrl: ""
+    videoUrl: "/videos/film-snippet.mp4"
   },
   {
     id: 5,
@@ -70,5 +70,15 @@ export const portfolioItems: PortfolioItem[] = [
     imageUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d",
     audioUrl: "/audio/demo6.mp3",
     videoUrl: ""
+  },
+  {
+    id: 7,
+    title: "Commercial Soundtrack",
+    client: "Outdoor Lifestyle Brand",
+    category: "Sound for Picture",
+    description: "Composed and produced a custom soundtrack for a national commercial campaign, blending organic instruments with modern production.",
+    imageUrl: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4",
+    audioUrl: "/audio/demo7.mp3",
+    videoUrl: "/videos/commercial.mp4"
   }
 ];

@@ -64,9 +64,7 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Studio Hours</h4>
             <ul className="space-y-2 text-nature-cream/80">
-              <li>Monday - Friday: 9:00 AM - 6:00 PM</li>
-              <li>Saturday: By appointment</li>
-              <li>Sunday: Closed</li>
+              <li>Monday - Sunday: 9:00 AM - 6:00 PM</li>
             </ul>
           </div>
         </div>
