@@ -182,6 +182,17 @@ const ManagePortfolio: React.FC = () => {
     setVideoFileName("");
   };
   
+  const getIconComponent = (icon: string) => {
+    switch(icon) {
+      case 'youtube': return <Music className="h-4 w-4 text-white" />;
+      case 'instagram': return <Music className="h-4 w-4 text-white" />;
+      case 'facebook': return <Music className="h-4 w-4 text-white" />;
+      case 'twitter': return <Music className="h-4 w-4 text-white" />;
+      case 'linkedin': return <Music className="h-4 w-4 text-white" />;
+      default: return <LinkIcon className="h-4 w-4 text-white" />;
+    }
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -415,16 +426,7 @@ const ManagePortfolio: React.FC = () => {
                                     <div key={index} className="flex items-center justify-between border p-2 rounded">
                                       <div className="flex items-center">
                                         <div className="bg-nature-stone p-1 rounded mr-2">
-                                          {(() => {
-                                            switch(link.icon) {
-                                              case 'youtube': return <Music className="h-4 w-4 text-white" />;
-                                              case 'instagram': return <Music className="h-4 w-4 text-white" />;
-                                              case 'facebook': return <Music className="h-4 w-4 text-white" />;
-                                              case 'twitter': return <Music className="h-4 w-4 text-white" />;
-                                              case 'linkedin': return <Music className="h-4 w-4 text-white" />;
-                                              default: return <LinkIcon className="h-4 w-4 text-white" />;
-                                            }
-                                          })()}
+                                          {getIconComponent(link.icon)}
                                         </div>
                                         <div>
                                           <p className="text-sm font-medium">{link.title}</p>

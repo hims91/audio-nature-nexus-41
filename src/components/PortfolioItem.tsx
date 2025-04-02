@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { PortfolioItem as PortfolioItemType } from "@/data/portfolio";
 import AudioPlayer from "./AudioPlayer";
 import VideoPlayer from "./VideoPlayer";
-import { FileVideo, Music, Link as LinkIcon, Spotify } from "lucide-react";
-import { YouTube, Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
+import { FileVideo, Music, Link as LinkIcon } from "lucide-react";
+import { Youtube, Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
 
 interface PortfolioItemProps {
   item: PortfolioItemType;
@@ -16,7 +16,7 @@ interface PortfolioItemProps {
 const getIconComponent = (iconName: string) => {
   switch (iconName) {
     case "youtube":
-      return <YouTube className="h-4 w-4" />;
+      return <Youtube className="h-4 w-4" />;
     case "instagram":
       return <Instagram className="h-4 w-4" />;
     case "facebook":
@@ -26,7 +26,7 @@ const getIconComponent = (iconName: string) => {
     case "linkedin":
       return <Linkedin className="h-4 w-4" />;
     case "spotify":
-      return <Spotify className="h-4 w-4" />;
+      return <Music className="h-4 w-4" />; // Using Music icon for Spotify as a fallback
     case "link":
     default:
       return <LinkIcon className="h-4 w-4" />;
@@ -69,7 +69,7 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#1DB954] text-white hover:bg-opacity-90 transition-colors"
                 >
-                  <Spotify className="h-3.5 w-3.5 mr-1" />
+                  <Music className="h-3.5 w-3.5 mr-1" />
                   Spotify
                 </a>
               )}
