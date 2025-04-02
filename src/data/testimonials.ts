@@ -35,5 +35,12 @@ export const testimonials: Testimonial[] = [
     author: "Robert Chen",
     role: "Archivist",
     company: "Heritage Sound Collection"
+  },
+  {
+    id: 5,
+    content: "Will is truly a prolific and multi talented producer, mixing and mastering engineer. He brought my EP to life and I always know to send my own client mixes off to him for mastering. I'm always taken back to his attention to detail and he's honestly taught me so much about sound design as a whole and has helped me develop my own ear. I love how much he understands artistry and the importance of the sonic landscape. He is also such an awesome human, friend and is so passionate about what he does. 10/10 recommend working with Will !!!",
+    author: "Grace Pelle",
+    role: "Artist",
+    company: "Independent"
   }
 ];

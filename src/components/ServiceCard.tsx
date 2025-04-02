@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { AudioWaveform, Headphones, Music, Folder, Mic, Image, Star } from "lucide-react";
+import { AudioWaveform, Headphones, Music, Folder, Mic, Image, Star, Volume2, Wand2 } from "lucide-react";
 import { Service } from "@/data/services";
 
 interface ServiceCardProps {
@@ -23,6 +23,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
         return <Mic className="h-12 w-12 text-nature-forest" />;
       case "image":
         return <Image className="h-12 w-12 text-nature-forest" />;
+      case "volume-2":
+        return <Volume2 className="h-12 w-12 text-nature-forest" />;
+      case "wand-2":
+        return <Wand2 className="h-12 w-12 text-nature-forest" />;
       case "star":
         return <Star className="h-12 w-12 text-nature-forest" />;
       default:

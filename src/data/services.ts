@@ -48,5 +48,11 @@ export const services: Service[] = [
     title: "Live Event Work",
     description: "Professional live sound engineering services including FOH mixing, monitor mixing, and high-quality live recordings of performances and events.",
     icon: "volume-2"
+  },
+  {
+    id: 8,
+    title: "Audio Restoration",
+    description: "Specialized techniques to remove noise, clicks, hums, and other artifacts from audio recordings, restoring clarity to vintage or damaged materials.",
+    icon: "wand-2"
   }
 ];
