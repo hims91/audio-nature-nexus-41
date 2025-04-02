@@ -1,11 +1,21 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PortfolioItem from "./PortfolioItem";
-import { portfolioItems } from "@/data/portfolio";
+import { portfolioItems as initialPortfolioItems } from "@/data/portfolio";
 import { Button } from "@/components/ui/button";
 
 const Portfolio: React.FC = () => {
   const [filter, setFilter] = useState<string | null>(null);
+  
+  // Load items from localStorage or use initial data
+  const [portfolioItems, setPortfolioItems] = useState(initialPortfolioItems);
+  
+  useEffect(() => {
+    const savedItems = localStorage.getItem('portfolioItems');
+    if (savedItems) {
+      setPortfolioItems(JSON.parse(savedItems));
+    }
+  }, []);
   
   const categories = ["All", ...new Set(portfolioItems.map(item => item.category))];
   

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,14 +10,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Music, Video, Upload, Save, FileVideo, Music2, Trash2, PlusCircle, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { portfolioItems, PortfolioItem } from "@/data/portfolio";
+import { portfolioItems as initialPortfolioItems, PortfolioItem } from "@/data/portfolio";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const ManagePortfolio: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [items, setItems] = useState<PortfolioItem[]>(portfolioItems);
+  
+  // Load items from localStorage or use initial data
+  const [items, setItems] = useState<PortfolioItem[]>(() => {
+    const savedItems = localStorage.getItem('portfolioItems');
+    return savedItems ? JSON.parse(savedItems) : initialPortfolioItems;
+  });
+  
   const [currentItem, setCurrentItem] = useState<PortfolioItem | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioFileName, setAudioFileName] = useState("");
@@ -26,6 +33,11 @@ const ManagePortfolio: React.FC = () => {
   const [newLinkTitle, setNewLinkTitle] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
   const [newLinkIcon, setNewLinkIcon] = useState("link");
+  
+  // Save items to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('portfolioItems', JSON.stringify(items));
+  }, [items]);
   
   const iconOptions = [
     { value: "link", label: "Generic Link" },

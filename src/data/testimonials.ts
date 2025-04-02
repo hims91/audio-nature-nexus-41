@@ -9,13 +9,6 @@ export interface Testimonial {
 
 export const testimonials: Testimonial[] = [
   {
-    id: 1,
-    content: "The sound design work transformed our documentary. The forest ambience captured exactly what we were looking for - natural yet cinematic. Highly recommended!",
-    author: "Sarah Johnson",
-    role: "Director",
-    company: "Wildlight Films"
-  },
-  {
     id: 2,
     content: "Our podcast sounds incredible after working together. The clarity and warmth achieved in our field recordings is remarkable. Professional, responsive, and truly talented.",
     author: "Mike Thompson",
