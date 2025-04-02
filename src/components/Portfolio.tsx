@@ -3,24 +3,31 @@ import React, { useState, useEffect } from "react";
 import PortfolioItem from "./PortfolioItem";
 import { portfolioItems as initialPortfolioItems } from "@/data/portfolio";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const Portfolio: React.FC = () => {
   const [filter, setFilter] = useState<string | null>(null);
+  const { toast } = useToast();
   
   // Load items from localStorage or use initial data
   const [portfolioItems, setPortfolioItems] = useState(initialPortfolioItems);
   
   useEffect(() => {
-    const savedItems = localStorage.getItem('portfolioItems');
-    if (savedItems) {
-      try {
+    try {
+      const savedItems = localStorage.getItem('portfolioItems');
+      if (savedItems) {
         const parsedItems = JSON.parse(savedItems);
         setPortfolioItems(parsedItems);
-      } catch (error) {
-        console.error("Error parsing portfolio items from localStorage:", error);
       }
+    } catch (error) {
+      console.error("Error loading portfolio items from localStorage:", error);
+      toast({
+        title: "Error Loading Portfolio",
+        description: "There was an issue loading your portfolio data. Using default data instead.",
+        variant: "destructive"
+      });
     }
-  }, []);
+  }, [toast]);
   
   const categories = ["All", ...new Set(portfolioItems.map(item => item.category))];
   

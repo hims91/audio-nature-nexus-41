@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -20,8 +19,13 @@ const ManagePortfolio: React.FC = () => {
   
   // Load items from localStorage or use initial data
   const [items, setItems] = useState<PortfolioItem[]>(() => {
-    const savedItems = localStorage.getItem('portfolioItems');
-    return savedItems ? JSON.parse(savedItems) : initialPortfolioItems;
+    try {
+      const savedItems = localStorage.getItem('portfolioItems');
+      return savedItems ? JSON.parse(savedItems) : initialPortfolioItems;
+    } catch (error) {
+      console.error("Error loading portfolio items:", error);
+      return initialPortfolioItems;
+    }
   });
   
   const [currentItem, setCurrentItem] = useState<PortfolioItem | null>(null);
@@ -37,10 +41,36 @@ const ManagePortfolio: React.FC = () => {
   const [newLinkUrl, setNewLinkUrl] = useState("");
   const [newLinkIcon, setNewLinkIcon] = useState("link");
   
-  // Save items to localStorage whenever they change
+  // Save items to localStorage whenever they change, with error handling
   useEffect(() => {
-    localStorage.setItem('portfolioItems', JSON.stringify(items));
-  }, [items]);
+    try {
+      // Create a storage-safe version of items (without data URLs)
+      const storageSafeItems = items.map(item => ({
+        ...item,
+        // If the image URL is a data URL, don't store it in localStorage
+        imageUrl: item.imageUrl.startsWith('data:') 
+          ? (item.id ? initialPortfolioItems.find(i => i.id === item.id)?.imageUrl || item.imageUrl : item.imageUrl)
+          : item.imageUrl
+      }));
+      
+      // Convert to JSON and check size
+      const jsonData = JSON.stringify(storageSafeItems);
+      const sizeInMB = (new Blob([jsonData]).size / 1024 / 1024).toFixed(2);
+      
+      if (parseFloat(sizeInMB) > 4.5) { // Stay well under the 5MB limit
+        throw new Error(`Data size (${sizeInMB}MB) exceeds safe localStorage limit of 4.5MB`);
+      }
+      
+      localStorage.setItem('portfolioItems', jsonData);
+    } catch (error) {
+      console.error("Error saving portfolio items to localStorage:", error);
+      toast({
+        title: "Storage Error",
+        description: error instanceof Error ? error.message : "Failed to save your changes to browser storage. Your changes will be visible now but won't persist after refresh.",
+        variant: "destructive"
+      });
+    }
+  }, [items, toast]);
   
   const iconOptions = [
     { value: "link", label: "Generic Link" },
@@ -179,60 +209,67 @@ const ManagePortfolio: React.FC = () => {
   const handleUpdateItem = () => {
     if (!currentItem) return;
     
-    // Create a copy of the current item to modify
-    const updatedItem = { ...currentItem };
-    
-    if (audioFile) {
-      updatedItem.audioUrl = `/audio/${audioFileName}`;
-    }
-    
-    if (videoFile) {
-      updatedItem.videoUrl = `/videos/${videoFileName}`;
-    }
-    
-    // Handle image updates
-    if (imageFile && imagePreview) {
-      // For immediate preview, use the data URL temporarily
-      // In a real app with server upload, this would be the path to the uploaded file
-      updatedItem.imageUrl = imagePreview;
+    try {
+      // Create a copy of the current item to modify
+      const updatedItem = { ...currentItem };
       
-      // Inform user about manual file copying
+      if (audioFile) {
+        updatedItem.audioUrl = `/audio/${audioFileName}`;
+      }
+      
+      if (videoFile) {
+        updatedItem.videoUrl = `/videos/${videoFileName}`;
+      }
+      
+      // Handle image updates
+      if (imageFile && imagePreview) {
+        // Store path instead of data URL for localStorage
+        updatedItem.imageUrl = `/images/${imageFileName}`;
+        
+        // Inform user about manual file copying
+        toast({
+          title: "Image Updated",
+          description: `Remember to manually copy '${imageFileName}' to your public/images/ directory for the image to appear permanently.`,
+        });
+      }
+      
+      // Update the items array with the modified item
+      const updatedItems = items.map(item => 
+        item.id === currentItem.id ? updatedItem : item
+      );
+      
+      // Update state only (localStorage update happens in useEffect)
+      setItems(updatedItems);
+      
       toast({
-        title: "Image Preview Updated",
-        description: "The image preview has been updated. Remember to manually copy the image file to public/images/ directory and update the imageUrl in the portfolio data to the correct path.",
+        title: "Portfolio item updated",
+        description: "Your changes have been saved.",
+      });
+      
+      if (audioFile || videoFile || imageFile) {
+        toast({
+          title: "Manual file upload required",
+          description: "Please manually copy your media files to the appropriate public directories.",
+        });
+      }
+      
+      // Reset form state
+      setCurrentItem(null);
+      setAudioFile(null);
+      setAudioFileName("");
+      setVideoFile(null);
+      setVideoFileName("");
+      setImageFile(null);
+      setImageFileName("");
+      setImagePreview(null);
+    } catch (error) {
+      console.error("Error updating portfolio item:", error);
+      toast({
+        title: "Update Failed",
+        description: "An error occurred while updating the portfolio item.",
+        variant: "destructive"
       });
     }
-    
-    // Update the items array with the modified item
-    const updatedItems = items.map(item => 
-      item.id === currentItem.id ? updatedItem : item
-    );
-    
-    // Update state and localStorage
-    setItems(updatedItems);
-    localStorage.setItem('portfolioItems', JSON.stringify(updatedItems));
-    
-    toast({
-      title: "Portfolio item updated",
-      description: "Your changes have been saved.",
-    });
-    
-    if (audioFile || videoFile || imageFile) {
-      toast({
-        title: "Manual file upload required",
-        description: "Please manually copy your media files to the appropriate public directories.",
-      });
-    }
-    
-    // Reset form state
-    setCurrentItem(null);
-    setAudioFile(null);
-    setAudioFileName("");
-    setVideoFile(null);
-    setVideoFileName("");
-    setImageFile(null);
-    setImageFileName("");
-    setImagePreview(null);
   };
   
   const getIconComponent = (icon: string) => {
