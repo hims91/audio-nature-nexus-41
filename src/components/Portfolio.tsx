@@ -13,7 +13,12 @@ const Portfolio: React.FC = () => {
   useEffect(() => {
     const savedItems = localStorage.getItem('portfolioItems');
     if (savedItems) {
-      setPortfolioItems(JSON.parse(savedItems));
+      try {
+        const parsedItems = JSON.parse(savedItems);
+        setPortfolioItems(parsedItems);
+      } catch (error) {
+        console.error("Error parsing portfolio items from localStorage:", error);
+      }
     }
   }, []);
   

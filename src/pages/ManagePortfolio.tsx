@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -178,51 +179,52 @@ const ManagePortfolio: React.FC = () => {
   const handleUpdateItem = () => {
     if (!currentItem) return;
     
-    let updatedAudioUrl = currentItem.audioUrl;
-    let updatedVideoUrl = currentItem.videoUrl || "";
-    let updatedImageUrl = currentItem.imageUrl;
+    // Create a copy of the current item to modify
+    const updatedItem = { ...currentItem };
     
     if (audioFile) {
-      updatedAudioUrl = `/audio/${audioFileName}`;
+      updatedItem.audioUrl = `/audio/${audioFileName}`;
     }
     
     if (videoFile) {
-      updatedVideoUrl = `/videos/${videoFileName}`;
+      updatedItem.videoUrl = `/videos/${videoFileName}`;
     }
     
-    if (imageFile) {
-      updatedImageUrl = `/images/${imageFileName}`;
+    // Handle image updates
+    if (imageFile && imagePreview) {
+      // For immediate preview, use the data URL temporarily
+      // In a real app with server upload, this would be the path to the uploaded file
+      updatedItem.imageUrl = imagePreview;
+      
+      // Inform user about manual file copying
+      toast({
+        title: "Image Preview Updated",
+        description: "The image preview has been updated. Remember to manually copy the image file to public/images/ directory and update the imageUrl in the portfolio data to the correct path.",
+      });
     }
     
-    const updatedItem = {
-      ...currentItem,
-      audioUrl: updatedAudioUrl,
-      videoUrl: updatedVideoUrl,
-      imageUrl: updatedImageUrl
-    };
-    
+    // Update the items array with the modified item
     const updatedItems = items.map(item => 
       item.id === currentItem.id ? updatedItem : item
     );
     
+    // Update state and localStorage
     setItems(updatedItems);
+    localStorage.setItem('portfolioItems', JSON.stringify(updatedItems));
     
     toast({
       title: "Portfolio item updated",
-      description: [
-        audioFile ? `Added audio: ${audioFileName}` : "",
-        videoFile ? `Added video: ${videoFileName}` : "",
-        imageFile ? `Changed image: ${imageFileName}` : ""
-      ].filter(Boolean).join(", ") || "Updated details",
+      description: "Your changes have been saved.",
     });
     
     if (audioFile || videoFile || imageFile) {
       toast({
         title: "Manual file upload required",
-        description: `Please manually copy your ${audioFile ? "audio" : ""} ${(audioFile && videoFile) || (audioFile && imageFile) ? "," : ""} ${videoFile ? "video" : ""} ${(videoFile && imageFile) ? "and" : ""} ${imageFile ? "image" : ""} files to the ${audioFile ? "public/audio" : ""} ${(audioFile && videoFile) || (audioFile && imageFile) ? "," : ""} ${videoFile ? "public/videos" : ""} ${(videoFile && imageFile) ? "and" : ""} ${imageFile ? "public/images" : ""} directories.`,
+        description: "Please manually copy your media files to the appropriate public directories.",
       });
     }
     
+    // Reset form state
     setCurrentItem(null);
     setAudioFile(null);
     setAudioFileName("");
