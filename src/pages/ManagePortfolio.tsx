@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -8,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Music, Video, Upload, Save, FileVideo, Music2, Trash2, PlusCircle, Link as LinkIcon } from "lucide-react";
+import { Music, Video, Upload, Save, FileVideo, Music2, Trash2, PlusCircle, Link as LinkIcon, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { portfolioItems as initialPortfolioItems, PortfolioItem } from "@/data/portfolio";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,6 +28,9 @@ const ManagePortfolio: React.FC = () => {
   const [audioFileName, setAudioFileName] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoFileName, setVideoFileName] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFileName, setImageFileName] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   
   const [newLinkTitle, setNewLinkTitle] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
@@ -54,6 +56,9 @@ const ManagePortfolio: React.FC = () => {
     setAudioFile(null);
     setVideoFileName("");
     setVideoFile(null);
+    setImageFileName("");
+    setImageFile(null);
+    setImagePreview(null);
     setNewLinkTitle("");
     setNewLinkUrl("");
     setNewLinkIcon("link");
@@ -92,6 +97,30 @@ const ManagePortfolio: React.FC = () => {
       
       setVideoFile(file);
       setVideoFileName(file.name);
+    }
+  };
+  
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload an image file (JPG, PNG, etc.)",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setImageFile(file);
+      setImageFileName(file.name);
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
   
@@ -151,6 +180,7 @@ const ManagePortfolio: React.FC = () => {
     
     let updatedAudioUrl = currentItem.audioUrl;
     let updatedVideoUrl = currentItem.videoUrl || "";
+    let updatedImageUrl = currentItem.imageUrl;
     
     if (audioFile) {
       updatedAudioUrl = `/audio/${audioFileName}`;
@@ -160,10 +190,15 @@ const ManagePortfolio: React.FC = () => {
       updatedVideoUrl = `/videos/${videoFileName}`;
     }
     
+    if (imageFile) {
+      updatedImageUrl = `/images/${imageFileName}`;
+    }
+    
     const updatedItem = {
       ...currentItem,
       audioUrl: updatedAudioUrl,
-      videoUrl: updatedVideoUrl
+      videoUrl: updatedVideoUrl,
+      imageUrl: updatedImageUrl
     };
     
     const updatedItems = items.map(item => 
@@ -176,14 +211,15 @@ const ManagePortfolio: React.FC = () => {
       title: "Portfolio item updated",
       description: [
         audioFile ? `Added audio: ${audioFileName}` : "",
-        videoFile ? `Added video: ${videoFileName}` : ""
+        videoFile ? `Added video: ${videoFileName}` : "",
+        imageFile ? `Changed image: ${imageFileName}` : ""
       ].filter(Boolean).join(", ") || "Updated details",
     });
     
-    if (audioFile || videoFile) {
+    if (audioFile || videoFile || imageFile) {
       toast({
         title: "Manual file upload required",
-        description: `Please manually copy your ${audioFile ? "audio" : ""} ${audioFile && videoFile ? "and" : ""} ${videoFile ? "video" : ""} files to the ${audioFile ? "public/audio" : ""} ${audioFile && videoFile ? "and" : ""} ${videoFile ? "public/videos" : ""} directories.`,
+        description: `Please manually copy your ${audioFile ? "audio" : ""} ${(audioFile && videoFile) || (audioFile && imageFile) ? "," : ""} ${videoFile ? "video" : ""} ${(videoFile && imageFile) ? "and" : ""} ${imageFile ? "image" : ""} files to the ${audioFile ? "public/audio" : ""} ${(audioFile && videoFile) || (audioFile && imageFile) ? "," : ""} ${videoFile ? "public/videos" : ""} ${(videoFile && imageFile) ? "and" : ""} ${imageFile ? "public/images" : ""} directories.`,
       });
     }
     
@@ -192,6 +228,9 @@ const ManagePortfolio: React.FC = () => {
     setAudioFileName("");
     setVideoFile(null);
     setVideoFileName("");
+    setImageFile(null);
+    setImageFileName("");
+    setImagePreview(null);
   };
   
   const getIconComponent = (icon: string) => {
@@ -214,7 +253,7 @@ const ManagePortfolio: React.FC = () => {
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold text-nature-forest mb-4">Manage Portfolio</h1>
             <p className="text-nature-bark max-w-2xl mx-auto">
-              Upload audio and video files for your portfolio items. These will be displayed on your portfolio page.
+              Upload audio, video, and image files for your portfolio items. These will be displayed on your portfolio page.
             </p>
           </div>
           
@@ -288,8 +327,12 @@ const ManagePortfolio: React.FC = () => {
                         />
                       </div>
                       
-                      <Tabs defaultValue="audio" className="w-full mt-6">
-                        <TabsList className="grid w-full grid-cols-3">
+                      <Tabs defaultValue="image" className="w-full mt-6">
+                        <TabsList className="grid w-full grid-cols-4">
+                          <TabsTrigger value="image" className="flex items-center">
+                            <Image className="mr-2 h-4 w-4" />
+                            Image
+                          </TabsTrigger>
                           <TabsTrigger value="audio" className="flex items-center">
                             <Music2 className="mr-2 h-4 w-4" />
                             Audio
@@ -303,6 +346,57 @@ const ManagePortfolio: React.FC = () => {
                             Links
                           </TabsTrigger>
                         </TabsList>
+                        
+                        <TabsContent value="image" className="mt-4">
+                          <div>
+                            <Label htmlFor="image">Featured Image</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                              <div className="flex-grow">
+                                <Input
+                                  id="image"
+                                  className="cursor-pointer"
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleImageUpload}
+                                />
+                              </div>
+                              {imageFileName && (
+                                <div className="text-sm text-nature-forest">
+                                  {imageFileName}
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Upload JPG, PNG, or other image files
+                            </p>
+                            
+                            <div className="mt-4 flex flex-col md:flex-row gap-4">
+                              <div className="flex-1">
+                                <p className="text-sm font-medium mb-2">Current Image:</p>
+                                <div className="border rounded-md overflow-hidden h-48">
+                                  <img 
+                                    src={currentItem.imageUrl} 
+                                    alt={currentItem.title} 
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              </div>
+                              
+                              {imagePreview && (
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium mb-2">New Image Preview:</p>
+                                  <div className="border rounded-md overflow-hidden h-48">
+                                    <img 
+                                      src={imagePreview} 
+                                      alt="Preview" 
+                                      className="w-full h-full object-cover" 
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </TabsContent>
                         
                         <TabsContent value="audio" className="mt-4">
                           <div>
