@@ -45,13 +45,18 @@ const ManagePortfolio: React.FC = () => {
   useEffect(() => {
     try {
       // Create a storage-safe version of items (without data URLs)
-      const storageSafeItems = items.map(item => ({
-        ...item,
-        // If the image URL is a data URL, don't store it in localStorage
-        imageUrl: item.imageUrl.startsWith('data:') 
-          ? (item.id ? initialPortfolioItems.find(i => i.id === item.id)?.imageUrl || item.imageUrl : item.imageUrl)
-          : item.imageUrl
-      }));
+      const storageSafeItems = items.map(item => {
+        // Store both the path and the preview URL
+        const safeItem = {
+          ...item,
+          // Keep the original imageUrl for path reference
+          imageUrl: item.imageUrl,
+          // Store the preview separately if it exists
+          imagePreviewUrl: item.imagePreviewUrl || null
+        };
+        
+        return safeItem;
+      });
       
       // Convert to JSON and check size
       const jsonData = JSON.stringify(storageSafeItems);
@@ -221,10 +226,12 @@ const ManagePortfolio: React.FC = () => {
         updatedItem.videoUrl = `/videos/${videoFileName}`;
       }
       
-      // Handle image updates
+      // Handle image updates - store both path and preview
       if (imageFile && imagePreview) {
-        // Store path instead of data URL for localStorage
+        // Store the server path for long-term reference
         updatedItem.imageUrl = `/images/${imageFileName}`;
+        // Store the data URL for immediate preview
+        updatedItem.imagePreviewUrl = imagePreview;
         
         // Inform user about manual file copying
         toast({

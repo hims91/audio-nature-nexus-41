@@ -17,7 +17,20 @@ const Portfolio: React.FC = () => {
       const savedItems = localStorage.getItem('portfolioItems');
       if (savedItems) {
         const parsedItems = JSON.parse(savedItems);
-        setPortfolioItems(parsedItems);
+        
+        // Process saved items to properly handle image URLs
+        const processedItems = parsedItems.map((item: any) => {
+          // If the item has an imagePreviewUrl, use that for display
+          if (item.imagePreviewUrl) {
+            return {
+              ...item,
+              imageUrl: item.imagePreviewUrl
+            };
+          }
+          return item;
+        });
+        
+        setPortfolioItems(processedItems);
       }
     } catch (error) {
       console.error("Error loading portfolio items from localStorage:", error);
