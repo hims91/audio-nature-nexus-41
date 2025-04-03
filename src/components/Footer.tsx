@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Headphones } from "lucide-react";
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -19,7 +18,11 @@ const Footer: React.FC = () => {
           {/* Logo and About */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <Headphones className="h-8 w-8 text-nature-cream" />
+              <img 
+                src="/lovable-uploads/5bf7a89b-4112-422f-a28c-92df6c7ea6cf.png" 
+                alt="Frog with Speaker Logo" 
+                className="h-10 w-10 object-contain bg-white/90 rounded-md p-1"
+              />
               <span className="text-xl font-bold">Will Hall Sound Studios</span>
             </div>
             

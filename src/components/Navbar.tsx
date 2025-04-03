@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Headphones, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,7 +23,11 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Headphones className="h-8 w-8 text-nature-forest" />
+            <img 
+              src="/lovable-uploads/5bf7a89b-4112-422f-a28c-92df6c7ea6cf.png" 
+              alt="Frog with Speaker Logo" 
+              className="h-10 w-10 object-contain"
+            />
             <span className="text-xl font-bold text-nature-forest">Will Hall Sound Studios</span>
           </div>
           
