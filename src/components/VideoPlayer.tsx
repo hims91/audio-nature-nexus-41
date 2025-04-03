@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Play } from "lucide-react";
 
 interface VideoPlayerProps {
@@ -10,6 +10,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [videoExists, setVideoExists] = useState(true);
+
+  useEffect(() => {
+    // Reset states when videoUrl changes
+    setIsLoading(true);
+    setHasError(false);
+    setVideoExists(true);
+  }, [videoUrl]);
 
   if (!videoUrl) {
     return null;
@@ -18,6 +26,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
   const handleRetry = () => {
     setIsLoading(true);
     setHasError(false);
+    setVideoExists(true);
     setRetryCount((prev) => prev + 1);
   };
 

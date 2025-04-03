@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { PortfolioItem, portfolioItems as initialPortfolioItems } from "@/data/portfolio";
+import { useState, useEffect } from 'react';
+import { portfolioItems as initialPortfolioItems, PortfolioItem } from "@/data/portfolio";
 import { useToast } from "@/hooks/use-toast";
 
 export const useLocalStorage = () => {
@@ -16,11 +16,23 @@ export const useLocalStorage = () => {
       return initialPortfolioItems;
     }
   });
-  
-  const saveItems = (itemsToSave: PortfolioItem[]) => {
+
+  // Save items to localStorage with error handling
+  const saveItems = (newItems: PortfolioItem[]) => {
     try {
+      // Update the Louie Louie item to remove audioUrl
+      const updatedItems = newItems.map(item => {
+        if (item.title === "Louie, Louie" || item.title === "Louie Louie") {
+          return {
+            ...item,
+            audioUrl: undefined // Remove audioUrl from Louie Louie
+          };
+        }
+        return item;
+      });
+
       // Create a storage-safe version of items
-      const storageSafeItems = itemsToSave.map(item => {
+      const storageSafeItems = updatedItems.map(item => {
         const safeItem = {
           ...item,
           imageUrl: item.imageUrl,
@@ -33,10 +45,9 @@ export const useLocalStorage = () => {
       const jsonData = JSON.stringify(storageSafeItems);
       const sizeInMB = (new Blob([jsonData]).size / 1024 / 1024).toFixed(2);
       
-      // Increased localStorage size threshold from 4.5MB to 9MB
-      if (parseFloat(sizeInMB) > 9) {
+      if (parseFloat(sizeInMB) > 4.5) {
         // If too large, create a smaller version without image previews
-        const minimalSafeItems = itemsToSave.map(item => ({
+        const minimalSafeItems = updatedItems.map(item => ({
           ...item,
           imagePreviewUrl: null, // Remove image previews to save space
         }));
@@ -44,7 +55,7 @@ export const useLocalStorage = () => {
         const minimalJsonData = JSON.stringify(minimalSafeItems);
         const minimalSizeInMB = (new Blob([minimalJsonData]).size / 1024 / 1024).toFixed(2);
         
-        if (parseFloat(minimalSizeInMB) > 9) {
+        if (parseFloat(minimalSizeInMB) > 4.5) {
           throw new Error(`Data size (${minimalSizeInMB}MB) still exceeds safe localStorage limit even after compression`);
         }
         
@@ -58,6 +69,9 @@ export const useLocalStorage = () => {
         // If size is acceptable, save the complete data
         localStorage.setItem('portfolioItems', jsonData);
       }
+
+      // Return the updated items
+      return updatedItems;
     } catch (error) {
       console.error("Error saving portfolio items to localStorage:", error);
       
@@ -70,7 +84,7 @@ export const useLocalStorage = () => {
           category: item.category,
           description: item.description,
           imageUrl: item.imageUrl, // Keep path reference but not preview
-          audioUrl: item.audioUrl,
+          audioUrl: item.title === "Louie, Louie" || item.title === "Louie Louie" ? undefined : item.audioUrl,
           videoUrl: item.videoUrl,
           spotifyUrl: item.spotifyUrl,
           otherLinks: item.otherLinks
@@ -90,7 +104,15 @@ export const useLocalStorage = () => {
         });
       }
     }
+    
+    // Return the current items if saving failed
+    return items;
   };
-  
+
+  // Apply the save functionality whenever items change
+  useEffect(() => {
+    saveItems(items);
+  }, [items]);
+
   return { items, setItems, saveItems };
 };

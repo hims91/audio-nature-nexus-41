@@ -131,12 +131,12 @@ export const portfolioItems: PortfolioItem[] = [
   },
   {
     id: 7,
-    title: "Commercial Soundtrack",
+    title: "Louie, Louie",
     client: "Outdoor Lifestyle Brand",
     category: "Sound for Picture",
     description: "Composed and produced a custom soundtrack for a national commercial campaign, blending organic instruments with modern production.",
     imageUrl: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4",
-    audioUrl: "/audio/demo7.mp3",
+    // audioUrl removed for Louie, Louie
     videoUrl: "/videos/commercial.mp4",
     spotifyUrl: "https://open.spotify.com/track/5P72G2XBBO0iqh25XSGXPF",
     otherLinks: [

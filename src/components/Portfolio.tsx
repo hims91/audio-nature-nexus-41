@@ -12,6 +12,7 @@ const Portfolio: React.FC = () => {
   // Load items from localStorage or use initial data
   const [portfolioItems, setPortfolioItems] = useState(initialPortfolioItems);
   
+  // Load portfolio items from localStorage
   useEffect(() => {
     try {
       const savedItems = localStorage.getItem('portfolioItems');
