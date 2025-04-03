@@ -13,12 +13,12 @@ const About: React.FC = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           {/* Image Side */}
-          <div className="relative">
+          <div className="relative w-1/2 mx-auto lg:w-full">
             <div className="bg-nature-forest/10 absolute inset-0 rounded-lg transform rotate-3"></div>
             <img 
               src="/lovable-uploads/40101aee-c085-43b1-a83a-03ed8d362687.png" 
               alt="Will Hall holding a speaker in nature" 
-              className="rounded-lg shadow-xl relative z-10 object-cover h-full"
+              className="rounded-lg shadow-xl relative z-10 object-cover h-auto max-w-full"
             />
           </div>
           
