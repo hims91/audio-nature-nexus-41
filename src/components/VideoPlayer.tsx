@@ -3,11 +3,13 @@ import React, { useState } from "react";
 
 interface VideoPlayerProps {
   videoUrl?: string;
+  poster?: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = "/placeholder.svg" }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [videoError, setVideoError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   
   // Return null if no videoUrl is provided
   if (!videoUrl) {
@@ -28,10 +30,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
     console.error("Video error loading:", videoUrl, e);
     setVideoError(true);
     setIsLoading(false);
+    
+    // Try to determine a more specific error message
+    const video = e.currentTarget;
+    
+    if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+      setErrorMessage("Video file not found or format not supported by your browser.");
+    } else if (video.networkState === HTMLMediaElement.NETWORK_EMPTY) {
+      setErrorMessage("Video resource could not be loaded.");
+    } else {
+      setErrorMessage("Unable to load video. The file may be missing or in an unsupported format.");
+    }
   };
   
   return (
-    <div className="bg-white/80 rounded-md overflow-hidden">
+    <div className="bg-white/80 rounded-md overflow-hidden shadow-sm">
       {isLoading && !videoError && (
         <div className="bg-gray-100 h-40 flex items-center justify-center">
           <div className="animate-pulse text-nature-forest">Loading video...</div>
@@ -40,7 +53,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
       
       {videoError ? (
         <div className="bg-red-50 text-red-500 p-4 text-sm">
-          Unable to load video. The file may be missing or in an unsupported format.
+          {errorMessage}
           <p className="text-xs mt-2 text-nature-bark">Path: {videoUrl}</p>
         </div>
       ) : (
@@ -51,9 +64,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
           preload="metadata"
           onLoadedData={handleVideoLoad}
           onError={handleVideoError}
-          poster="/placeholder.svg"
+          poster={poster}
         >
           <source src={safeVideoUrl} type="video/mp4" />
+          <source src={safeVideoUrl} type="video/webm" />
           Your browser does not support the video tag.
         </video>
       )}
