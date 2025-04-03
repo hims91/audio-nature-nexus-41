@@ -1,4 +1,3 @@
-
 export interface PortfolioItem {
   id: number;
   title: string;
@@ -136,7 +135,6 @@ export const portfolioItems: PortfolioItem[] = [
     category: "Sound for Picture",
     description: "Composed and produced a custom soundtrack for a national commercial campaign, blending organic instruments with modern production.",
     imageUrl: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4",
-    // Removed audioUrl for Louie, Louie
     videoUrl: "/videos/commercial.mp4",
     spotifyUrl: "https://open.spotify.com/track/5P72G2XBBO0iqh25XSGXPF",
     otherLinks: [

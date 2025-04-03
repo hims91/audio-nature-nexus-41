@@ -87,9 +87,15 @@ const Portfolio: React.FC = () => {
         
         {/* Portfolio Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-          {filteredItems.map((item) => (
-            <PortfolioItem key={item.id} item={item} />
-          ))}
+          {filteredItems.length > 0 ? (
+            filteredItems.map((item) => (
+              <PortfolioItem key={item.id} item={item} />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p className="text-lg text-nature-bark">No portfolio items found for this category.</p>
+            </div>
+          )}
         </div>
       </div>
     </section>

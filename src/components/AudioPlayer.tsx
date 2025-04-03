@@ -14,6 +14,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.7);
   const [audioError, setAudioError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
@@ -22,6 +23,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
     setIsPlaying(false);
     setCurrentTime(0);
     setAudioError(false);
+    setIsLoading(true);
     
     // Set volume when audio element is created
     if (audioRef.current) {
@@ -64,6 +66,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
       setDuration(audioRef.current.duration);
       // Set volume again once metadata is loaded
       audioRef.current.volume = volume;
+      setIsLoading(false);
     }
   };
   
@@ -73,6 +76,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
     }
+  };
+  
+  const handleAudioError = (e: React.SyntheticEvent<HTMLAudioElement>) => {
+    console.error("Audio error loading:", audioUrl, e);
+    setAudioError(true);
+    setIsLoading(false);
   };
   
   const handleSeek = (value: number[]) => {
@@ -115,14 +124,21 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
-        onError={() => setAudioError(true)}
+        onError={handleAudioError}
         preload="metadata"
         style={{ display: 'none' }}
       />
       
+      {isLoading && !audioError && (
+        <div className="text-sm text-nature-bark mb-2">
+          Loading audio...
+        </div>
+      )}
+      
       {audioError ? (
         <div className="text-sm text-red-500 mb-2">
           Audio could not be loaded. The file may be missing or in an unsupported format.
+          <p className="text-xs mt-1 text-nature-bark">Path: {audioUrl}</p>
         </div>
       ) : (
         <div className="flex items-center gap-3">

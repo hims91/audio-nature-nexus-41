@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,7 @@ interface PortfolioItemProps {
 
 // Helper function to get the appropriate icon component
 const getIconComponent = (iconName: string) => {
-  switch (iconName) {
+  switch (iconName.toLowerCase()) {
     case "youtube":
       return <Youtube className="h-4 w-4" />;
     case "instagram":
@@ -38,8 +39,12 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
     return url && url.trim() !== '';
   };
 
-  // Determine if we should show audio preview based on category
-  const shouldShowAudioPreview = item.category !== "Sound for Picture" && hasValidUrl(item.audioUrl);
+  // Determine if we should show audio preview
+  // For "Sound for Picture" category OR the "Louie, Louie" item, don't show audio
+  const shouldShowAudioPreview = 
+    item.category !== "Sound for Picture" && 
+    hasValidUrl(item.audioUrl) && 
+    item.title !== "Louie, Louie";
 
   return (
     <Card className="overflow-hidden bg-white h-full shadow-md hover:shadow-xl transition-shadow duration-300">
@@ -49,6 +54,10 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
             src={item.imageUrl} 
             alt={item.title} 
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+            onError={(e) => {
+              e.currentTarget.src = "/placeholder.svg";
+              e.currentTarget.className = "w-full h-full object-contain p-4";
+            }}
           />
           <Badge 
             className="absolute top-3 right-3 bg-nature-forest text-white hover:bg-nature-leaf"
@@ -109,7 +118,7 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
           </div>
         )}
         
-        {/* Audio Preview - Only show if audio exists, is valid, and category is not Sound for Picture */}
+        {/* Audio Preview - Only show if audio exists and is valid, and not for "Louie, Louie" */}
         {shouldShowAudioPreview && (
           <div className="mb-3">
             <div className="flex items-center mb-2 text-nature-forest">
