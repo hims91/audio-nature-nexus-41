@@ -102,7 +102,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               </Badge>
             )}
             
-            {item.externalLinks.length > 0 && (
+            {item.externalLinks && item.externalLinks.length > 0 && (
               <Badge variant="outline" className="text-xs bg-white">
                 <ExternalLink className="h-3 w-3 mr-1" />
                 {item.externalLinks.length} Links

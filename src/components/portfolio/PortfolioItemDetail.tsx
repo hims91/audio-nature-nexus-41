@@ -114,7 +114,7 @@ const PortfolioItemDetail: React.FC<PortfolioItemDetailProps> = ({ item, onClose
             </div>
             
             {/* External Links */}
-            {item.externalLinks.length > 0 && (
+            {item.externalLinks && item.externalLinks.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium text-nature-forest mb-2">Listen & Watch</h3>
                 <div className="flex flex-wrap gap-2">
