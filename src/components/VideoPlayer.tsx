@@ -35,6 +35,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
           onError={() => {
             setIsLoading(false);
             setHasError(true);
+            console.error("Video error loading:", videoUrl);
           }}
           poster="/placeholder.svg"
         >

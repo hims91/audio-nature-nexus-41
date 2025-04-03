@@ -34,9 +34,14 @@ const getIconComponent = (iconName: string) => {
 };
 
 const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
+  // Function to check if a URL actually exists and is not an empty string
+  const hasValidUrl = (url?: string) => {
+    return url && url.trim() !== '';
+  };
+
   return (
     <Card className="overflow-hidden bg-white h-full shadow-md hover:shadow-xl transition-shadow duration-300">
-      {item.imageUrl && (
+      {hasValidUrl(item.imageUrl) && (
         <div className="relative h-52 overflow-hidden">
           <img 
             src={item.imageUrl} 
@@ -51,7 +56,7 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
         </div>
       )}
       
-      {!item.imageUrl && (
+      {!hasValidUrl(item.imageUrl) && (
         <div className="relative h-16 bg-nature-cream flex items-center justify-center">
           <Badge 
             className="absolute top-3 right-3 bg-nature-forest text-white hover:bg-nature-leaf"
@@ -67,14 +72,14 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
         <p className="mb-4 text-nature-bark">{item.description}</p>
         
         {/* External Links Section - Only show if links exist */}
-        {(item.spotifyUrl || (item.otherLinks && item.otherLinks.length > 0)) && (
+        {(hasValidUrl(item.spotifyUrl) || (item.otherLinks && item.otherLinks.length > 0)) && (
           <div className="mb-4">
             <div className="flex items-center mb-2 text-nature-forest">
               <LinkIcon className="h-4 w-4 mr-1" />
               <span className="text-sm font-medium">Links</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {item.spotifyUrl && (
+              {hasValidUrl(item.spotifyUrl) && (
                 <a 
                   href={item.spotifyUrl}
                   target="_blank"
@@ -102,8 +107,8 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
           </div>
         )}
         
-        {/* Audio Preview - Only show if audio exists */}
-        {item.audioUrl && (
+        {/* Audio Preview - Only show if audio exists and is valid */}
+        {hasValidUrl(item.audioUrl) && (
           <div className="mb-3">
             <div className="flex items-center mb-2 text-nature-forest">
               <Music className="h-4 w-4 mr-1" />
@@ -113,8 +118,8 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
           </div>
         )}
         
-        {/* Video Preview - Only show if video exists */}
-        {item.videoUrl && (
+        {/* Video Preview - Only show if video exists and is valid */}
+        {hasValidUrl(item.videoUrl) && (
           <div className="mt-4">
             <div className="flex items-center mb-2 text-nature-forest">
               <FileVideo className="h-4 w-4 mr-1" />

@@ -72,20 +72,9 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
   
-  // Create placeholder waveform when no audio is available
+  // Return null if no audioUrl is provided
   if (!audioUrl) {
-    return (
-      <div className="flex justify-center items-end h-12 mb-2 mt-4 space-x-[1px] opacity-50">
-        {[...Array(30)].map((_, i) => (
-          <div 
-            key={i}
-            className="h-8 w-1 bg-nature-bark mx-[1px] rounded-sm opacity-70"
-            style={{ height: `${Math.random() * 16 + 8}px` }}
-          ></div>
-        ))}
-        <span className="ml-2 text-sm text-nature-bark">Demo not available</span>
-      </div>
-    );
+    return null;
   }
   
   return (
