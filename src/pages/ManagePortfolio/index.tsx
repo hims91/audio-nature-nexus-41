@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -11,7 +10,7 @@ import EmptyState from "./components/EmptyState";
 import DataManagement from "./components/DataManagement";
 import { PortfolioItem } from "@/data/portfolio";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, Settings, List } from "lucide-react";
+import { PlusCircle, Settings, List, AlertTriangle } from "lucide-react";
 
 const ManagePortfolio: React.FC = () => {
   const navigate = useNavigate();
