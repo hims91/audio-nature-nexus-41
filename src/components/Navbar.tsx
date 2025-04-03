@@ -22,11 +22,11 @@ const Navbar: React.FC = () => {
     <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-sm z-50 shadow-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <img 
-              src="/lovable-uploads/c5a95b2d-5143-43bf-9748-b613979e99fa.png" 
+              src="/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png" 
               alt="Frog with Speaker Logo" 
-              className="h-12 w-12 object-contain"
+              className="h-16 w-16 object-contain"
             />
             <span className="text-xl font-bold text-nature-forest">Will Hall Sound Studios</span>
           </div>
