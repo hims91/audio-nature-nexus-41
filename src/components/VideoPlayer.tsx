@@ -23,6 +23,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
     return null;
   }
 
+  // Properly encode the URL to handle spaces and special characters
+  const safeVideoUrl = videoUrl.startsWith("http") 
+    ? videoUrl 
+    : encodeURI(videoUrl);
+
   const handleRetry = () => {
     setIsLoading(true);
     setHasError(false);
@@ -62,7 +67,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
           }}
           poster="/placeholder.svg"
         >
-          <source src={videoUrl} type="video/mp4" />
+          <source src={safeVideoUrl} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       )}
