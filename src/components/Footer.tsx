@@ -19,9 +19,9 @@ const Footer: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <img 
-                src="/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png" 
+                src="/lovable-uploads/76d94f05-ac88-4917-9a0e-19c90eb2d209.png" 
                 alt="Frog with Speaker Logo" 
-                className="h-20 w-20 object-contain bg-white/90 rounded-md p-1"
+                className="h-24 w-24 object-contain bg-white/90 rounded-md p-1"
               />
               <span className="text-xl font-bold">Will Hall Sound Studios</span>
             </div>
