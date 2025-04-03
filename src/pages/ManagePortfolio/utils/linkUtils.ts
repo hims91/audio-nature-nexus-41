@@ -1,6 +1,4 @@
-
 import { PortfolioItem, ExternalLink } from "@/data/portfolio";
-import { Toast } from "@/hooks/use-toast";
 
 export const handleAddLink = (
   currentItem: PortfolioItem,
