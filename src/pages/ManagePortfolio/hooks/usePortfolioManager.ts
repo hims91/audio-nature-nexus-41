@@ -10,6 +10,7 @@ export function usePortfolioManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [storageAvailable, setStorageAvailable] = useState<boolean>(true);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
   // Check if localStorage is available
   useEffect(() => {
@@ -18,8 +19,9 @@ export function usePortfolioManager() {
       localStorage.setItem(testKey, testKey);
       localStorage.removeItem(testKey);
       setStorageAvailable(true);
+      console.log("✅ localStorage is available");
     } catch (e) {
-      console.error("localStorage is not available:", e);
+      console.error("❌ localStorage is not available:", e);
       setStorageAvailable(false);
       toast({
         title: "Storage Warning",
@@ -36,6 +38,7 @@ export function usePortfolioManager() {
         setIsLoading(true);
         
         if (!storageAvailable) {
+          console.log("⚠️ Storage unavailable, using initial data");
           setItems(initialPortfolioItems);
           return;
         }
@@ -44,6 +47,7 @@ export function usePortfolioManager() {
         
         if (savedItems) {
           try {
+            console.log("🔍 Found saved portfolio data in localStorage");
             const parsedItems = JSON.parse(savedItems);
             
             // Validate that the parsed data is an array
@@ -58,29 +62,30 @@ export function usePortfolioManager() {
               );
               
               if (validItems.length !== parsedItems.length) {
-                console.warn("Some portfolio items were invalid and filtered out");
+                console.warn("⚠️ Some portfolio items were invalid and filtered out");
                 toast({
                   title: "Data Warning",
                   description: "Some saved portfolio items were corrupted and have been removed."
                 });
               }
               
+              console.log(`📥 Loaded ${validItems.length} portfolio items from localStorage`);
               setItems(validItems);
             } else {
               throw new Error("Saved data is not in the expected format");
             }
           } catch (parseError) {
-            console.error("Error parsing saved portfolio items:", parseError);
+            console.error("❌ Error parsing saved portfolio items:", parseError);
             throw new Error("Could not parse saved data");
           }
         } else {
-          console.log("No saved portfolio items found, using initial data");
+          console.log("ℹ️ No saved portfolio items found, using initial data");
           setItems(initialPortfolioItems);
         }
         
         setErrorMessage(null);
       } catch (error) {
-        console.error("Error loading portfolio items:", error);
+        console.error("❌ Error loading portfolio items:", error);
         setErrorMessage("Failed to load portfolio items. Using default data.");
         setItems(initialPortfolioItems);
         
@@ -108,7 +113,7 @@ export function usePortfolioManager() {
           
           if (parseFloat(sizeInMB) > 4.5) {
             // Getting close to the localStorage 5MB limit, warn the user
-            console.warn(`Portfolio data is ${sizeInMB}MB, approaching localStorage limits`);
+            console.warn(`⚠️ Portfolio data is ${sizeInMB}MB, approaching localStorage limits`);
             toast({
               title: "Storage Warning",
               description: "Your portfolio data is getting large. Consider removing unused items."
@@ -116,9 +121,12 @@ export function usePortfolioManager() {
           }
           
           localStorage.setItem('portfolioItems', itemsJson);
-          console.log(`Portfolio data (${sizeInMB}MB) saved successfully`);
+          const now = new Date();
+          setLastSaved(now);
+          console.log(`💾 Portfolio data (${sizeInMB}MB) saved successfully at ${now.toLocaleTimeString()}`);
+          console.log(`📊 Saved ${items.length} items with IDs: ${items.map(i => i.id).join(', ')}`);
         } catch (error) {
-          console.error("Error saving portfolio items:", error);
+          console.error("❌ Error saving portfolio items:", error);
           
           if (error instanceof DOMException && 
              (error.name === 'QuotaExceededError' || 
@@ -145,9 +153,9 @@ export function usePortfolioManager() {
             }));
             
             localStorage.setItem('portfolioItems', JSON.stringify(minimalItems));
-            console.log("Saved minimal portfolio data without image previews");
+            console.log("⚠️ Saved minimal portfolio data without image previews");
           } catch (fallbackError) {
-            console.error("Failed to save even minimal data:", fallbackError);
+            console.error("❌ Failed to save even minimal data:", fallbackError);
           }
         }
       }
@@ -164,6 +172,7 @@ export function usePortfolioManager() {
       createdAt: new Date().toISOString()
     };
     
+    console.log("➕ Adding new portfolio item:", newItem.title);
     setItems(prevItems => [newItem, ...prevItems]);
     
     toast({
@@ -176,6 +185,7 @@ export function usePortfolioManager() {
   
   // Update an existing portfolio item
   const updateItem = (updatedItem: PortfolioItem) => {
+    console.log("🔄 Updating portfolio item:", updatedItem.title);
     setItems(prevItems => 
       prevItems.map(item => 
         item.id === updatedItem.id ? updatedItem : item
@@ -194,12 +204,37 @@ export function usePortfolioManager() {
     
     if (!itemToDelete) return;
     
+    console.log("🗑️ Deleting portfolio item:", itemToDelete.title);
     setItems(prevItems => prevItems.filter(item => item.id !== id));
     
     toast({
       title: "Item Deleted",
       description: `"${itemToDelete.title}" has been removed from your portfolio.`
     });
+  };
+  
+  // Verify localStorage function for testing
+  const verifyStorage = () => {
+    if (!storageAvailable) {
+      console.error("❌ Cannot verify: localStorage is not available");
+      return false;
+    }
+    
+    try {
+      const savedItems = localStorage.getItem('portfolioItems');
+      if (!savedItems) {
+        console.warn("⚠️ No items found in localStorage");
+        return false;
+      }
+      
+      const parsedItems = JSON.parse(savedItems);
+      console.log(`✅ Storage verification: ${parsedItems.length} items found in localStorage`);
+      console.log(`✅ Last save timestamp: ${lastSaved?.toLocaleTimeString() || 'Never'}`);
+      return true;
+    } catch (error) {
+      console.error("❌ Storage verification failed:", error);
+      return false;
+    }
   };
   
   return {
@@ -209,6 +244,8 @@ export function usePortfolioManager() {
     deleteItem,
     isLoading,
     errorMessage,
-    storageAvailable
+    storageAvailable,
+    verifyStorage,
+    lastSaved
   };
 }

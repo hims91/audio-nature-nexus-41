@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { portfolioItems as initialPortfolioItems } from "@/data/portfolio";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Edit, Star } from "lucide-react";
+import { Edit, Star, Save, CheckCircle2 } from "lucide-react";
 import PortfolioGallery from "./portfolio/PortfolioGallery";
 import PortfolioFilters from "./portfolio/PortfolioFilters";
 
@@ -12,6 +12,7 @@ const Portfolio: React.FC = () => {
   const [items, setItems] = useState(initialPortfolioItems);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [filteredItems, setFilteredItems] = useState(items);
+  const [verificationStatus, setVerificationStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { toast } = useToast();
   
   // Load items from localStorage on initial render
@@ -19,11 +20,12 @@ const Portfolio: React.FC = () => {
     try {
       const savedItems = localStorage.getItem('portfolioItems');
       if (savedItems) {
+        console.log("📥 Portfolio component loading saved items");
         const parsedItems = JSON.parse(savedItems);
         setItems(parsedItems);
       }
     } catch (error) {
-      console.error("Error loading portfolio items:", error);
+      console.error("❌ Error loading portfolio items in Portfolio component:", error);
       toast({
         title: "Error Loading Portfolio",
         description: "There was an issue loading your portfolio data. Using default data instead.",
@@ -41,6 +43,44 @@ const Portfolio: React.FC = () => {
     }
   }, [activeCategory, items]);
 
+  // Verify localStorage function
+  const verifyLocalStorage = () => {
+    try {
+      const savedItems = localStorage.getItem('portfolioItems');
+      
+      if (savedItems) {
+        const parsedItems = JSON.parse(savedItems);
+        console.log("✅ Verification successful: Found saved items", parsedItems);
+        toast({
+          title: "Storage Verification Success",
+          description: `Found ${parsedItems.length} items saved in localStorage.`,
+        });
+        setVerificationStatus('success');
+      } else {
+        console.warn("⚠️ No saved items found in localStorage");
+        toast({
+          title: "Storage Verification Warning",
+          description: "No saved items found in localStorage.",
+          variant: "destructive"
+        });
+        setVerificationStatus('error');
+      }
+    } catch (error) {
+      console.error("❌ Storage verification failed:", error);
+      toast({
+        title: "Storage Verification Failed",
+        description: "There was an error checking localStorage.",
+        variant: "destructive"
+      });
+      setVerificationStatus('error');
+    }
+    
+    // Reset status after 3 seconds
+    setTimeout(() => {
+      setVerificationStatus('idle');
+    }, 3000);
+  };
+
   // Get unique categories
   const categories = ["All", ...Array.from(new Set(items.map(item => item.category)))];
   
@@ -55,10 +95,32 @@ const Portfolio: React.FC = () => {
           </p>
           <div className="w-20 h-1 bg-nature-forest mx-auto mt-4"></div>
           
-          <Link to="/manage-portfolio" className="inline-flex items-center mt-6 text-nature-forest hover:text-nature-leaf transition-colors">
-            <Edit className="mr-1 h-4 w-4" />
-            Manage Portfolio
-          </Link>
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <Link to="/manage-portfolio" className="inline-flex items-center text-nature-forest hover:text-nature-leaf transition-colors">
+              <Edit className="mr-1 h-4 w-4" />
+              Manage Portfolio
+            </Link>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={verifyLocalStorage}
+              className={`text-xs ${
+                verificationStatus === 'success' 
+                  ? "bg-green-50 text-green-600 border-green-200" 
+                  : verificationStatus === 'error'
+                  ? "bg-red-50 text-red-600 border-red-200"
+                  : "text-nature-forest border-nature-forest"
+              }`}
+            >
+              {verificationStatus === 'success' ? (
+                <CheckCircle2 className="mr-1 h-3 w-3" />
+              ) : (
+                <Save className="mr-1 h-3 w-3" />
+              )}
+              Verify Storage
+            </Button>
+          </div>
         </div>
         
         {/* Category Filters */}
