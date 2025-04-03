@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -7,10 +8,9 @@ import { usePortfolioManager } from "./hooks/usePortfolioManager";
 import PortfolioItemsList from "./components/PortfolioItemsList";
 import PortfolioEditor from "./components/PortfolioEditor";
 import EmptyState from "./components/EmptyState";
-import DataManagement from "./components/DataManagement";
 import { PortfolioItem } from "@/data/portfolio";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, Settings, List, AlertTriangle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 
 const ManagePortfolio: React.FC = () => {
   const navigate = useNavigate();
@@ -20,16 +20,11 @@ const ManagePortfolio: React.FC = () => {
     updateItem, 
     deleteItem,
     isLoading,
-    errorMessage,
-    storageUsage,
-    exportData,
-    importData,
-    clearStorage
+    errorMessage
   } = usePortfolioManager();
   
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [activeTab, setActiveTab] = useState<'items' | 'settings'>('items');
   
   const selectedItem = selectedId 
     ? items.find(item => item.id === selectedId) || null
@@ -38,7 +33,6 @@ const ManagePortfolio: React.FC = () => {
   const handleNewItem = () => {
     setSelectedId(null);
     setIsCreating(true);
-    setActiveTab('items');
   };
   
   const handleSaveNew = (item: Omit<PortfolioItem, "id" | "createdAt">) => {
@@ -87,49 +81,24 @@ const ManagePortfolio: React.FC = () => {
             <div className="grid md:grid-cols-3 gap-8">
               {/* Sidebar */}
               <div className="md:col-span-1">
-                <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'items' | 'settings')} className="mb-4">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="items" className="flex items-center">
-                      <List className="h-4 w-4 mr-2" />
-                      Items
-                    </TabsTrigger>
-                    <TabsTrigger value="settings" className="flex items-center">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Settings
-                    </TabsTrigger>
-                  </TabsList>
+                <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
+                  <Button 
+                    onClick={handleNewItem}
+                    className="w-full bg-nature-forest hover:bg-nature-leaf mb-4"
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    New Portfolio Item
+                  </Button>
                   
-                  <TabsContent value="items" className="mt-4">
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <Button 
-                        onClick={handleNewItem}
-                        className="w-full bg-nature-forest hover:bg-nature-leaf mb-4"
-                      >
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        New Portfolio Item
-                      </Button>
-                      
-                      <PortfolioItemsList 
-                        items={items} 
-                        selectedId={selectedId}
-                        onSelectItem={(id) => {
-                          setIsCreating(false);
-                          setSelectedId(id);
-                          setActiveTab('items');
-                        }} 
-                      />
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="settings" className="mt-4">
-                    <DataManagement 
-                      storageUsage={storageUsage}
-                      exportData={exportData}
-                      importData={importData}
-                      clearStorage={clearStorage}
-                    />
-                  </TabsContent>
-                </Tabs>
+                  <PortfolioItemsList 
+                    items={items} 
+                    selectedId={selectedId}
+                    onSelectItem={(id) => {
+                      setIsCreating(false);
+                      setSelectedId(id);
+                    }} 
+                  />
+                </div>
                 
                 <div className="text-center mt-4">
                   <Button
@@ -144,48 +113,22 @@ const ManagePortfolio: React.FC = () => {
               
               {/* Main Content */}
               <div className="md:col-span-2">
-                {activeTab === 'items' ? (
-                  isCreating ? (
-                    <PortfolioEditor 
-                      mode="create"
-                      onSave={handleSaveNew}
-                      onCancel={handleCancel}
-                    />
-                  ) : selectedItem ? (
-                    <PortfolioEditor 
-                      mode="edit"
-                      item={selectedItem}
-                      onSave={handleUpdate}
-                      onDelete={() => handleDelete(selectedItem.id)}
-                      onCancel={handleCancel}
-                    />
-                  ) : (
-                    <EmptyState onCreateNew={handleNewItem} />
-                  )
+                {isCreating ? (
+                  <PortfolioEditor 
+                    mode="create"
+                    onSave={handleSaveNew}
+                    onCancel={handleCancel}
+                  />
+                ) : selectedItem ? (
+                  <PortfolioEditor 
+                    mode="edit"
+                    item={selectedItem}
+                    onSave={handleUpdate}
+                    onDelete={() => handleDelete(selectedItem.id)}
+                    onCancel={handleCancel}
+                  />
                 ) : (
-                  <div className="bg-white p-6 rounded-lg shadow-sm">
-                    <h2 className="text-xl font-semibold mb-4 text-nature-forest">Storage Management Tips</h2>
-                    <div className="prose max-w-none text-nature-bark">
-                      <p>Browser storage is limited to approximately 5-10 MB depending on your browser. Here are some tips to manage your storage effectively:</p>
-                      
-                      <ul className="mt-4 space-y-2">
-                        <li>Regularly export your portfolio data as a backup</li>
-                        <li>Keep image sizes small (under 500KB recommended)</li>
-                        <li>Limit the number of portfolio items if you're experiencing storage issues</li>
-                        <li>Host audio and video files on external services when possible</li>
-                        <li>Use the "Clear Browser Storage" option and reimport your data if you encounter persistent storage issues</li>
-                      </ul>
-                      
-                      <div className="mt-6 p-3 bg-amber-50 border border-amber-200 rounded-md">
-                        <p className="text-amber-700 flex items-start">
-                          <AlertTriangle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-                          <span>
-                            <strong>Important:</strong> Always export your data before clearing storage or using browser cleaning tools that might clear your local data.
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <EmptyState onCreateNew={handleNewItem} />
                 )}
               </div>
             </div>
