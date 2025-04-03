@@ -16,8 +16,8 @@ const About: React.FC = () => {
           <div className="relative">
             <div className="bg-nature-forest/10 absolute inset-0 rounded-lg transform rotate-3"></div>
             <img 
-              src="https://images.unsplash.com/photo-1521106581313-72a2b5a7a8a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8c3R1ZGlvLGF1ZGlvLGVuZ2luZWVyfHx8fHx8MTcyMTkzODQzNg&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1080" 
-              alt="Audio Engineer in Studio" 
+              src="/lovable-uploads/40101aee-c085-43b1-a83a-03ed8d362687.png" 
+              alt="Will Hall holding a speaker in nature" 
               className="rounded-lg shadow-xl relative z-10 object-cover h-full"
             />
           </div>
