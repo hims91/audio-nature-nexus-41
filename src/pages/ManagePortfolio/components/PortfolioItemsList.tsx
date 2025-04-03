@@ -20,7 +20,9 @@ const PortfolioItemsList: React.FC<PortfolioItemsListProps> = ({
   const getItemIcon = (item: PortfolioItem) => {
     if (item.videoUrl) return <FileVideo className="mr-2 h-4 w-4" />;
     if (item.audioUrl) return <Music className="mr-2 h-4 w-4" />;
-    return <FileImage className="mr-2 h-4 w-4" />;
+    if (item.imageUrl) return <FileImage className="mr-2 h-4 w-4" />;
+    // Default icon if no media is available
+    return <FileImage className="mr-2 h-4 w-4 opacity-50" />;
   };
 
   return (

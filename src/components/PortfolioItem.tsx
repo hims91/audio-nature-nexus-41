@@ -36,25 +36,37 @@ const getIconComponent = (iconName: string) => {
 const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
   return (
     <Card className="overflow-hidden bg-white h-full shadow-md hover:shadow-xl transition-shadow duration-300">
-      <div className="relative h-52 overflow-hidden">
-        <img 
-          src={item.imageUrl} 
-          alt={item.title} 
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-        />
-        <Badge 
-          className="absolute top-3 right-3 bg-nature-forest text-white hover:bg-nature-leaf"
-        >
-          {item.category}
-        </Badge>
-      </div>
+      {item.imageUrl && (
+        <div className="relative h-52 overflow-hidden">
+          <img 
+            src={item.imageUrl} 
+            alt={item.title} 
+            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+          />
+          <Badge 
+            className="absolute top-3 right-3 bg-nature-forest text-white hover:bg-nature-leaf"
+          >
+            {item.category}
+          </Badge>
+        </div>
+      )}
+      
+      {!item.imageUrl && (
+        <div className="relative h-16 bg-nature-cream flex items-center justify-center">
+          <Badge 
+            className="absolute top-3 right-3 bg-nature-forest text-white hover:bg-nature-leaf"
+          >
+            {item.category}
+          </Badge>
+        </div>
+      )}
       
       <CardContent className="p-5">
         <h3 className="text-xl font-semibold text-nature-forest mb-1">{item.title}</h3>
         <p className="text-sm text-nature-stone/80 mb-3">Client: {item.client}</p>
         <p className="mb-4 text-nature-bark">{item.description}</p>
         
-        {/* External Links Section */}
+        {/* External Links Section - Only show if links exist */}
         {(item.spotifyUrl || (item.otherLinks && item.otherLinks.length > 0)) && (
           <div className="mb-4">
             <div className="flex items-center mb-2 text-nature-forest">
@@ -90,7 +102,7 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
           </div>
         )}
         
-        {/* Audio Preview - Optional now */}
+        {/* Audio Preview - Only show if audio exists */}
         {item.audioUrl && (
           <div className="mb-3">
             <div className="flex items-center mb-2 text-nature-forest">
@@ -101,6 +113,7 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
           </div>
         )}
         
+        {/* Video Preview - Only show if video exists */}
         {item.videoUrl && (
           <div className="mt-4">
             <div className="flex items-center mb-2 text-nature-forest">
