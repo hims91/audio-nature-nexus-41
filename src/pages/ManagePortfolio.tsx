@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -44,36 +45,75 @@ const ManagePortfolio: React.FC = () => {
   // Save items to localStorage whenever they change, with error handling
   useEffect(() => {
     try {
-      // Create a storage-safe version of items (without data URLs)
+      // Create a storage-safe version of items
       const storageSafeItems = items.map(item => {
-        // Store both the path and the preview URL
         const safeItem = {
           ...item,
-          // Keep the original imageUrl for path reference
           imageUrl: item.imageUrl,
-          // Store the preview separately if it exists
           imagePreviewUrl: item.imagePreviewUrl || null
         };
-        
         return safeItem;
       });
       
-      // Convert to JSON and check size
+      // Try to save complete data first
       const jsonData = JSON.stringify(storageSafeItems);
       const sizeInMB = (new Blob([jsonData]).size / 1024 / 1024).toFixed(2);
       
-      if (parseFloat(sizeInMB) > 4.5) { // Stay well under the 5MB limit
-        throw new Error(`Data size (${sizeInMB}MB) exceeds safe localStorage limit of 4.5MB`);
+      if (parseFloat(sizeInMB) > 4.5) {
+        // If too large, create a smaller version without image previews
+        const minimalSafeItems = items.map(item => ({
+          ...item,
+          imagePreviewUrl: null, // Remove image previews to save space
+        }));
+        
+        const minimalJsonData = JSON.stringify(minimalSafeItems);
+        const minimalSizeInMB = (new Blob([minimalJsonData]).size / 1024 / 1024).toFixed(2);
+        
+        if (parseFloat(minimalSizeInMB) > 4.5) {
+          throw new Error(`Data size (${minimalSizeInMB}MB) still exceeds safe localStorage limit even after compression`);
+        }
+        
+        localStorage.setItem('portfolioItems', minimalJsonData);
+        
+        toast({
+          title: "Storage Optimization",
+          description: "Your portfolio data was too large for browser storage. Image previews won't persist after refresh, but all other data is saved.",
+        });
+      } else {
+        // If size is acceptable, save the complete data
+        localStorage.setItem('portfolioItems', jsonData);
       }
-      
-      localStorage.setItem('portfolioItems', jsonData);
     } catch (error) {
       console.error("Error saving portfolio items to localStorage:", error);
-      toast({
-        title: "Storage Error",
-        description: error instanceof Error ? error.message : "Failed to save your changes to browser storage. Your changes will be visible now but won't persist after refresh.",
-        variant: "destructive"
-      });
+      
+      try {
+        // Last resort: Save only essential data (no previews or binary data)
+        const essentialData = items.map(item => ({
+          id: item.id,
+          title: item.title,
+          client: item.client,
+          category: item.category,
+          description: item.description,
+          imageUrl: item.imageUrl, // Keep path reference but not preview
+          audioUrl: item.audioUrl,
+          videoUrl: item.videoUrl,
+          spotifyUrl: item.spotifyUrl,
+          otherLinks: item.otherLinks
+        }));
+        
+        localStorage.setItem('portfolioItems', JSON.stringify(essentialData));
+        
+        toast({
+          title: "Limited Storage Available",
+          description: "Your portfolio data was saved without preview images due to browser storage limitations.",
+        });
+      } catch (finalError) {
+        toast({
+          title: "Storage Error",
+          description: "Unable to save your portfolio changes to browser storage. Your changes will be visible now but won't persist after refresh.",
+          variant: "destructive"
+        });
+      }
     }
   }, [items, toast]);
   
@@ -144,6 +184,17 @@ const ManagePortfolio: React.FC = () => {
         toast({
           title: "Invalid file type",
           description: "Please upload an image file (JPG, PNG, etc.)",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Check file size before creating preview
+      const fileSizeInMB = file.size / 1024 / 1024;
+      if (fileSizeInMB > 2) {
+        toast({
+          title: "Image too large",
+          description: "Please use an image smaller than 2MB to avoid storage issues",
           variant: "destructive"
         });
         return;

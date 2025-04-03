@@ -94,7 +94,7 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
           <div className="mb-3">
             <div className="flex items-center mb-2 text-nature-forest">
               <Music className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">Audio Sample</span>
+              <span className="text-sm font-medium">Preview</span>
             </div>
             <AudioPlayer audioUrl={item.audioUrl} />
           </div>

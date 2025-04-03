@@ -7,7 +7,7 @@ export interface PortfolioItem {
   description: string;
   imageUrl: string;
   imagePreviewUrl?: string; // Add support for image preview URLs
-  audioUrl: string;
+  audioUrl?: string; // Made optional
   videoUrl?: string;
   spotifyUrl?: string;
   otherLinks?: {
