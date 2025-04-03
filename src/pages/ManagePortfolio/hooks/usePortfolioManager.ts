@@ -3,6 +3,12 @@ import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "@/hooks/use-toast";
 import { portfolioItems as initialPortfolioItems, PortfolioItem } from "@/data/portfolio";
+import LZString from 'lz-string';
+
+// Storage key for compressed portfolio data
+const STORAGE_KEY = 'compressedPortfolioItems';
+// Previous storage key - for migration
+const LEGACY_STORAGE_KEY = 'portfolioItems';
 
 export function usePortfolioManager() {
   const { toast } = useToast();
@@ -11,6 +17,7 @@ export function usePortfolioManager() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [storageAvailable, setStorageAvailable] = useState<boolean>(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [storageUsage, setStorageUsage] = useState<string>('0');
   
   // Check if localStorage is available
   useEffect(() => {
@@ -31,6 +38,78 @@ export function usePortfolioManager() {
     }
   }, [toast]);
   
+  // Helper function to compress data before saving
+  const compressData = (data: any): string => {
+    try {
+      const jsonString = JSON.stringify(data);
+      const compressed = LZString.compressToUTF16(jsonString);
+      console.log(`🗜️ Compressed data: ${(jsonString.length / 1024).toFixed(2)}KB → ${(compressed.length / 1024).toFixed(2)}KB`);
+      return compressed;
+    } catch (error) {
+      console.error("❌ Compression error:", error);
+      throw new Error("Failed to compress data");
+    }
+  };
+  
+  // Helper function to decompress saved data
+  const decompressData = (compressedData: string): any => {
+    try {
+      const decompressed = LZString.decompressFromUTF16(compressedData);
+      if (!decompressed) throw new Error("Decompression resulted in null/empty data");
+      return JSON.parse(decompressed);
+    } catch (error) {
+      console.error("❌ Decompression error:", error);
+      throw new Error("Failed to decompress data");
+    }
+  };
+  
+  // Clean item before storage by removing large preview data
+  const cleanItemForStorage = (item: PortfolioItem): PortfolioItem => {
+    const { coverImagePreview, ...cleanedItem } = item;
+    return cleanedItem as PortfolioItem;
+  };
+  
+  // Clean all items for storage
+  const prepareItemsForStorage = (items: PortfolioItem[]): PortfolioItem[] => {
+    return items.map(cleanItemForStorage);
+  };
+  
+  // Estimate storage size
+  const calculateStorageSize = (): void => {
+    let total = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        const value = localStorage.getItem(key) || '';
+        total += key.length + value.length;
+      }
+    }
+    // Size in MB
+    const sizeMB = (total * 2 / 1024 / 1024).toFixed(2);
+    setStorageUsage(sizeMB);
+    console.log(`📊 Current storage usage: ${sizeMB}MB`);
+  };
+  
+  // Migration from old storage format
+  const migrateFromLegacyStorage = (): PortfolioItem[] | null => {
+    try {
+      const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacyData) {
+        console.log("🔄 Migrating from legacy storage format");
+        const parsedItems = JSON.parse(legacyData);
+        if (Array.isArray(parsedItems)) {
+          // Remove legacy storage to free up space
+          localStorage.removeItem(LEGACY_STORAGE_KEY);
+          return parsedItems;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error("❌ Error migrating from legacy storage:", error);
+      return null;
+    }
+  };
+  
   // Load portfolio items from localStorage on component mount
   useEffect(() => {
     const loadItems = () => {
@@ -43,40 +122,47 @@ export function usePortfolioManager() {
           return;
         }
         
-        const savedItems = localStorage.getItem('portfolioItems');
+        // First try to get compressed data
+        const compressedData = localStorage.getItem(STORAGE_KEY);
         
-        if (savedItems) {
+        let portfolioData: PortfolioItem[] | null = null;
+        
+        if (compressedData) {
           try {
-            console.log("🔍 Found saved portfolio data in localStorage");
-            const parsedItems = JSON.parse(savedItems);
+            // Try to load compressed data
+            portfolioData = decompressData(compressedData);
+            console.log("🔍 Found compressed portfolio data");
+          } catch (decompressError) {
+            console.error("❌ Error decompressing data:", decompressError);
+          }
+        } else {
+          // Check for legacy data for migration
+          portfolioData = migrateFromLegacyStorage();
+        }
+        
+        if (portfolioData) {
+          // Basic validation of required fields
+          if (Array.isArray(portfolioData)) {
+            const validItems = portfolioData.filter(item => 
+              item && 
+              typeof item === 'object' && 
+              item.id && 
+              item.title && 
+              item.category
+            );
             
-            // Validate that the parsed data is an array
-            if (Array.isArray(parsedItems)) {
-              // Basic validation of required fields
-              const validItems = parsedItems.filter(item => 
-                item && 
-                typeof item === 'object' && 
-                item.id && 
-                item.title && 
-                item.category
-              );
-              
-              if (validItems.length !== parsedItems.length) {
-                console.warn("⚠️ Some portfolio items were invalid and filtered out");
-                toast({
-                  title: "Data Warning",
-                  description: "Some saved portfolio items were corrupted and have been removed."
-                });
-              }
-              
-              console.log(`📥 Loaded ${validItems.length} portfolio items from localStorage`);
-              setItems(validItems);
-            } else {
-              throw new Error("Saved data is not in the expected format");
+            if (validItems.length !== portfolioData.length) {
+              console.warn("⚠️ Some portfolio items were invalid and filtered out");
+              toast({
+                title: "Data Warning",
+                description: "Some saved portfolio items were corrupted and have been removed."
+              });
             }
-          } catch (parseError) {
-            console.error("❌ Error parsing saved portfolio items:", parseError);
-            throw new Error("Could not parse saved data");
+            
+            console.log(`📥 Loaded ${validItems.length} portfolio items from storage`);
+            setItems(validItems);
+          } else {
+            throw new Error("Saved data is not in the expected format");
           }
         } else {
           console.log("ℹ️ No saved portfolio items found, using initial data");
@@ -84,6 +170,7 @@ export function usePortfolioManager() {
         }
         
         setErrorMessage(null);
+        calculateStorageSize();
       } catch (error) {
         console.error("❌ Error loading portfolio items:", error);
         setErrorMessage("Failed to load portfolio items. Using default data.");
@@ -107,24 +194,22 @@ export function usePortfolioManager() {
     const saveToStorage = () => {
       if (!isLoading && items.length > 0 && storageAvailable) {
         try {
-          // First, check if we're exceeding localStorage size limits
-          const itemsJson = JSON.stringify(items);
-          const sizeInMB = (new Blob([itemsJson]).size / 1024 / 1024).toFixed(2);
+          // Clean items before storage to reduce size
+          const cleanedItems = prepareItemsForStorage(items);
           
-          if (parseFloat(sizeInMB) > 4.5) {
-            // Getting close to the localStorage 5MB limit, warn the user
-            console.warn(`⚠️ Portfolio data is ${sizeInMB}MB, approaching localStorage limits`);
-            toast({
-              title: "Storage Warning",
-              description: "Your portfolio data is getting large. Consider removing unused items."
-            });
-          }
+          // Compress the data
+          const compressed = compressData(cleanedItems);
           
-          localStorage.setItem('portfolioItems', itemsJson);
+          // Save compressed data
+          localStorage.setItem(STORAGE_KEY, compressed);
+          
+          // Update timestamp and calculate storage
           const now = new Date();
           setLastSaved(now);
-          console.log(`💾 Portfolio data (${sizeInMB}MB) saved successfully at ${now.toLocaleTimeString()}`);
-          console.log(`📊 Saved ${items.length} items with IDs: ${items.map(i => i.id).join(', ')}`);
+          calculateStorageSize();
+          
+          console.log(`💾 Portfolio data saved successfully at ${now.toLocaleTimeString()}`);
+          console.log(`📊 Saved ${items.length} items with IDs: ${items.slice(0, 3).map(i => i.id).join(', ')}${items.length > 3 ? '...' : ''}`);
         } catch (error) {
           console.error("❌ Error saving portfolio items:", error);
           
@@ -134,9 +219,31 @@ export function usePortfolioManager() {
             
             toast({
               title: "Storage Limit Reached",
-              description: "Your browser's storage limit has been reached. Try removing some items or images.",
+              description: "Your browser's storage limit has been reached. Try removing some items or export your data.",
               variant: "destructive"
             });
+            
+            // Try aggressive cleanup to save at least the item metadata
+            try {
+              const minimalItems = items.map(item => ({
+                id: item.id,
+                title: item.title,
+                category: item.category,
+                client: item.client,
+                description: item.description?.substring(0, 100), // Truncate description
+                featured: item.featured,
+                createdAt: item.createdAt,
+                externalLinks: item.externalLinks,
+                coverImageUrl: item.coverImageUrl,
+                // Remove all other large data
+              }));
+              
+              const compressed = compressData(minimalItems);
+              localStorage.setItem(STORAGE_KEY, compressed);
+              console.log("⚠️ Saved minimal portfolio data (emergency mode)");
+            } catch (fallbackError) {
+              console.error("❌ Failed to save even minimal data:", fallbackError);
+            }
           } else {
             toast({
               title: "Error Saving Data",
@@ -144,25 +251,104 @@ export function usePortfolioManager() {
               variant: "destructive"
             });
           }
-          
-          // Attempt to save minimal data without image data
-          try {
-            const minimalItems = items.map(item => ({
-              ...item,
-              coverImagePreview: undefined // Remove large preview data
-            }));
-            
-            localStorage.setItem('portfolioItems', JSON.stringify(minimalItems));
-            console.log("⚠️ Saved minimal portfolio data without image previews");
-          } catch (fallbackError) {
-            console.error("❌ Failed to save even minimal data:", fallbackError);
-          }
         }
       }
     };
     
     saveToStorage();
   }, [items, isLoading, toast, storageAvailable]);
+  
+  // Export portfolio data to JSON file
+  const exportData = () => {
+    try {
+      const dataStr = JSON.stringify(items, null, 2);
+      const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
+      
+      const exportFileDefaultName = `portfolio-export-${new Date().toISOString().slice(0, 10)}.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      
+      toast({
+        title: "Export Successful",
+        description: "Your portfolio data has been exported."
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("❌ Export error:", error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting your portfolio data.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+  
+  // Import portfolio data from JSON file
+  const importData = (jsonData: string) => {
+    try {
+      const importedItems = JSON.parse(jsonData);
+      
+      if (!Array.isArray(importedItems)) {
+        throw new Error("Imported data is not a valid portfolio array");
+      }
+      
+      // Basic validation
+      const validItems = importedItems.filter(item => 
+        item && 
+        typeof item === 'object' && 
+        item.id && 
+        item.title && 
+        item.category
+      );
+      
+      if (validItems.length === 0) {
+        throw new Error("No valid portfolio items found in import data");
+      }
+      
+      // Set the imported items
+      setItems(validItems);
+      
+      toast({
+        title: "Import Successful",
+        description: `Imported ${validItems.length} portfolio items.`
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("❌ Import error:", error);
+      toast({
+        title: "Import Failed",
+        description: "The selected file doesn't contain valid portfolio data.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+  
+  // Clear all storage (for troubleshooting)
+  const clearStorage = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      calculateStorageSize();
+      console.log("🧹 Storage cleared");
+      
+      toast({
+        title: "Storage Cleared",
+        description: "All portfolio data has been removed from browser storage."
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("❌ Error clearing storage:", error);
+      return false;
+    }
+  };
   
   // Add a new portfolio item
   const addItem = (newItemData: Omit<PortfolioItem, "id" | "createdAt">) => {
@@ -221,15 +407,25 @@ export function usePortfolioManager() {
     }
     
     try {
-      const savedItems = localStorage.getItem('portfolioItems');
-      if (!savedItems) {
-        console.warn("⚠️ No items found in localStorage");
+      const compressedData = localStorage.getItem(STORAGE_KEY);
+      if (!compressedData) {
+        console.warn("⚠️ No compressed items found in localStorage");
+        
+        // Check legacy storage
+        const legacyData = localStorage.getItem(LEGACY_STORAGE_KEY);
+        if (legacyData) {
+          console.log("ℹ️ Legacy data exists but not compressed data");
+          return false;
+        }
+        
         return false;
       }
       
-      const parsedItems = JSON.parse(savedItems);
-      console.log(`✅ Storage verification: ${parsedItems.length} items found in localStorage`);
+      // Try to decompress and validate
+      const decompressed = decompressData(compressedData);
+      console.log(`✅ Storage verification: ${decompressed.length} items found in compressed storage`);
       console.log(`✅ Last save timestamp: ${lastSaved?.toLocaleTimeString() || 'Never'}`);
+      console.log(`✅ Current storage usage: ${storageUsage}MB`);
       return true;
     } catch (error) {
       console.error("❌ Storage verification failed:", error);
@@ -245,7 +441,11 @@ export function usePortfolioManager() {
     isLoading,
     errorMessage,
     storageAvailable,
+    storageUsage,
     verifyStorage,
-    lastSaved
+    lastSaved,
+    exportData,
+    importData,
+    clearStorage
   };
 }

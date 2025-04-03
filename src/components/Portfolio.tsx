@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { portfolioItems as initialPortfolioItems } from "@/data/portfolio";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Edit, Star, Save, CheckCircle2 } from "lucide-react";
+import { Edit, Star, Save, CheckCircle2, AlertTriangle, HardDrive } from "lucide-react";
 import PortfolioGallery from "./portfolio/PortfolioGallery";
 import PortfolioFilters from "./portfolio/PortfolioFilters";
 
@@ -13,14 +13,32 @@ const Portfolio: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [filteredItems, setFilteredItems] = useState(items);
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [storageInfo, setStorageInfo] = useState<string | null>(null);
   const { toast } = useToast();
   
   // Load items from localStorage on initial render
   useEffect(() => {
     try {
+      // Try compressed storage first
+      const compressedData = localStorage.getItem('compressedPortfolioItems');
+      if (compressedData) {
+        try {
+          const decompressed = LZString.decompressFromUTF16(compressedData);
+          if (decompressed) {
+            console.log("📥 Portfolio component loading saved compressed items");
+            const parsedItems = JSON.parse(decompressed);
+            setItems(parsedItems);
+            return;
+          }
+        } catch (decompressError) {
+          console.error("❌ Error decompressing portfolio data:", decompressError);
+        }
+      }
+      
+      // Fall back to legacy storage
       const savedItems = localStorage.getItem('portfolioItems');
       if (savedItems) {
-        console.log("📥 Portfolio component loading saved items");
+        console.log("📥 Portfolio component loading saved legacy items");
         const parsedItems = JSON.parse(savedItems);
         setItems(parsedItems);
       }
@@ -46,14 +64,50 @@ const Portfolio: React.FC = () => {
   // Verify localStorage function
   const verifyLocalStorage = () => {
     try {
+      // Check for compressed data
+      const compressedData = localStorage.getItem('compressedPortfolioItems');
+      
+      // Calculate storage usage
+      let total = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          const value = localStorage.getItem(key) || '';
+          total += key.length + value.length;
+        }
+      }
+      
+      // Size in MB
+      const sizeMB = (total * 2 / 1024 / 1024).toFixed(2);
+      setStorageInfo(`${sizeMB}MB used`);
+      
+      if (compressedData) {
+        try {
+          const decompressed = LZString.decompressFromUTF16(compressedData);
+          if (decompressed) {
+            const parsedItems = JSON.parse(decompressed);
+            console.log("✅ Verification successful: Found compressed items", parsedItems.length);
+            toast({
+              title: "Storage Verification Success",
+              description: `Found ${parsedItems.length} items in compressed storage (${sizeMB}MB used).`,
+            });
+            setVerificationStatus('success');
+            return;
+          }
+        } catch (error) {
+          console.error("❌ Compressed data verification failed:", error);
+        }
+      }
+      
+      // Try legacy storage
       const savedItems = localStorage.getItem('portfolioItems');
       
       if (savedItems) {
         const parsedItems = JSON.parse(savedItems);
-        console.log("✅ Verification successful: Found saved items", parsedItems);
+        console.log("✅ Verification successful: Found legacy items", parsedItems);
         toast({
           title: "Storage Verification Success",
-          description: `Found ${parsedItems.length} items saved in localStorage.`,
+          description: `Found ${parsedItems.length} items saved in legacy storage (${sizeMB}MB used).`,
         });
         setVerificationStatus('success');
       } else {
@@ -115,10 +169,13 @@ const Portfolio: React.FC = () => {
             >
               {verificationStatus === 'success' ? (
                 <CheckCircle2 className="mr-1 h-3 w-3" />
+              ) : verificationStatus === 'error' ? (
+                <AlertTriangle className="mr-1 h-3 w-3" />
               ) : (
                 <Save className="mr-1 h-3 w-3" />
               )}
               Verify Storage
+              {storageInfo && <span className="ml-1 text-xs opacity-70">{storageInfo}</span>}
             </Button>
           </div>
         </div>
