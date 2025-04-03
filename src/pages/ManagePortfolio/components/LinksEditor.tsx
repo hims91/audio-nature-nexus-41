@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Trash2, LinkIcon, Music } from "lucide-react";
-import { PortfolioItem } from "@/data/portfolio";
+import { PortfolioItem, ExternalLink } from "@/data/portfolio";
 
 interface LinksEditorProps {
   currentItem: PortfolioItem;
@@ -32,47 +32,28 @@ export const LinksEditor: React.FC<LinksEditorProps> = ({
   onAddLink,
   onRemoveLink
 }) => {
-  const iconOptions = [
-    { value: "link", label: "Generic Link" },
+  const linkTypeOptions = [
+    { value: "spotify", label: "Spotify" },
+    { value: "appleMusic", label: "Apple Music" },
     { value: "youtube", label: "YouTube" },
-    { value: "instagram", label: "Instagram" },
-    { value: "facebook", label: "Facebook" },
-    { value: "twitter", label: "Twitter" },
-    { value: "linkedin", label: "LinkedIn" }
+    { value: "vimeo", label: "Vimeo" },
+    { value: "other", label: "Other Link" }
   ];
   
-  const getIconComponent = (icon: string) => {
-    switch(icon) {
-      case 'youtube': return <Music className="h-4 w-4 text-white" />;
-      case 'instagram': return <Music className="h-4 w-4 text-white" />;
-      case 'facebook': return <Music className="h-4 w-4 text-white" />;
-      case 'twitter': return <Music className="h-4 w-4 text-white" />;
-      case 'linkedin': return <Music className="h-4 w-4 text-white" />;
-      default: return <LinkIcon className="h-4 w-4 text-white" />;
-    }
+  const getIconComponent = (type: string) => {
+    // For simplicity, we'll use the Music icon for all types
+    // In a real app, you'd have different icons for different types
+    return <Music className="h-4 w-4 text-white" />;
   };
 
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="spotifyUrl">Spotify Link</Label>
-        <Input 
-          id="spotifyUrl" 
-          placeholder="https://open.spotify.com/..."
-          value={currentItem.spotifyUrl || ""}
-          onChange={(e) => setCurrentItem({...currentItem, spotifyUrl: e.target.value})}
-        />
-        <p className="text-xs text-muted-foreground mt-1">
-          Add a link to the Spotify album, track, or playlist
-        </p>
-      </div>
-      
-      <div>
-        <h3 className="text-sm font-medium mb-2">Other Links</h3>
+        <h3 className="text-sm font-medium mb-2">External Links</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
           <Input 
-            placeholder="Link title" 
+            placeholder="Link title (for 'Other' type)" 
             value={newLinkTitle}
             onChange={(e) => setNewLinkTitle(e.target.value)}
           />
@@ -87,10 +68,10 @@ export const LinksEditor: React.FC<LinksEditorProps> = ({
               onValueChange={setNewLinkIcon}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Icon" />
+                <SelectValue placeholder="Link Type" />
               </SelectTrigger>
               <SelectContent>
-                {iconOptions.map(option => (
+                {linkTypeOptions.map(option => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -108,16 +89,16 @@ export const LinksEditor: React.FC<LinksEditorProps> = ({
           </div>
         </div>
         
-        {currentItem.otherLinks && currentItem.otherLinks.length > 0 ? (
+        {currentItem.externalLinks && currentItem.externalLinks.length > 0 ? (
           <div className="space-y-2">
-            {currentItem.otherLinks.map((link, index) => (
+            {currentItem.externalLinks.map((link, index) => (
               <div key={index} className="flex items-center justify-between border p-2 rounded">
                 <div className="flex items-center">
                   <div className="bg-nature-stone p-1 rounded mr-2">
-                    {getIconComponent(link.icon)}
+                    {getIconComponent(link.type)}
                   </div>
                   <div>
-                    <p className="text-sm font-medium">{link.title}</p>
+                    <p className="text-sm font-medium">{link.type === 'other' ? link.title : link.type}</p>
                     <p className="text-xs text-nature-bark truncate">{link.url}</p>
                   </div>
                 </div>
@@ -133,7 +114,7 @@ export const LinksEditor: React.FC<LinksEditorProps> = ({
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground italic">No additional links added yet</p>
+          <p className="text-sm text-muted-foreground italic">No external links added yet</p>
         )}
       </div>
     </div>

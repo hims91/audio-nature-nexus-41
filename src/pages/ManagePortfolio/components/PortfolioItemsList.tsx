@@ -91,7 +91,7 @@ const PortfolioItemsList: React.FC<PortfolioItemsListProps> = ({
                     </Badge>
                   )}
                   
-                  {item.externalLinks.length > 0 && (
+                  {item.externalLinks && item.externalLinks.length > 0 && (
                     <Badge variant="outline" className="text-[0.65rem] px-1 py-0 h-auto">
                       <ExternalLink className="h-2.5 w-2.5 mr-0.5" />
                       {item.externalLinks.length}

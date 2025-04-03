@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PortfolioItem } from "@/data/portfolio";
+import { PortfolioItem, ExternalLink } from "@/data/portfolio";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Image, Music2, FileVideo, LinkIcon, PlusCircle, Trash2, Save } from "lucide-react";
@@ -70,47 +70,57 @@ const ItemEditor: React.FC<ItemEditorProps> = ({
   
   const handleAddLink = () => {
     if (!currentItem) return;
-    if (!newLinkTitle || !newLinkUrl) {
+    if (!newLinkUrl) {
       toast({
         title: "Missing information",
-        description: "Please provide both a title and URL for the link",
+        description: "Please provide a URL for the link",
         variant: "destructive"
       });
       return;
     }
     
-    const newLink = {
-      title: newLinkTitle,
+    // For 'other' type links, require a title
+    if (newLinkIcon === 'other' && !newLinkTitle) {
+      toast({
+        title: "Missing information",
+        description: "Please provide a title for custom links",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const newLink: ExternalLink = {
+      type: newLinkIcon as ExternalLink['type'],
       url: newLinkUrl,
-      icon: newLinkIcon
+      ...(newLinkIcon === 'other' && { title: newLinkTitle })
     };
     
-    const updatedOtherLinks = currentItem.otherLinks ? [...currentItem.otherLinks, newLink] : [newLink];
+    const updatedExternalLinks = [...currentItem.externalLinks, newLink];
     
     setCurrentItem({
       ...currentItem,
-      otherLinks: updatedOtherLinks
+      externalLinks: updatedExternalLinks
     });
     
     setNewLinkTitle("");
     setNewLinkUrl("");
-    setNewLinkIcon("link");
+    setNewLinkIcon("spotify");
     
     toast({
       title: "Link added",
-      description: `Added link to ${newLinkTitle}`,
+      description: `Added ${newLinkIcon} link`,
     });
   };
   
   const handleRemoveLink = (index: number) => {
-    if (!currentItem || !currentItem.otherLinks) return;
+    if (!currentItem) return;
     
-    const updatedLinks = [...currentItem.otherLinks];
+    const updatedLinks = [...currentItem.externalLinks];
     updatedLinks.splice(index, 1);
     
     setCurrentItem({
       ...currentItem,
-      otherLinks: updatedLinks
+      externalLinks: updatedLinks
     });
     
     toast({
@@ -157,21 +167,24 @@ const ItemEditor: React.FC<ItemEditorProps> = ({
           
           <div>
             <Label htmlFor="category">Category</Label>
-            <Input 
-              id="category" 
-              value={currentItem.category}
-              onChange={(e) => setCurrentItem({...currentItem, category: e.target.value})}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="spotifyUrl">Spotify URL</Label>
-            <Input 
-              id="spotifyUrl" 
-              placeholder="https://open.spotify.com/..."
-              value={currentItem.spotifyUrl || ""}
-              onChange={(e) => setCurrentItem({...currentItem, spotifyUrl: e.target.value})}
-            />
+            <Select 
+              value={currentItem.category} 
+              onValueChange={(value) => setCurrentItem({
+                ...currentItem, 
+                category: value as PortfolioItem['category']
+              })}
+            >
+              <SelectTrigger id="category">
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Mixing & Mastering">Mixing & Mastering</SelectItem>
+                <SelectItem value="Sound Design">Sound Design</SelectItem>
+                <SelectItem value="Podcasting">Podcasting</SelectItem>
+                <SelectItem value="Sound for Picture">Sound for Picture</SelectItem>
+                <SelectItem value="Dolby Atmos">Dolby Atmos</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <Tabs defaultValue="image" className="w-full mt-6">
