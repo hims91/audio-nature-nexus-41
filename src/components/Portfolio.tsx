@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { portfolioItems as initialPortfolioItems } from "@/data/portfolio";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Edit, Star, Save, CheckCircle2, AlertTriangle, HardDrive } from "lucide-react";
+import { Edit, Star, Save, CheckCircle2, AlertTriangle } from "lucide-react";
 import PortfolioGallery from "./portfolio/PortfolioGallery";
 import PortfolioFilters from "./portfolio/PortfolioFilters";
+import LZString from "lz-string";
 
 const Portfolio: React.FC = () => {
   const [items, setItems] = useState(initialPortfolioItems);
@@ -16,10 +16,8 @@ const Portfolio: React.FC = () => {
   const [storageInfo, setStorageInfo] = useState<string | null>(null);
   const { toast } = useToast();
   
-  // Load items from localStorage on initial render
   useEffect(() => {
     try {
-      // Try compressed storage first
       const compressedData = localStorage.getItem('compressedPortfolioItems');
       if (compressedData) {
         try {
@@ -35,7 +33,6 @@ const Portfolio: React.FC = () => {
         }
       }
       
-      // Fall back to legacy storage
       const savedItems = localStorage.getItem('portfolioItems');
       if (savedItems) {
         console.log("📥 Portfolio component loading saved legacy items");
@@ -52,7 +49,6 @@ const Portfolio: React.FC = () => {
     }
   }, [toast]);
   
-  // Filter items when category or items change
   useEffect(() => {
     if (!activeCategory || activeCategory === "All") {
       setFilteredItems(items);
@@ -61,13 +57,10 @@ const Portfolio: React.FC = () => {
     }
   }, [activeCategory, items]);
 
-  // Verify localStorage function
   const verifyLocalStorage = () => {
     try {
-      // Check for compressed data
       const compressedData = localStorage.getItem('compressedPortfolioItems');
       
-      // Calculate storage usage
       let total = 0;
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -77,7 +70,6 @@ const Portfolio: React.FC = () => {
         }
       }
       
-      // Size in MB
       const sizeMB = (total * 2 / 1024 / 1024).toFixed(2);
       setStorageInfo(`${sizeMB}MB used`);
       
@@ -99,7 +91,6 @@ const Portfolio: React.FC = () => {
         }
       }
       
-      // Try legacy storage
       const savedItems = localStorage.getItem('portfolioItems');
       
       if (savedItems) {
@@ -129,13 +120,11 @@ const Portfolio: React.FC = () => {
       setVerificationStatus('error');
     }
     
-    // Reset status after 3 seconds
     setTimeout(() => {
       setVerificationStatus('idle');
     }, 3000);
   };
 
-  // Get unique categories
   const categories = ["All", ...Array.from(new Set(items.map(item => item.category)))];
   
   return (
@@ -180,14 +169,12 @@ const Portfolio: React.FC = () => {
           </div>
         </div>
         
-        {/* Category Filters */}
         <PortfolioFilters 
           categories={categories}
           activeCategory={activeCategory}
           setActiveCategory={setActiveCategory}
         />
         
-        {/* Featured Items Section (only on "All" view) */}
         {(!activeCategory || activeCategory === "All") && (
           <div className="mb-12">
             <div className="flex items-center mb-6">
@@ -201,7 +188,6 @@ const Portfolio: React.FC = () => {
           </div>
         )}
         
-        {/* Main Portfolio Gallery */}
         <div className="mb-6">
           <h3 className="text-xl font-semibold text-nature-forest mb-6">
             {activeCategory && activeCategory !== "All" 
