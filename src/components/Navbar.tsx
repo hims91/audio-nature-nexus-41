@@ -24,9 +24,9 @@ const Navbar: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <img 
-              src="/lovable-uploads/5bf7a89b-4112-422f-a28c-92df6c7ea6cf.png" 
+              src="/lovable-uploads/c5a95b2d-5143-43bf-9748-b613979e99fa.png" 
               alt="Frog with Speaker Logo" 
-              className="h-10 w-10 object-contain"
+              className="h-12 w-12 object-contain"
             />
             <span className="text-xl font-bold text-nature-forest">Will Hall Sound Studios</span>
           </div>
