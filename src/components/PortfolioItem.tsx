@@ -48,10 +48,10 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
 
   return (
     <Card className="overflow-hidden bg-white h-full shadow-md hover:shadow-xl transition-shadow duration-300">
-      {hasValidUrl(item.imageUrl) && (
+      {hasValidUrl(item.coverImageUrl) && (
         <div className="relative h-52 overflow-hidden">
           <img 
-            src={item.imageUrl} 
+            src={item.coverImageUrl} 
             alt={item.title} 
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             onError={(e) => {
@@ -67,7 +67,7 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
         </div>
       )}
       
-      {!hasValidUrl(item.imageUrl) && (
+      {!hasValidUrl(item.coverImageUrl) && (
         <div className="relative h-16 bg-nature-cream flex items-center justify-center">
           <Badge 
             className="absolute top-3 right-3 bg-nature-forest text-white hover:bg-nature-leaf"
@@ -83,16 +83,17 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
         <p className="mb-4 text-nature-bark">{item.description}</p>
         
         {/* External Links Section - Only show if links exist */}
-        {(hasValidUrl(item.spotifyUrl) || (item.otherLinks && item.otherLinks.length > 0)) && (
+        {item.externalLinks && item.externalLinks.length > 0 && (
           <div className="mb-4">
             <div className="flex items-center mb-2 text-nature-forest">
               <LinkIcon className="h-4 w-4 mr-1" />
               <span className="text-sm font-medium">Links</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {hasValidUrl(item.spotifyUrl) && (
+              {item.externalLinks.filter(link => link.type === "spotify").map((link, index) => (
                 <a 
-                  href={item.spotifyUrl}
+                  key={index}
+                  href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#1DB954] text-white hover:bg-opacity-90 transition-colors"
@@ -100,9 +101,9 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
                   <Music className="h-3.5 w-3.5 mr-1" />
                   Spotify
                 </a>
-              )}
+              ))}
               
-              {item.otherLinks && item.otherLinks.map((link, index) => (
+              {item.externalLinks.filter(link => link.type === "other").map((link, index) => (
                 <a 
                   key={index}
                   href={link.url}
@@ -110,8 +111,8 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-nature-stone text-white hover:bg-nature-bark transition-colors"
                 >
-                  {getIconComponent(link.icon)}
-                  <span className="ml-1">{link.title}</span>
+                  {getIconComponent(link.title || "link")}
+                  <span className="ml-1">{link.title || "Link"}</span>
                 </a>
               ))}
             </div>

@@ -99,12 +99,12 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       </p>
       
       <div className="mt-4 flex flex-col md:flex-row gap-4">
-        {currentItem.imageUrl && (
+        {currentItem.coverImageUrl && (
           <div className="flex-1">
             <p className="text-sm font-medium mb-2">Current Image:</p>
             <div className="border rounded-md overflow-hidden h-48">
               <img 
-                src={currentItem.imageUrl} 
+                src={currentItem.coverImageUrl} 
                 alt={currentItem.title} 
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -113,7 +113,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 }}
               />
             </div>
-            <p className="text-xs text-nature-bark mt-1">{currentItem.imageUrl}</p>
+            <p className="text-xs text-nature-bark mt-1">{currentItem.coverImageUrl}</p>
           </div>
         )}
         
