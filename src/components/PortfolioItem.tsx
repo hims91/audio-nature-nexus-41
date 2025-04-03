@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +37,9 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
   const hasValidUrl = (url?: string) => {
     return url && url.trim() !== '';
   };
+
+  // Determine if we should show audio preview based on category
+  const shouldShowAudioPreview = item.category !== "Sound for Picture" && hasValidUrl(item.audioUrl);
 
   return (
     <Card className="overflow-hidden bg-white h-full shadow-md hover:shadow-xl transition-shadow duration-300">
@@ -107,8 +109,8 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
           </div>
         )}
         
-        {/* Audio Preview - Only show if audio exists and is valid */}
-        {hasValidUrl(item.audioUrl) && (
+        {/* Audio Preview - Only show if audio exists, is valid, and category is not Sound for Picture */}
+        {shouldShowAudioPreview && (
           <div className="mb-3">
             <div className="flex items-center mb-2 text-nature-forest">
               <Music className="h-4 w-4 mr-1" />
