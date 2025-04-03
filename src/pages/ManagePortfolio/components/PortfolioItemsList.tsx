@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Music } from "lucide-react";
+import { Music, FileImage, FileVideo } from "lucide-react";
 import { PortfolioItem } from "@/data/portfolio";
 
 interface PortfolioItemsListProps {
@@ -16,6 +16,13 @@ const PortfolioItemsList: React.FC<PortfolioItemsListProps> = ({
   currentItemId, 
   onSelectItem 
 }) => {
+  // Helper function to get the most relevant icon for an item
+  const getItemIcon = (item: PortfolioItem) => {
+    if (item.videoUrl) return <FileVideo className="mr-2 h-4 w-4" />;
+    if (item.audioUrl) return <Music className="mr-2 h-4 w-4" />;
+    return <FileImage className="mr-2 h-4 w-4" />;
+  };
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -30,7 +37,7 @@ const PortfolioItemsList: React.FC<PortfolioItemsListProps> = ({
               }`}
               onClick={() => onSelectItem(item)}
             >
-              <Music className="mr-2 h-4 w-4" />
+              {getItemIcon(item)}
               {item.title}
             </Button>
           ))}

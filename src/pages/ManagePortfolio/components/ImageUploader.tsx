@@ -38,12 +38,12 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         return;
       }
       
-      // Check file size before creating preview
+      // Check file size before creating preview - increased to 5MB
       const fileSizeInMB = file.size / 1024 / 1024;
-      if (fileSizeInMB > 2) {
+      if (fileSizeInMB > 5) {
         toast({
           title: "Image too large",
-          description: "Please use an image smaller than 2MB to avoid storage issues",
+          description: "Please use an image smaller than 5MB to avoid storage issues",
           variant: "destructive"
         });
         return;
@@ -80,7 +80,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         )}
       </div>
       <p className="text-xs text-muted-foreground mt-1">
-        Upload JPG, PNG, or other image files
+        Upload JPG, PNG, or other image files (max 5MB)
       </p>
       
       <div className="mt-4 flex flex-col md:flex-row gap-4">

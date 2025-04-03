@@ -33,7 +33,8 @@ export const useLocalStorage = () => {
       const jsonData = JSON.stringify(storageSafeItems);
       const sizeInMB = (new Blob([jsonData]).size / 1024 / 1024).toFixed(2);
       
-      if (parseFloat(sizeInMB) > 4.5) {
+      // Increased localStorage size threshold from 4.5MB to 9MB
+      if (parseFloat(sizeInMB) > 9) {
         // If too large, create a smaller version without image previews
         const minimalSafeItems = itemsToSave.map(item => ({
           ...item,
@@ -43,7 +44,7 @@ export const useLocalStorage = () => {
         const minimalJsonData = JSON.stringify(minimalSafeItems);
         const minimalSizeInMB = (new Blob([minimalJsonData]).size / 1024 / 1024).toFixed(2);
         
-        if (parseFloat(minimalSizeInMB) > 4.5) {
+        if (parseFloat(minimalSizeInMB) > 9) {
           throw new Error(`Data size (${minimalSizeInMB}MB) still exceeds safe localStorage limit even after compression`);
         }
         

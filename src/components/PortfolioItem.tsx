@@ -90,6 +90,7 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
           </div>
         )}
         
+        {/* Audio Preview - Optional now */}
         {item.audioUrl && (
           <div className="mb-3">
             <div className="flex items-center mb-2 text-nature-forest">
