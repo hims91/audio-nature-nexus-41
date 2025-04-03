@@ -4,6 +4,8 @@ import PortfolioItem from "./PortfolioItem";
 import { portfolioItems as initialPortfolioItems } from "@/data/portfolio";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+import { Edit } from "lucide-react";
 
 const Portfolio: React.FC = () => {
   const [filter, setFilter] = useState<string | null>(null);
@@ -58,6 +60,11 @@ const Portfolio: React.FC = () => {
             Explore selected works showcasing my expertise across various audio disciplines
           </p>
           <div className="w-20 h-1 bg-nature-forest mx-auto mt-4"></div>
+          
+          <Link to="/manage-portfolio" className="inline-flex items-center mt-4 text-nature-forest hover:text-nature-leaf transition-colors">
+            <Edit className="mr-1 h-4 w-4" />
+            Manage Portfolio Items
+          </Link>
         </div>
         
         {/* Filter Buttons */}

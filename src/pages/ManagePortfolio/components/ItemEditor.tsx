@@ -164,6 +164,16 @@ const ItemEditor: React.FC<ItemEditorProps> = ({
             />
           </div>
           
+          <div>
+            <Label htmlFor="spotifyUrl">Spotify URL</Label>
+            <Input 
+              id="spotifyUrl" 
+              placeholder="https://open.spotify.com/..."
+              value={currentItem.spotifyUrl || ""}
+              onChange={(e) => setCurrentItem({...currentItem, spotifyUrl: e.target.value})}
+            />
+          </div>
+          
           <Tabs defaultValue="image" className="w-full mt-6">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="image" className="flex items-center">

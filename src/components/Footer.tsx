@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
               <img 
                 src="/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png" 
                 alt="Frog with Speaker Logo" 
-                className="h-16 w-16 object-contain bg-white/90 rounded-md p-1"
+                className="h-20 w-20 object-contain bg-white/90 rounded-md p-1"
               />
               <span className="text-xl font-bold">Will Hall Sound Studios</span>
             </div>
