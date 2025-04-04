@@ -21,6 +21,7 @@ interface PortfolioEditorProps {
   onSave: (item: any) => void;
   onDelete?: () => void;
   onCancel: () => void;
+  saveFileToPublic?: (file: File, directory: string) => Promise<{ success: boolean, path?: string, error?: string }>;
 }
 
 const CATEGORIES = [
