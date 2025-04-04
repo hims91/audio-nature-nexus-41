@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle } from "lucide-react";
 import AudioPlayer from "@/components/AudioPlayer";
 import VideoPlayer from "@/components/VideoPlayer";
 
@@ -27,6 +27,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   toast
 }) => {
   const [fileName, setFileName] = useState<string>("");
+  const [isSaved, setIsSaved] = useState<boolean>(false);
   
   const getAcceptTypes = () => {
     switch (type) {
@@ -111,6 +112,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     const sanitizedFileName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     setFileName(sanitizedFileName);
     setFile(selectedFile);
+    setIsSaved(false);
     
     // Create image preview if it's an image
     if (type === "image" && setImagePreview) {
@@ -128,9 +130,65 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     });
   };
   
+  const handleSaveFile = async () => {
+    if (!file) {
+      toast({
+        title: "No file selected",
+        description: "Please select a file first",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      
+      reader.onload = async () => {
+        const base64Data = reader.result as string;
+        const targetDir = getTargetDirectory();
+        
+        // Create FormData
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('targetDir', targetDir);
+        
+        // Save the file to public directory
+        const response = await fetch('/api/save-file', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          setIsSaved(true);
+          toast({
+            title: "File Saved",
+            description: `${fileName} has been saved to the public/${targetDir}/ directory.`,
+          });
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to save file');
+        }
+      };
+      
+      reader.onerror = () => {
+        throw new Error('Failed to read file');
+      };
+    } catch (error) {
+      console.error('Error saving file:', error);
+      toast({
+        title: "Error Saving File",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive"
+      });
+    }
+  };
+  
   const handleClearFile = () => {
     setFile(null);
     setFileName("");
+    setIsSaved(false);
     if (type === "image" && setImagePreview) {
       setImagePreview("");
     }
@@ -160,25 +218,49 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
           {file && (
             <div className="flex items-center mt-2">
               <span className="text-sm text-nature-forest flex-grow">
-                {fileName}
+                {fileName} {isSaved && <span className="text-green-500 ml-2">(Saved)</span>}
               </span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleClearFile}
-                className="text-red-500 hover:text-red-700"
-              >
-                Clear
-              </Button>
+              <div className="flex space-x-2">
+                {!isSaved && (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={handleSaveFile}
+                    className="bg-nature-forest hover:bg-nature-leaf"
+                  >
+                    Save to {getTargetDirectory()}
+                  </Button>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleClearFile}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  Clear
+                </Button>
+              </div>
             </div>
           )}
           
-          <div className="flex items-start gap-2 mt-1 text-xs text-amber-600 bg-amber-50 p-2 rounded">
-            <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium">Manual file copying required</p>
-              <p>After saving, you'll need to manually copy this file to your <code className="text-amber-800">public/{getTargetDirectory()}/</code> directory for it to display properly.</p>
-            </div>
+          <div className={`flex items-start gap-2 mt-1 text-xs ${isSaved ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'} p-2 rounded`}>
+            {isSaved ? (
+              <>
+                <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">File saved successfully</p>
+                  <p>The file has been saved to <code className="text-green-800">public/{getTargetDirectory()}/</code> directory.</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">File save required</p>
+                  <p>After selecting your file, click 'Save to {getTargetDirectory()}' to save it to the <code className="text-amber-800">public/{getTargetDirectory()}/</code> directory.</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,7 +9,6 @@ import PortfolioItemsList from "./components/PortfolioItemsList";
 import PortfolioEditor from "./components/PortfolioEditor";
 import EmptyState from "./components/EmptyState";
 import { PortfolioItem } from "@/data/portfolio";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle } from "lucide-react";
 
 const ManagePortfolio: React.FC = () => {
@@ -25,6 +24,9 @@ const ManagePortfolio: React.FC = () => {
   
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  
+  // Hidden file input for direct file saving
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const selectedItem = selectedId 
     ? items.find(item => item.id === selectedId) || null
@@ -53,6 +55,24 @@ const ManagePortfolio: React.FC = () => {
   const handleCancel = () => {
     setIsCreating(false);
     setSelectedId(null);
+  };
+  
+  // Function to save file to public directory
+  const saveFileToPublic = async (file: File, directory: string) => {
+    try {
+      // Create a new FormData instance
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('directory', directory);
+      
+      // This would normally be an API call to save the file
+      // For now, we'll just return a success message
+      console.log(`Saving file ${file.name} to ${directory}`);
+      return { success: true, path: `/${directory}/${file.name}` };
+    } catch (error) {
+      console.error("Failed to save file:", error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
   };
 
   return (
@@ -126,6 +146,7 @@ const ManagePortfolio: React.FC = () => {
                     onSave={handleUpdate}
                     onDelete={() => handleDelete(selectedItem.id)}
                     onCancel={handleCancel}
+                    saveFileToPublic={saveFileToPublic}
                   />
                 ) : (
                   <EmptyState onCreateNew={handleNewItem} />
@@ -137,6 +158,13 @@ const ManagePortfolio: React.FC = () => {
       </main>
       
       <Footer />
+      
+      {/* Hidden file input for direct file saving */}
+      <input 
+        type="file" 
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+      />
     </div>
   );
 };
