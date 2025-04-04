@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,7 +40,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   const getMaxSize = () => {
     switch (type) {
       case "image": return 5; // 5MB
-      case "audio": return 15; // 15MB
+      case "audio": return 50; // Increased from 15MB to 50MB
       case "video": return 100; // 100MB
       default: return 10;
     }
@@ -81,7 +80,6 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     const selectedFile = files[0];
     const fileType = selectedFile.type;
     
-    // Validate file type
     if (
       (type === "image" && !fileType.startsWith("image/")) ||
       (type === "audio" && !fileType.startsWith("audio/")) ||
@@ -95,7 +93,6 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       return;
     }
     
-    // Check file size
     const fileSizeInMB = selectedFile.size / 1024 / 1024;
     const maxSize = getMaxSize();
     
@@ -108,13 +105,11 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       return;
     }
     
-    // Sanitize filename
     const sanitizedFileName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     setFileName(sanitizedFileName);
     setFile(selectedFile);
     setIsSaved(false);
     
-    // Create image preview if it's an image
     if (type === "image" && setImagePreview) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -141,7 +136,6 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     }
     
     try {
-      // Convert file to base64
       const reader = new FileReader();
       reader.readAsDataURL(file);
       
@@ -149,12 +143,10 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         const base64Data = reader.result as string;
         const targetDir = getTargetDirectory();
         
-        // Create FormData
         const formData = new FormData();
         formData.append('file', file);
         formData.append('targetDir', targetDir);
         
-        // Save the file to public directory
         const response = await fetch('/api/save-file', {
           method: 'POST',
           body: formData
@@ -194,7 +186,6 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     }
   };
   
-  // Function to determine if currentUrl is valid and not empty
   const hasCurrentMedia = (url?: string) => {
     return url && url.trim() !== '';
   };
@@ -265,13 +256,11 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         </div>
       </div>
       
-      {/* Preview Section */}
       {type === "image" && (
         <div className="mt-6 space-y-4">
           <h4 className="text-sm font-medium text-nature-forest">Preview</h4>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Current Image */}
             {hasCurrentMedia(currentUrl) && (
               <div>
                 <p className="text-xs text-nature-bark mb-1">Current Image:</p>
@@ -290,7 +279,6 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
               </div>
             )}
             
-            {/* New Image Preview */}
             {imagePreview && (
               <div>
                 <p className="text-xs text-nature-bark mb-1">New Image Preview:</p>
@@ -310,7 +298,6 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         </div>
       )}
       
-      {/* Audio Preview */}
       {type === "audio" && hasCurrentMedia(currentUrl) && (
         <div className="mt-4">
           <h4 className="text-sm font-medium text-nature-forest mb-2">Current Audio:</h4>
@@ -319,7 +306,6 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         </div>
       )}
       
-      {/* Video Preview */}
       {type === "video" && hasCurrentMedia(currentUrl) && (
         <div className="mt-4">
           <h4 className="text-sm font-medium text-nature-forest mb-2">Current Video:</h4>
