@@ -1,17 +1,12 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Music } from "lucide-react";
-
 const LiveEventWork: React.FC = () => {
-  return (
-    <section id="live-events" className="py-20 bg-gradient-to-br from-nature-forest/10 to-nature-moss/20">
+  return <section id="live-events" className="py-20 bg-gradient-to-br from-nature-forest/10 to-nature-moss/20">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-nature-forest mb-4">Live Event Work</h2>
-          <p className="text-lg text-nature-bark max-w-3xl mx-auto">
-            Professional sound engineering for concerts, festivals, and live performances
-          </p>
+          <p className="text-lg text-nature-bark max-w-3xl mx-auto">Professional Recording for any size event </p>
           <div className="w-20 h-1 bg-nature-forest mx-auto mt-4"></div>
         </div>
         
@@ -19,12 +14,8 @@ const LiveEventWork: React.FC = () => {
           {/* Live Recording - Now as a single, centered card */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="relative h-64">
-              <img 
-                src="https://images.unsplash.com/photo-1511379938547-c1f69419868d" 
-                alt="Live Recording" 
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-nature-forest/40 flex items-center justify-center">
+              <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d" alt="Live Recording" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 flex items-center justify-center bg-[#183b29]/40">
                 <Music className="w-16 h-16 text-white" />
               </div>
             </div>
@@ -52,19 +43,16 @@ const LiveEventWork: React.FC = () => {
         </div>
         
         <div className="text-center mt-12">
-          <Button 
-            onClick={() => {
-              const element = document.getElementById("contact");
-              if (element) element.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="bg-nature-forest hover:bg-nature-leaf text-white"
-          >
+          <Button onClick={() => {
+          const element = document.getElementById("contact");
+          if (element) element.scrollIntoView({
+            behavior: "smooth"
+          });
+        }} className="bg-nature-forest hover:bg-nature-leaf text-white">
             Book Your Live Event
           </Button>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default LiveEventWork;

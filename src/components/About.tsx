@@ -1,10 +1,7 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-
 const About: React.FC = () => {
-  return (
-    <section id="about" className="py-20 bg-nature-cream/30">
+  return <section id="about" className="py-20 bg-nature-cream/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-nature-forest mb-4">About Me</h2>
@@ -15,18 +12,12 @@ const About: React.FC = () => {
           {/* Image Side */}
           <div className="relative w-1/2 mx-auto lg:w-full">
             <div className="bg-nature-forest/10 absolute inset-0 rounded-lg transform rotate-3"></div>
-            <img 
-              src="/lovable-uploads/40101aee-c085-43b1-a83a-03ed8d362687.png" 
-              alt="Will Hall holding a speaker in nature" 
-              className="rounded-lg shadow-xl relative z-10 object-cover h-auto max-w-full"
-            />
+            <img src="/lovable-uploads/40101aee-c085-43b1-a83a-03ed8d362687.png" alt="Will Hall holding a speaker in nature" className="rounded-lg shadow-xl relative z-10 object-cover h-auto max-w-full" />
           </div>
           
           {/* Content Side */}
           <div className="space-y-6">
-            <h3 className="text-2xl md:text-3xl font-semibold text-nature-forest">
-              Hi, I'm Will Hall
-            </h3>
+            <h3 className="text-2xl md:text-3xl font-semibold text-nature-forest">Hi, I'm Will </h3>
             
             <p className="text-lg text-nature-bark">
               I'm an audio engineer and sound designer obsessed with the power of sonic storytelling. 
@@ -78,8 +69,6 @@ const About: React.FC = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default About;
