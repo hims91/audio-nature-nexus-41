@@ -2,7 +2,7 @@
 import React from "react";
 import { BaseMediaUploader, BaseMediaUploaderProps } from "./BaseMediaUploader";
 
-interface ImageMediaUploaderProps extends Omit<BaseMediaUploaderProps, 'type'> {
+interface ImageMediaUploaderProps extends Omit<BaseMediaUploaderProps, 'type' | 'children'> {
   imagePreview?: string;
   setImagePreview?: (preview: string) => void;
 }

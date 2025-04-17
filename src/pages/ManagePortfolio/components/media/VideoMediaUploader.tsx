@@ -3,7 +3,7 @@ import React from "react";
 import { BaseMediaUploader, BaseMediaUploaderProps } from "./BaseMediaUploader";
 import VideoPlayer from "@/components/VideoPlayer";
 
-type VideoMediaUploaderProps = Omit<BaseMediaUploaderProps, 'type'>;
+type VideoMediaUploaderProps = Omit<BaseMediaUploaderProps, 'type' | 'children'>;
 
 export const VideoMediaUploader: React.FC<VideoMediaUploaderProps> = ({
   currentUrl,

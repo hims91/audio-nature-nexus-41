@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { portfolioItems as initialPortfolioItems } from "@/data/portfolio";
@@ -6,14 +7,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Edit, Star, Save, CheckCircle2 } from "lucide-react";
 import PortfolioGallery from "./portfolio/PortfolioGallery";
 import PortfolioFilters from "./portfolio/PortfolioFilters";
+
 const Portfolio: React.FC = () => {
   const [items, setItems] = useState(initialPortfolioItems);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [filteredItems, setFilteredItems] = useState(items);
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
 
   // Load items from localStorage on initial render
   useEffect(() => {
@@ -82,6 +82,73 @@ const Portfolio: React.FC = () => {
 
   // Get unique categories
   const categories = ["All", ...Array.from(new Set(items.map(item => item.category)))];
-  return;
+
+  return (
+    <section id="portfolio" className="py-16 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-nature-forest mb-4">Portfolio</h2>
+          <p className="text-lg text-nature-bark max-w-3xl mx-auto">
+            Explore my work in audio engineering and sound design across various mediums and industries
+          </p>
+        </div>
+
+        <div className="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          {/* Category Filters */}
+          <PortfolioFilters 
+            categories={categories} 
+            activeCategory={activeCategory} 
+            onSelectCategory={setActiveCategory}
+          />
+          
+          {/* Admin Actions (only visible to admin) */}
+          <div className="flex items-center gap-2">
+            <Link to="/manage-portfolio">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Manage Portfolio
+              </Button>
+            </Link>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-2 ${
+                verificationStatus === 'success' 
+                  ? 'border-green-500 text-green-500' 
+                  : verificationStatus === 'error'
+                    ? 'border-red-500 text-red-500' 
+                    : 'border-nature-bark text-nature-bark'
+              }`}
+              onClick={verifyLocalStorage}
+            >
+              {verificationStatus === 'success' ? (
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Verify Storage
+            </Button>
+          </div>
+        </div>
+
+        {/* Portfolio Items */}
+        <div className="pb-8">
+          {filteredItems.length > 0 ? (
+            <PortfolioGallery items={filteredItems} featured={false} />
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <p className="text-nature-bark">No portfolio items found in this category.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
 };
+
 export default Portfolio;
