@@ -3,17 +3,14 @@ import React, { useState } from "react";
 import { PortfolioItem, ExternalLink } from "@/data/portfolio";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import MediaUploader from "./MediaUploader";
 import ExternalLinksEditor from "./ExternalLinksEditor";
-import { Save, Trash2, Image, Music, FileVideo, ExternalLink as ExternalLinkIcon, ArrowLeft } from "lucide-react";
+import DetailsForm from "./editor/DetailsForm";
+import FormHeader from "./editor/FormHeader";
+import { useFormSubmission } from "./editor/useFormSubmission";
+import { Save, Image, Music, FileVideo, ExternalLink as ExternalLinkIcon, ArrowLeft } from "lucide-react";
 
 interface PortfolioEditorProps {
   mode: "create" | "edit";
@@ -24,14 +21,6 @@ interface PortfolioEditorProps {
   saveFileToPublic?: (file: File, directory: string) => Promise<{ success: boolean, path?: string, error?: string }>;
 }
 
-const CATEGORIES = [
-  "Mixing & Mastering", 
-  "Sound Design", 
-  "Podcasting", 
-  "Sound for Picture", 
-  "Dolby Atmos"
-];
-
 const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ 
   mode, 
   item, 
@@ -40,6 +29,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
   onCancel
 }) => {
   const { toast } = useToast();
+  const { handleSubmit, isSubmitting } = useFormSubmission({ mode, item, onSave, toast });
   
   // Create initial state based on mode and item
   const [formData, setFormData] = useState<Omit<PortfolioItem, "id" | "createdAt">>({
@@ -94,93 +84,17 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
   };
   
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.title.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please provide a title for this portfolio item.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // For new uploads, update file paths based on files that would be uploaded
-    const updatedData = { ...formData };
-    
-    if (coverImageFile) {
-      // Use the image preview for immediate display and also set the final path
-      // In a real app, you'd upload the file to a server and get back a URL
-      updatedData.coverImageUrl = `/images/${coverImageFile.name}`;
-    }
-    
-    if (audioFile) {
-      updatedData.audioUrl = `/audio/${audioFile.name}`;
-    }
-    
-    if (videoFile) {
-      updatedData.videoUrl = `/videos/${videoFile.name}`;
-    }
-    
-    // In edit mode, preserve the original ID and creation date
-    if (mode === "edit" && item) {
-      onSave({
-        ...updatedData,
-        id: item.id,
-        createdAt: item.createdAt
-      });
-    } else {
-      onSave(updatedData);
-    }
-    
-    // Alert about manual file copying
-    if (coverImageFile || audioFile || videoFile) {
-      toast({
-        title: "Media File Reminder",
-        description: "Remember to manually copy your media files to the appropriate public directories for them to be displayed.",
-      });
-    }
+    handleSubmit(formData, coverImageFile, audioFile, videoFile);
   };
 
   return (
     <Card className="shadow-sm">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-nature-forest">
-            {mode === "create" ? "Create New Portfolio Item" : `Edit: ${item?.title}`}
-          </h2>
-          
-          {mode === "edit" && onDelete && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600">
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete this portfolio item and cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={onDelete}
-                    className="bg-red-500 hover:bg-red-600"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
-        </div>
+        <FormHeader mode={mode} item={item} onDelete={onDelete} />
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={onSubmit}>
           <Tabs defaultValue="details" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="details">Details</TabsTrigger>
@@ -199,72 +113,13 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
             </TabsList>
             
             {/* Details Tab */}
-            <TabsContent value="details" className="py-4 space-y-4">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="title">Title *</Label>
-                  <Input 
-                    id="title" 
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="client">Client *</Label>
-                  <Input 
-                    id="client" 
-                    name="client"
-                    value={formData.client}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="category">Category *</Label>
-                  <Select 
-                    value={formData.category} 
-                    onValueChange={handleCategoryChange}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="description">Description *</Label>
-                  <Textarea 
-                    id="description" 
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows={4}
-                    required
-                  />
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="featured"
-                    checked={formData.featured}
-                    onCheckedChange={handleFeaturedChange}
-                  />
-                  <Label htmlFor="featured" className="cursor-pointer">
-                    Feature this item in the portfolio
-                  </Label>
-                </div>
-              </div>
+            <TabsContent value="details" className="py-4">
+              <DetailsForm
+                formData={formData}
+                onInputChange={handleInputChange}
+                onCategoryChange={handleCategoryChange}
+                onFeaturedChange={handleFeaturedChange}
+              />
             </TabsContent>
             
             {/* Cover Image Tab */}
@@ -314,6 +169,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
               type="button"
               variant="outline"
               onClick={onCancel}
+              disabled={isSubmitting}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Cancel
@@ -322,6 +178,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
             <Button 
               type="submit"
               className="bg-nature-forest hover:bg-nature-leaf"
+              disabled={isSubmitting}
             >
               <Save className="mr-2 h-4 w-4" />
               {mode === "create" ? "Create Item" : "Save Changes"}
