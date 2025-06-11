@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +11,6 @@ export interface BaseMediaUploaderProps {
   file: File | null;
   setFile: React.Dispatch<React.SetStateAction<File | null>>;
   toast: any;
-  children?: React.ReactNode;
 }
 
 export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
