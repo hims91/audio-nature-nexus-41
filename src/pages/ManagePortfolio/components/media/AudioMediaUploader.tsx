@@ -3,7 +3,7 @@ import React from "react";
 import { BaseMediaUploader, BaseMediaUploaderProps } from "./BaseMediaUploader";
 import AudioPlayer from "@/components/AudioPlayer";
 
-type AudioMediaUploaderProps = Omit<BaseMediaUploaderProps, 'type'>;
+type AudioMediaUploaderProps = Omit<BaseMediaUploaderProps, 'type' | 'children'>;
 
 export const AudioMediaUploader: React.FC<AudioMediaUploaderProps> = ({
   currentUrl,
