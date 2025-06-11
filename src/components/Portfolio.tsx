@@ -100,27 +100,7 @@ const Portfolio: React.FC = () => {
           />
           
           {/* Admin Actions (only visible to admin) */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className={`flex items-center gap-2 ${
-                verificationStatus === 'success' 
-                  ? 'border-green-500 text-green-500' 
-                  : verificationStatus === 'error'
-                    ? 'border-red-500 text-red-500' 
-                    : 'border-nature-bark text-nature-bark'
-              }`}
-              onClick={verifyLocalStorage}
-            >
-              {verificationStatus === 'success' ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              Verify Storage
-            </Button>
-          </div>
+          
         </div>
 
         {/* Portfolio Items */}
