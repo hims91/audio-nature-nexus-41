@@ -25,50 +25,49 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
     setAudioError(false);
     setIsLoading(true);
     
+    // Set volume when audio element is created
     if (audioRef.current) {
-      audioRef.current.load(); // Force reload of audio element
       audioRef.current.volume = volume;
     }
   }, [audioUrl]);
   
-  const togglePlayPause = async () => {
-    if (!audioRef.current) return;
-    
-    try {
+  const togglePlayPause = () => {
+    if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
       } else {
-        // Ensure we can play the audio
-        await audioRef.current.play();
-        setIsPlaying(true);
-        setAudioError(false);
+        // Use a Promise with catch to handle any errors
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+              setAudioError(false);
+            })
+            .catch(error => {
+              console.error("Audio playback error:", error);
+              setAudioError(true);
+              setIsPlaying(false);
+            });
+        }
       }
-    } catch (error) {
-      console.error("Audio playback error:", error);
-      setAudioError(true);
-      setIsPlaying(false);
     }
   };
   
   const handleTimeUpdate = () => {
-    if (audioRef.current && !isNaN(audioRef.current.currentTime)) {
+    if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
     }
   };
   
   const handleLoadedMetadata = () => {
-    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+    if (audioRef.current) {
       setDuration(audioRef.current.duration);
+      // Set volume again once metadata is loaded
       audioRef.current.volume = volume;
       setIsLoading(false);
-      setAudioError(false);
     }
-  };
-  
-  const handleCanPlayThrough = () => {
-    setIsLoading(false);
-    setAudioError(false);
   };
   
   const handleEnded = () => {
@@ -80,21 +79,15 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
   };
   
   const handleAudioError = (e: React.SyntheticEvent<HTMLAudioElement>) => {
-    console.error("Audio loading error:", {
-      url: audioUrl,
-      error: e.currentTarget.error,
-      networkState: e.currentTarget.networkState,
-      readyState: e.currentTarget.readyState
-    });
+    console.error("Audio error loading:", audioUrl, e);
     setAudioError(true);
     setIsLoading(false);
-    setIsPlaying(false);
   };
   
   const handleSeek = (value: number[]) => {
     const newTime = value[0];
     setCurrentTime(newTime);
-    if (audioRef.current && !isNaN(newTime)) {
+    if (audioRef.current) {
       audioRef.current.currentTime = newTime;
     }
   };
@@ -108,7 +101,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
   };
   
   const formatTime = (time: number) => {
-    if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
@@ -119,18 +111,21 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
     return null;
   }
   
+  // Properly encode the URL to handle spaces and special characters
+  const safeAudioUrl = audioUrl.startsWith("http") 
+    ? audioUrl 
+    : encodeURI(audioUrl);
+  
   return (
     <div className="bg-white/80 rounded-lg p-4 shadow-sm">
       <audio
         ref={audioRef}
-        src={audioUrl}
+        src={safeAudioUrl}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
-        onCanPlayThrough={handleCanPlayThrough}
         onEnded={handleEnded}
         onError={handleAudioError}
         preload="metadata"
-        crossOrigin="anonymous"
         style={{ display: 'none' }}
       />
       
@@ -142,13 +137,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
       
       {audioError ? (
         <div className="text-sm text-red-500 mb-2">
-          <p>Unable to load audio file.</p>
-          <p className="text-xs mt-1 text-nature-bark">
-            URL: {audioUrl}
-          </p>
-          <p className="text-xs text-gray-500">
-            This may be due to CORS restrictions or the file format not being supported by your browser.
-          </p>
+          Audio could not be loaded. The file may be missing or in an unsupported format.
+          <p className="text-xs mt-1 text-nature-bark">Path: {audioUrl}</p>
         </div>
       ) : (
         <div className="flex items-center gap-3">
@@ -157,7 +147,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
             variant="outline"
             size="icon"
             className="h-10 w-10 rounded-full border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white"
-            disabled={isLoading}
           >
             {isPlaying ? <Pause size={18} /> : <Play size={18} />}
           </Button>
@@ -169,7 +158,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
               step={0.1}
               onValueChange={handleSeek}
               className="my-1"
-              disabled={isLoading || audioError}
             />
             <div className="flex justify-between text-xs text-nature-bark mt-1">
               <span>{formatTime(currentTime)}</span>
@@ -185,7 +173,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
               step={0.01}
               onValueChange={handleVolumeChange}
               className="my-1"
-              disabled={isLoading || audioError}
             />
           </div>
         </div>

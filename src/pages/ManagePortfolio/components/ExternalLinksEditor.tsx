@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { ExternalLink } from "@/types/portfolio";
+import { ExternalLink } from "@/data/portfolio";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,8 @@ import {
 
 interface ExternalLinksEditorProps {
   links: ExternalLink[];
-  onChange: (links: ExternalLink[]) => void;
+  onAddLink: (link: ExternalLink) => void;
+  onRemoveLink: (index: number) => void;
 }
 
 const LINK_TYPES = [
@@ -30,38 +31,31 @@ const LINK_TYPES = [
 
 const ExternalLinksEditor: React.FC<ExternalLinksEditorProps> = ({ 
   links, 
-  onChange
+  onAddLink, 
+  onRemoveLink 
 }) => {
-  const [linkType, setLinkType] = useState<string>("spotify");
+  const [linkType, setLinkType] = useState<ExternalLink["type"]>("spotify");
   const [linkUrl, setLinkUrl] = useState("");
   const [linkTitle, setLinkTitle] = useState("");
-  
-  const onAddLink = (link: ExternalLink) => {
-    onChange([...links, link]);
-  };
-  
-  const onRemoveLink = (index: number) => {
-    const newLinks = links.filter((_, i) => i !== index);
-    onChange(newLinks);
-  };
   
   const handleAddLink = () => {
     if (!linkUrl.trim()) return;
     
     // Validate URL format
-    let validUrl = linkUrl;
     try {
       new URL(linkUrl);
     } catch (e) {
       // Not a valid URL, prepend with https:// if no protocol
       if (!linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
-        validUrl = `https://${linkUrl}`;
+        setLinkUrl(`https://${linkUrl}`);
+        return;
       }
     }
     
     const newLink: ExternalLink = {
-      title: linkType === "other" && linkTitle ? linkTitle : getLinkTypeLabel(linkType),
-      url: validUrl
+      type: linkType,
+      url: linkUrl,
+      ...(linkType === "other" && linkTitle ? { title: linkTitle } : {})
     };
     
     onAddLink(newLink);
@@ -71,25 +65,35 @@ const ExternalLinksEditor: React.FC<ExternalLinksEditorProps> = ({
     setLinkTitle("");
   };
   
-  // Helper function to get link type label
-  const getLinkTypeLabel = (type: string) => {
-    const linkType = LINK_TYPES.find(t => t.value === type);
-    return linkType?.label || "External Link";
+  // Helper function to get icon based on link type
+  const getLinkIcon = (type: ExternalLink["type"]) => {
+    switch (type) {
+      case "spotify":
+        return <Music2 className="h-4 w-4 text-[#1DB954]" />;
+      case "appleMusic":
+        return <Music2 className="h-4 w-4 text-[#FB233B]" />;
+      case "youtube":
+        return <Youtube className="h-4 w-4 text-[#FF0000]" />;
+      case "vimeo":
+        return <Video className="h-4 w-4 text-[#1AB7EA]" />;
+      default:
+        return <Link2 className="h-4 w-4 text-nature-forest" />;
+    }
   };
   
-  // Helper function to get icon based on link type
-  const getLinkIcon = (link: ExternalLink) => {
-    const url = link.url.toLowerCase();
-    if (url.includes('spotify')) {
-      return <Music2 className="h-4 w-4 text-[#1DB954]" />;
-    } else if (url.includes('apple') || url.includes('itunes')) {
-      return <Music2 className="h-4 w-4 text-[#FB233B]" />;
-    } else if (url.includes('youtube')) {
-      return <Youtube className="h-4 w-4 text-[#FF0000]" />;
-    } else if (url.includes('vimeo')) {
-      return <Video className="h-4 w-4 text-[#1AB7EA]" />;
-    } else {
-      return <Link2 className="h-4 w-4 text-nature-forest" />;
+  // Helper function to get link label
+  const getLinkLabel = (link: ExternalLink) => {
+    switch (link.type) {
+      case "spotify":
+        return "Spotify";
+      case "appleMusic":
+        return "Apple Music";
+      case "youtube":
+        return "YouTube";
+      case "vimeo":
+        return "Vimeo";
+      case "other":
+        return link.title || "External Link";
     }
   };
   
@@ -106,7 +110,7 @@ const ExternalLinksEditor: React.FC<ExternalLinksEditorProps> = ({
             <Label htmlFor="link-type">Platform</Label>
             <Select 
               value={linkType} 
-              onValueChange={(value) => setLinkType(value)}
+              onValueChange={(value) => setLinkType(value as ExternalLink["type"])}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select link type" />
@@ -185,11 +189,11 @@ const ExternalLinksEditor: React.FC<ExternalLinksEditorProps> = ({
               <div key={index} className="flex items-center justify-between p-3 border rounded-md bg-white">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 mr-3">
-                    {getLinkIcon(link)}
+                    {getLinkIcon(link.type)}
                   </div>
                   <div>
                     <div className="font-medium text-sm">
-                      {link.title}
+                      {getLinkLabel(link)}
                     </div>
                     <div className="text-xs text-nature-bark truncate max-w-[250px]">
                       {link.url}
