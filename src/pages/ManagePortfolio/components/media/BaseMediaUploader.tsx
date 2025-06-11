@@ -1,10 +1,9 @@
 
 import React from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { getAcceptTypes, getTitle, getDescription, getTargetDirectory } from "./utils/mediaUtils";
-import { useFileHandler } from "./hooks/useFileHandler";
-import { FileControls } from "./components/FileControls";
+import { useEnhancedFileHandler } from "./hooks/useEnhancedFileHandler";
+import { DragDropUploader } from "./components/DragDropUploader";
+import { EnhancedFileControls } from "./components/EnhancedFileControls";
 import { FileStatusDisplay } from "./components/FileStatusDisplay";
 
 export interface BaseMediaUploaderProps {
@@ -26,10 +25,18 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   const {
     fileName,
     isSaved,
+    isUploading,
+    uploadProgress,
+    dragActive,
     handleFileChange,
     handleSaveFile,
-    handleClearFile
-  } = useFileHandler({ type, file, setFile, toast });
+    handleClearFile,
+    handleReplaceFile,
+    handleDragEnter,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop
+  } = useEnhancedFileHandler({ type, file, setFile, toast });
   
   const title = getTitle(type);
   const description = getDescription(type);
@@ -37,28 +44,34 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   const targetDirectory = getTargetDirectory(type);
   
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-nature-forest mb-2">{title}</h3>
         <p className="text-sm text-nature-bark mb-4">{description}</p>
         
-        <div className="flex flex-col space-y-2">
-          <Label htmlFor={`${type}-upload`}>Select {title}</Label>
-          <Input
-            id={`${type}-upload`}
-            type="file"
-            accept={acceptTypes}
-            onChange={handleFileChange}
-            className="cursor-pointer"
+        <div className="space-y-4">
+          <DragDropUploader
+            type={type}
+            acceptTypes={acceptTypes}
+            dragActive={dragActive}
+            isUploading={isUploading}
+            uploadProgress={uploadProgress}
+            onFileChange={handleFileChange}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
           />
           
           {file && (
-            <FileControls
+            <EnhancedFileControls
               fileName={fileName}
               isSaved={isSaved}
+              isUploading={isUploading}
               targetDirectory={targetDirectory}
               onSave={handleSaveFile}
               onClear={handleClearFile}
+              onReplace={handleReplaceFile}
             />
           )}
           

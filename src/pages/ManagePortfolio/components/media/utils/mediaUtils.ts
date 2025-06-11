@@ -11,7 +11,7 @@ export const getAcceptTypes = (type: "image" | "audio" | "video") => {
 export const getMaxSize = (type: "image" | "audio" | "video") => {
   switch (type) {
     case "image": return 5; // 5MB
-    case "audio": return 50; // 50MB
+    case "audio": return 100; // Increased from 50MB to 100MB
     case "video": return 100; // 100MB
     default: return 10;
   }
@@ -29,7 +29,7 @@ export const getTitle = (type: "image" | "audio" | "video") => {
 export const getDescription = (type: "image" | "audio" | "video") => {
   switch (type) {
     case "image": return "Upload a cover image for your portfolio item (JPG, PNG, WebP)";
-    case "audio": return "Upload an audio preview (MP3, WAV, OGG)";
+    case "audio": return "Upload an audio preview (MP3, WAV, OGG) - up to 100MB";
     case "video": return "Upload a video preview (MP4, WebM)";
     default: return "";
   }
