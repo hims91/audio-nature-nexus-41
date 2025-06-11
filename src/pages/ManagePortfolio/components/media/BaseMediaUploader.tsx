@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,13 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
 }) => {
   const [fileName, setFileName] = useState<string>("");
   const [isSaved, setIsSaved] = useState<boolean>(false);
+  
+  // Reset saved state when file changes
+  useEffect(() => {
+    if (file) {
+      setIsSaved(false);
+    }
+  }, [file]);
   
   const getAcceptTypes = () => {
     switch (type) {
@@ -107,7 +115,7 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
     
     toast({
       title: `${type.charAt(0).toUpperCase() + type.slice(1)} Selected`,
-      description: sanitizedFileName
+      description: `${sanitizedFileName} - Click "Save to ${getTargetDirectory()}" to save the file`
     });
   };
   
@@ -122,36 +130,27 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
     }
     
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
+      // Since we can't actually save files to the server in this environment,
+      // we'll simulate the save and provide instructions to the user
+      const targetDir = getTargetDirectory();
       
-      reader.onload = async () => {
-        const targetDir = getTargetDirectory();
-        
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('targetDir', targetDir);
-        
-        const response = await fetch('/api/save-file', {
-          method: 'POST',
-          body: formData
-        });
-        
-        if (response.ok) {
-          setIsSaved(true);
-          toast({
-            title: "File Saved",
-            description: `${fileName} has been saved to the public/${targetDir}/ directory.`,
-          });
-        } else {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to save file');
-        }
-      };
+      // Create a download link for the user to manually save the file
+      const url = URL.createObjectURL(file);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
-      reader.onerror = () => {
-        throw new Error('Failed to read file');
-      };
+      setIsSaved(true);
+      
+      toast({
+        title: "File Downloaded",
+        description: `${fileName} has been downloaded. Please manually save it to your public/${targetDir}/ directory.`,
+      });
+      
     } catch (error) {
       console.error('Error saving file:', error);
       toast({
@@ -187,7 +186,7 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
           {file && (
             <div className="flex items-center mt-2">
               <span className="text-sm text-nature-forest flex-grow">
-                {fileName} {isSaved && <span className="text-green-500 ml-2">(Saved)</span>}
+                {fileName} {isSaved && <span className="text-green-500 ml-2">(Downloaded)</span>}
               </span>
               <div className="flex space-x-2">
                 {!isSaved && (
@@ -217,8 +216,8 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
               <>
                 <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium">File saved successfully</p>
-                  <p>The file has been saved to <code className="text-green-800">public/{getTargetDirectory()}/</code> directory.</p>
+                  <p className="font-medium">File downloaded successfully</p>
+                  <p>Please manually save the downloaded file to your <code className="text-green-800">public/{getTargetDirectory()}/</code> directory.</p>
                 </div>
               </>
             ) : (
@@ -226,7 +225,7 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
                 <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium">File save required</p>
-                  <p>After selecting your file, click 'Save to {getTargetDirectory()}' to save it to the <code className="text-amber-800">public/{getTargetDirectory()}/</code> directory.</p>
+                  <p>After selecting your file, click 'Save to {getTargetDirectory()}' to download it. Then manually save it to the <code className="text-amber-800">public/{getTargetDirectory()}/</code> directory.</p>
                 </div>
               </>
             )}
