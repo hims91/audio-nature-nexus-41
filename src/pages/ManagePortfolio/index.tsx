@@ -56,24 +56,6 @@ const ManagePortfolio: React.FC = () => {
     setIsCreating(false);
     setSelectedId(null);
   };
-  
-  // Function to save file to public directory
-  const saveFileToPublic = async (file: File, directory: string) => {
-    try {
-      // Create a new FormData instance
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('directory', directory);
-      
-      // This would normally be an API call to save the file
-      // For now, we'll just return a success message
-      console.log(`Saving file ${file.name} to ${directory}`);
-      return { success: true, path: `/${directory}/${file.name}` };
-    } catch (error) {
-      console.error("Failed to save file:", error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -146,7 +128,6 @@ const ManagePortfolio: React.FC = () => {
                     onSave={handleUpdate}
                     onDelete={() => handleDelete(selectedItem.id)}
                     onCancel={handleCancel}
-                    saveFileToPublic={saveFileToPublic}
                   />
                 ) : (
                   <EmptyState onCreateNew={handleNewItem} />
