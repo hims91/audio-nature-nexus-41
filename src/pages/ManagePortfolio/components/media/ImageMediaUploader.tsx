@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BaseMediaUploader, BaseMediaUploaderProps } from "./BaseMediaUploader";
 
 interface ImageMediaUploaderProps extends Omit<BaseMediaUploaderProps, 'type' | 'children'> {
@@ -13,24 +13,30 @@ export const ImageMediaUploader: React.FC<ImageMediaUploaderProps> = ({
   setImagePreview,
   file,
   setFile,
-  toast
+  toast,
+  onFileUploaded
 }) => {
+  const [localPreview, setLocalPreview] = useState<string>("");
+  
   const hasCurrentMedia = (url?: string) => url && url.trim() !== '';
   
   // Handle image file selection with preview
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0 || !setImagePreview) return;
-    
-    const selectedFile = files[0];
-    
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      setImagePreview(result);
-    };
-    reader.readAsDataURL(selectedFile);
-  };
+  useEffect(() => {
+    if (file && setImagePreview) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setImagePreview(result);
+        setLocalPreview(result);
+      };
+      reader.readAsDataURL(file);
+    } else if (!file) {
+      setLocalPreview("");
+      if (setImagePreview) {
+        setImagePreview("");
+      }
+    }
+  }, [file, setImagePreview]);
 
   return (
     <BaseMediaUploader
@@ -39,6 +45,7 @@ export const ImageMediaUploader: React.FC<ImageMediaUploaderProps> = ({
       file={file}
       setFile={setFile}
       toast={toast}
+      onFileUploaded={onFileUploaded}
     >
       <div className="mt-6 space-y-4">
         <h4 className="text-sm font-medium text-nature-forest">Preview</h4>
@@ -62,18 +69,18 @@ export const ImageMediaUploader: React.FC<ImageMediaUploaderProps> = ({
             </div>
           )}
           
-          {imagePreview && (
+          {(localPreview || imagePreview) && (
             <div>
               <p className="text-xs text-nature-bark mb-1">New Image Preview:</p>
               <div className="h-48 rounded-md overflow-hidden bg-gray-100 border">
                 <img 
-                  src={imagePreview} 
+                  src={localPreview || imagePreview} 
                   alt="New cover preview" 
                   className="w-full h-full object-cover" 
                 />
               </div>
               {file && (
-                <p className="text-xs text-nature-bark mt-1">Will be saved as: {file.name}</p>
+                <p className="text-xs text-nature-bark mt-1">Will be uploaded as: {file.name}</p>
               )}
             </div>
           )}

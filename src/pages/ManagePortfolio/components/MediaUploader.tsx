@@ -12,6 +12,7 @@ interface MediaUploaderProps {
   file: File | null;
   setFile: React.Dispatch<React.SetStateAction<File | null>>;
   toast: any;
+  onFileUploaded?: (url: string, path: string) => void;
 }
 
 const MediaUploader: React.FC<MediaUploaderProps> = (props) => {

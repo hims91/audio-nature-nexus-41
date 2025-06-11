@@ -1,8 +1,11 @@
+
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Upload, Loader2 } from "lucide-react";
+import { FileUploadService, FileUploadResult } from "@/services/fileUpload";
+import { Progress } from "@/components/ui/progress";
 
 export interface BaseMediaUploaderProps {
   type: "image" | "audio" | "video";
@@ -11,6 +14,7 @@ export interface BaseMediaUploaderProps {
   setFile: React.Dispatch<React.SetStateAction<File | null>>;
   toast: any;
   children?: React.ReactNode;
+  onFileUploaded?: (url: string, path: string) => void;
 }
 
 export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
@@ -18,10 +22,14 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   file,
   setFile,
   toast,
-  children
+  children,
+  onFileUploaded
 }) => {
   const [fileName, setFileName] = useState<string>("");
-  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadedUrl, setUploadedUrl] = useState<string>("");
+  const [uploadedPath, setUploadedPath] = useState<string>("");
   
   const getAcceptTypes = () => {
     switch (type) {
@@ -34,7 +42,7 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   
   const getMaxSize = () => {
     switch (type) {
-      case "image": return 5; // 5MB
+      case "image": return 10; // 10MB
       case "audio": return 50; // 50MB
       case "video": return 100; // 100MB
       default: return 10;
@@ -52,18 +60,9 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   
   const getDescription = () => {
     switch (type) {
-      case "image": return "Upload a cover image for your portfolio item (JPG, PNG, WebP)";
+      case "image": return "Upload a cover image for your portfolio item (JPG, PNG, WebP, GIF)";
       case "audio": return "Upload an audio preview (MP3, WAV, OGG)";
-      case "video": return "Upload a video preview (MP4, WebM)";
-      default: return "";
-    }
-  };
-  
-  const getTargetDirectory = () => {
-    switch (type) {
-      case "image": return "images";
-      case "audio": return "audio";
-      case "video": return "videos";
+      case "video": return "Upload a video preview (MP4, WebM, MOV)";
       default: return "";
     }
   };
@@ -103,7 +102,8 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
     const sanitizedFileName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     setFileName(sanitizedFileName);
     setFile(selectedFile);
-    setIsSaved(false);
+    setUploadedUrl("");
+    setUploadedPath("");
     
     toast({
       title: `${type.charAt(0).toUpperCase() + type.slice(1)} Selected`,
@@ -111,7 +111,7 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
     });
   };
   
-  const handleSaveFile = async () => {
+  const handleUploadFile = async () => {
     if (!file) {
       toast({
         title: "No file selected",
@@ -121,52 +121,56 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
       return;
     }
     
+    setIsUploading(true);
+    setUploadProgress(0);
+    
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      
-      reader.onload = async () => {
-        const targetDir = getTargetDirectory();
-        
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('targetDir', targetDir);
-        
-        const response = await fetch('/api/save-file', {
-          method: 'POST',
-          body: formData
-        });
-        
-        if (response.ok) {
-          setIsSaved(true);
-          toast({
-            title: "File Saved",
-            description: `${fileName} has been saved to the public/${targetDir}/ directory.`,
-          });
-        } else {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to save file');
+      const result: FileUploadResult = await FileUploadService.uploadFile(
+        file,
+        type,
+        (progress) => {
+          setUploadProgress(progress.percentage);
         }
-      };
+      );
       
-      reader.onerror = () => {
-        throw new Error('Failed to read file');
-      };
+      if (result.success && result.url && result.path) {
+        setUploadedUrl(result.url);
+        setUploadedPath(result.path);
+        
+        // Notify parent component
+        if (onFileUploaded) {
+          onFileUploaded(result.url, result.path);
+        }
+        
+        toast({
+          title: "File Uploaded Successfully",
+          description: `${fileName} has been uploaded to Supabase Storage.`,
+        });
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
     } catch (error) {
-      console.error('Error saving file:', error);
+      console.error('Upload error:', error);
       toast({
-        title: "Error Saving File",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
+        title: "Upload Failed",
+        description: error instanceof Error ? error.message : "Failed to upload file",
         variant: "destructive"
       });
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
   
   const handleClearFile = () => {
     setFile(null);
     setFileName("");
-    setIsSaved(false);
+    setUploadedUrl("");
+    setUploadedPath("");
+    setUploadProgress(0);
   };
+  
+  const isUploaded = uploadedUrl !== "";
   
   return (
     <div className="space-y-4">
@@ -182,22 +186,36 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
             accept={getAcceptTypes()}
             onChange={handleFileChange}
             className="cursor-pointer"
+            disabled={isUploading}
           />
           
           {file && (
             <div className="flex items-center mt-2">
               <span className="text-sm text-nature-forest flex-grow">
-                {fileName} {isSaved && <span className="text-green-500 ml-2">(Saved)</span>}
+                {fileName} 
+                {isUploaded && <span className="text-green-500 ml-2">(Uploaded)</span>}
               </span>
               <div className="flex space-x-2">
-                {!isSaved && (
+                {!isUploaded && !isUploading && (
                   <Button 
                     variant="default" 
                     size="sm" 
-                    onClick={handleSaveFile}
+                    onClick={handleUploadFile}
                     className="bg-nature-forest hover:bg-nature-leaf"
                   >
-                    Save to {getTargetDirectory()}
+                    <Upload className="mr-1 h-3 w-3" />
+                    Upload
+                  </Button>
+                )}
+                {isUploading && (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    disabled
+                    className="bg-nature-forest"
+                  >
+                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                    Uploading...
                   </Button>
                 )}
                 <Button 
@@ -205,6 +223,7 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
                   size="sm" 
                   onClick={handleClearFile}
                   className="text-red-500 hover:text-red-700"
+                  disabled={isUploading}
                 >
                   Clear
                 </Button>
@@ -212,21 +231,31 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
             </div>
           )}
           
-          <div className={`flex items-start gap-2 mt-1 text-xs ${isSaved ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'} p-2 rounded`}>
-            {isSaved ? (
+          {isUploading && (
+            <div className="mt-2">
+              <Progress value={uploadProgress} className="w-full h-2" />
+              <p className="text-xs text-nature-bark mt-1">{uploadProgress.toFixed(0)}% uploaded</p>
+            </div>
+          )}
+          
+          <div className={`flex items-start gap-2 mt-1 text-xs ${isUploaded ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'} p-2 rounded`}>
+            {isUploaded ? (
               <>
                 <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium">File saved successfully</p>
-                  <p>The file has been saved to <code className="text-green-800">public/{getTargetDirectory()}/</code> directory.</p>
+                  <p className="font-medium">File uploaded successfully</p>
+                  <p>The file has been saved to Supabase Storage and is ready to use.</p>
+                  {uploadedUrl && (
+                    <p className="text-xs text-green-800 mt-1 break-all">URL: {uploadedUrl}</p>
+                  )}
                 </div>
               </>
             ) : (
               <>
                 <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium">File save required</p>
-                  <p>After selecting your file, click 'Save to {getTargetDirectory()}' to save it to the <code className="text-amber-800">public/{getTargetDirectory()}/</code> directory.</p>
+                  <p className="font-medium">Ready to upload</p>
+                  <p>Select a file and click 'Upload' to save it to Supabase Storage.</p>
                 </div>
               </>
             )}

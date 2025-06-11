@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { PortfolioItem, ExternalLink } from "@/data/portfolio";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,7 +20,6 @@ interface PortfolioEditorProps {
   onSave: (item: any) => void;
   onDelete?: () => void;
   onCancel: () => void;
-  saveFileToPublic?: (file: File, directory: string) => Promise<{ success: boolean, path?: string, error?: string }>;
 }
 
 const CATEGORIES = [
@@ -92,6 +90,22 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
       externalLinks: prev.externalLinks.filter((_, i) => i !== index)
     }));
   };
+
+  // Handle file uploads
+  const handleImageUploaded = (url: string, path: string) => {
+    setFormData(prev => ({ ...prev, coverImageUrl: url }));
+    console.log('Image uploaded:', url);
+  };
+
+  const handleAudioUploaded = (url: string, path: string) => {
+    setFormData(prev => ({ ...prev, audioUrl: url }));
+    console.log('Audio uploaded:', url);
+  };
+
+  const handleVideoUploaded = (url: string, path: string) => {
+    setFormData(prev => ({ ...prev, videoUrl: url }));
+    console.log('Video uploaded:', url);
+  };
   
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
@@ -106,40 +120,15 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
       return;
     }
     
-    // For new uploads, update file paths based on files that would be uploaded
-    const updatedData = { ...formData };
-    
-    if (coverImageFile) {
-      // Use the image preview for immediate display and also set the final path
-      // In a real app, you'd upload the file to a server and get back a URL
-      updatedData.coverImageUrl = `/images/${coverImageFile.name}`;
-    }
-    
-    if (audioFile) {
-      updatedData.audioUrl = `/audio/${audioFile.name}`;
-    }
-    
-    if (videoFile) {
-      updatedData.videoUrl = `/videos/${videoFile.name}`;
-    }
-    
     // In edit mode, preserve the original ID and creation date
     if (mode === "edit" && item) {
       onSave({
-        ...updatedData,
+        ...formData,
         id: item.id,
         createdAt: item.createdAt
       });
     } else {
-      onSave(updatedData);
-    }
-    
-    // Alert about manual file copying
-    if (coverImageFile || audioFile || videoFile) {
-      toast({
-        title: "Media File Reminder",
-        description: "Remember to manually copy your media files to the appropriate public directories for them to be displayed.",
-      });
+      onSave(formData);
     }
   };
 
@@ -277,6 +266,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                 file={coverImageFile}
                 setFile={setCoverImageFile}
                 toast={toast}
+                onFileUploaded={handleImageUploaded}
               />
             </TabsContent>
             
@@ -288,6 +278,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                 file={audioFile}
                 setFile={setAudioFile}
                 toast={toast}
+                onFileUploaded={handleAudioUploaded}
               />
               
               <MediaUploader
@@ -296,6 +287,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                 file={videoFile}
                 setFile={setVideoFile}
                 toast={toast}
+                onFileUploaded={handleVideoUploaded}
               />
             </TabsContent>
             
