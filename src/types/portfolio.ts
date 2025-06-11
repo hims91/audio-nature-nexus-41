@@ -1,4 +1,9 @@
 
+export interface ExternalLink {
+  title: string;
+  url: string;
+}
+
 export interface PortfolioItem {
   id: string;
   user_id: string;
@@ -9,10 +14,7 @@ export interface PortfolioItem {
   cover_image_url?: string;
   audio_url?: string;
   video_url?: string;
-  external_links: Array<{
-    title: string;
-    url: string;
-  }>;
+  external_links: ExternalLink[];
   featured: boolean;
   created_at: string;
   updated_at: string;
@@ -26,10 +28,7 @@ export interface CreatePortfolioItem {
   cover_image_url?: string;
   audio_url?: string;
   video_url?: string;
-  external_links?: Array<{
-    title: string;
-    url: string;
-  }>;
+  external_links?: ExternalLink[];
   featured?: boolean;
 }
 
