@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { portfolioItems as initialPortfolioItems } from "@/data/portfolio";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Edit, Star, Save, CheckCircle2 } from "lucide-react";
+import { Save, CheckCircle2 } from "lucide-react";
 import PortfolioGallery from "./portfolio/PortfolioGallery";
 import PortfolioFilters from "./portfolio/PortfolioFilters";
 
@@ -103,17 +101,6 @@ const Portfolio: React.FC = () => {
           
           {/* Admin Actions (only visible to admin) */}
           <div className="flex items-center gap-2">
-            <Link to="/manage-portfolio">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white"
-              >
-                <Edit className="mr-2 h-4 w-4" />
-                Manage Portfolio
-              </Button>
-            </Link>
-            
             <Button
               variant="outline"
               size="sm"
