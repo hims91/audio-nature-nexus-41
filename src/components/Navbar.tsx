@@ -1,20 +1,46 @@
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+    // Only scroll if we're on the home page
+    if (window.location.pathname === '/') {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Navigate to home page first, then scroll
+      navigate('/', { state: { scrollTo: id } });
     }
+    setIsMenuOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+    setIsMenuOpen(false);
+  };
+
+  const handleAuthClick = () => {
+    navigate('/auth');
+    setIsMenuOpen(false);
+  };
+
+  const handlePortfolioManagement = () => {
+    navigate('/manage-portfolio');
     setIsMenuOpen(false);
   };
 
@@ -22,7 +48,7 @@ const Navbar: React.FC = () => {
     <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-sm z-50 shadow-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
             <img 
               src="/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png" 
               alt="Frog with Speaker Logo" 
@@ -63,12 +89,43 @@ const Navbar: React.FC = () => {
             >
               Testimonials
             </button>
-            <Button 
-              onClick={() => scrollToSection("contact")}
-              className="bg-nature-forest hover:bg-nature-leaf text-white"
-            >
-              Contact
-            </Button>
+            
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <Button 
+                  onClick={handlePortfolioManagement}
+                  variant="outline"
+                  className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white"
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Manage Portfolio
+                </Button>
+                <Button 
+                  onClick={handleSignOut}
+                  variant="outline"
+                  className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Button 
+                  onClick={() => scrollToSection("contact")}
+                  className="bg-nature-forest hover:bg-nature-leaf text-white"
+                >
+                  Contact
+                </Button>
+                <Button 
+                  onClick={handleAuthClick}
+                  variant="outline"
+                  className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white"
+                >
+                  Sign In
+                </Button>
+              </div>
+            )}
           </div>
           
           {/* Mobile Menu Button */}
@@ -115,12 +172,42 @@ const Navbar: React.FC = () => {
             >
               Testimonials
             </button>
-            <Button 
-              onClick={() => scrollToSection("contact")}
-              className="w-full bg-nature-forest hover:bg-nature-leaf text-white"
-            >
-              Contact
-            </Button>
+            
+            {user ? (
+              <div className="space-y-2">
+                <Button 
+                  onClick={handlePortfolioManagement}
+                  className="w-full bg-nature-forest hover:bg-nature-leaf text-white"
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Manage Portfolio
+                </Button>
+                <Button 
+                  onClick={handleSignOut}
+                  variant="outline"
+                  className="w-full border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Button 
+                  onClick={() => scrollToSection("contact")}
+                  className="w-full bg-nature-forest hover:bg-nature-leaf text-white"
+                >
+                  Contact
+                </Button>
+                <Button 
+                  onClick={handleAuthClick}
+                  variant="outline"
+                  className="w-full border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white"
+                >
+                  Sign In
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

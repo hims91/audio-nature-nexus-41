@@ -10,9 +10,11 @@ import PortfolioEditor from "./components/PortfolioEditor";
 import EmptyState from "./components/EmptyState";
 import { PortfolioItem } from "@/data/portfolio";
 import { PlusCircle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ManagePortfolio: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { 
     items, 
     addItem, 
@@ -64,7 +66,16 @@ const ManagePortfolio: React.FC = () => {
       <main className="flex-grow py-16 bg-nature-cream/30">
         <div className="container mx-auto px-4">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-nature-forest mb-2">Portfolio Manager</h1>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-3xl font-bold text-nature-forest mb-2">Portfolio Manager</h1>
+                {user && (
+                  <p className="text-nature-bark text-sm">
+                    Signed in as: {user.email}
+                  </p>
+                )}
+              </div>
+            </div>
             <p className="text-nature-bark max-w-3xl">
               Upload and manage your portfolio items with audio, video, and images. 
               Add links to external platforms to showcase your work.
