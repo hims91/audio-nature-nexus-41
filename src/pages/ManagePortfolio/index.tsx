@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { usePortfolioManager } from "./hooks/usePortfolioManager";
+import { useSupabasePortfolio } from "@/hooks/useSupabasePortfolio";
 import PortfolioItemsList from "./components/PortfolioItemsList";
 import PortfolioEditor from "./components/PortfolioEditor";
 import EmptyState from "./components/EmptyState";
-import { PortfolioItem } from "@/data/portfolio";
+import { CreatePortfolioItem, UpdatePortfolioItem } from "@/types/portfolio";
 import { PlusCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -16,16 +16,20 @@ const ManagePortfolio: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { 
-    items, 
-    addItem, 
-    updateItem, 
+    userPortfolioItems: items,
+    createItem,
+    updateItem,
     deleteItem,
-    isLoading,
-    errorMessage
-  } = usePortfolioManager();
+    isLoadingUserPortfolio: isLoading,
+    portfolioError,
+    userPortfolioError,
+    isCreating,
+    isUpdating,
+    isDeleting
+  } = useSupabasePortfolio();
   
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
   
   // Hidden file input for direct file saving
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,16 +40,15 @@ const ManagePortfolio: React.FC = () => {
     
   const handleNewItem = () => {
     setSelectedId(null);
-    setIsCreating(true);
+    setIsCreatingNew(true);
   };
   
-  const handleSaveNew = (item: Omit<PortfolioItem, "id" | "createdAt">) => {
-    const newItem = addItem(item);
-    setSelectedId(newItem.id);
-    setIsCreating(false);
+  const handleSaveNew = (item: CreatePortfolioItem) => {
+    createItem(item);
+    setIsCreatingNew(false);
   };
   
-  const handleUpdate = (item: PortfolioItem) => {
+  const handleUpdate = (item: UpdatePortfolioItem) => {
     updateItem(item);
   };
   
@@ -55,9 +58,11 @@ const ManagePortfolio: React.FC = () => {
   };
   
   const handleCancel = () => {
-    setIsCreating(false);
+    setIsCreatingNew(false);
     setSelectedId(null);
   };
+
+  const errorMessage = portfolioError?.message || userPortfolioError?.message;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -82,7 +87,18 @@ const ManagePortfolio: React.FC = () => {
             </p>
           </div>
           
-          {isLoading ? (
+          {!user ? (
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-6 rounded-lg mb-6">
+              <h3 className="font-semibold mb-2">Authentication Required</h3>
+              <p className="mb-4">You need to be signed in to manage your portfolio items.</p>
+              <Button
+                onClick={() => navigate('/auth')}
+                className="bg-nature-forest hover:bg-nature-leaf"
+              >
+                Sign In / Sign Up
+              </Button>
+            </div>
+          ) : isLoading ? (
             <div className="text-center py-12">
               <div className="animate-pulse text-nature-forest">Loading portfolio items...</div>
             </div>
@@ -98,16 +114,17 @@ const ManagePortfolio: React.FC = () => {
                   <Button 
                     onClick={handleNewItem}
                     className="w-full bg-nature-forest hover:bg-nature-leaf mb-4"
+                    disabled={isCreating}
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    New Portfolio Item
+                    {isCreating ? 'Creating...' : 'New Portfolio Item'}
                   </Button>
                   
                   <PortfolioItemsList 
                     items={items} 
                     selectedId={selectedId}
                     onSelectItem={(id) => {
-                      setIsCreating(false);
+                      setIsCreatingNew(false);
                       setSelectedId(id);
                     }} 
                   />
@@ -126,11 +143,12 @@ const ManagePortfolio: React.FC = () => {
               
               {/* Main Content */}
               <div className="md:col-span-2">
-                {isCreating ? (
+                {isCreatingNew ? (
                   <PortfolioEditor 
                     mode="create"
                     onSave={handleSaveNew}
                     onCancel={handleCancel}
+                    isLoading={isCreating}
                   />
                 ) : selectedItem ? (
                   <PortfolioEditor 
@@ -139,6 +157,8 @@ const ManagePortfolio: React.FC = () => {
                     onSave={handleUpdate}
                     onDelete={() => handleDelete(selectedItem.id)}
                     onCancel={handleCancel}
+                    isLoading={isUpdating}
+                    isDeleting={isDeleting}
                   />
                 ) : (
                   <EmptyState onCreateNew={handleNewItem} />
