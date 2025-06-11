@@ -1,14 +1,13 @@
 
 import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle, Upload, Loader2 } from "lucide-react";
-import { FileUploadService, FileUploadResult } from "@/services/fileUpload";
-import { Progress } from "@/components/ui/progress";
+import { Upload, X, Loader2 } from "lucide-react";
+import { uploadFileToSupabase, FileUploadType } from "@/services/supabaseFileUpload";
 
 export interface BaseMediaUploaderProps {
-  type: "image" | "audio" | "video";
+  type: FileUploadType;
   currentUrl?: string;
   file: File | null;
   setFile: React.Dispatch<React.SetStateAction<File | null>>;
@@ -19,250 +18,160 @@ export interface BaseMediaUploaderProps {
 
 export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   type,
+  currentUrl,
   file,
   setFile,
   toast,
   children,
   onFileUploaded
 }) => {
-  const [fileName, setFileName] = useState<string>("");
-  const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [uploadedUrl, setUploadedUrl] = useState<string>("");
-  const [uploadedPath, setUploadedPath] = useState<string>("");
-  
-  const getAcceptTypes = () => {
+  const [uploading, setUploading] = useState(false);
+
+  const getAcceptedTypes = () => {
     switch (type) {
-      case "image": return "image/*";
-      case "audio": return "audio/*";
-      case "video": return "video/*";
-      default: return "";
+      case 'image':
+        return 'image/jpeg,image/png,image/webp,image/gif';
+      case 'audio':
+        return 'audio/*,.wav,.mp3,.ogg,.m4a';
+      case 'video':
+        return 'video/*,.mp4,.webm,.mov';
+      default:
+        return '';
     }
   };
-  
+
   const getMaxSize = () => {
     switch (type) {
-      case "image": return 10; // 10MB
-      case "audio": return 50; // 50MB
-      case "video": return 100; // 100MB
-      default: return 10;
+      case 'image':
+        return '10MB';
+      case 'audio':
+        return '50MB';
+      case 'video':
+        return '100MB';
+      default:
+        return '10MB';
     }
   };
-  
-  const getTitle = () => {
-    switch (type) {
-      case "image": return "Cover Image";
-      case "audio": return "Audio File";
-      case "video": return "Video File";
-      default: return "File";
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      console.log(`Selected ${type} file:`, selectedFile.name, selectedFile.type, selectedFile.size);
+      setFile(selectedFile);
     }
   };
-  
-  const getDescription = () => {
-    switch (type) {
-      case "image": return "Upload a cover image for your portfolio item (JPG, PNG, WebP, GIF)";
-      case "audio": return "Upload an audio preview (MP3, WAV, OGG)";
-      case "video": return "Upload a video preview (MP4, WebM, MOV)";
-      default: return "";
-    }
-  };
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    
-    const selectedFile = files[0];
-    const fileType = selectedFile.type;
-    
-    if (
-      (type === "image" && !fileType.startsWith("image/")) ||
-      (type === "audio" && !fileType.startsWith("audio/")) ||
-      (type === "video" && !fileType.startsWith("video/"))
-    ) {
-      toast({
-        title: "Invalid File Type",
-        description: `Please select a ${type} file.`,
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const fileSizeInMB = selectedFile.size / 1024 / 1024;
-    const maxSize = getMaxSize();
-    
-    if (fileSizeInMB > maxSize) {
-      toast({
-        title: "File Too Large",
-        description: `${type.charAt(0).toUpperCase() + type.slice(1)} files must be smaller than ${maxSize}MB. Selected file is ${fileSizeInMB.toFixed(2)}MB.`,
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const sanitizedFileName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    setFileName(sanitizedFileName);
-    setFile(selectedFile);
-    setUploadedUrl("");
-    setUploadedPath("");
-    
-    toast({
-      title: `${type.charAt(0).toUpperCase() + type.slice(1)} Selected`,
-      description: sanitizedFileName
-    });
-  };
-  
-  const handleUploadFile = async () => {
+
+  const handleUpload = async () => {
     if (!file) {
       toast({
         title: "No file selected",
-        description: "Please select a file first",
+        description: `Please select a ${type} file to upload.`,
         variant: "destructive"
       });
       return;
     }
-    
-    setIsUploading(true);
-    setUploadProgress(0);
-    
+
+    setUploading(true);
+    console.log(`Starting ${type} upload process...`);
+
     try {
-      const result: FileUploadResult = await FileUploadService.uploadFile(
-        file,
-        type,
-        (progress) => {
-          setUploadProgress(progress.percentage);
-        }
-      );
+      const result = await uploadFileToSupabase(file, type);
       
-      if (result.success && result.url && result.path) {
-        setUploadedUrl(result.url);
-        setUploadedPath(result.path);
-        
-        // Notify parent component
-        if (onFileUploaded) {
-          onFileUploaded(result.url, result.path);
-        }
-        
-        toast({
-          title: "File Uploaded Successfully",
-          description: `${fileName} has been uploaded to Supabase Storage.`,
-        });
-      } else {
-        throw new Error(result.error || 'Upload failed');
+      if (result.error) {
+        throw new Error(result.error);
       }
-    } catch (error) {
-      console.error('Upload error:', error);
+
+      console.log(`${type} upload successful:`, result);
+
       toast({
-        title: "Upload Failed",
-        description: error instanceof Error ? error.message : "Failed to upload file",
+        title: "Upload successful",
+        description: `${type.charAt(0).toUpperCase() + type.slice(1)} has been uploaded successfully.`,
+      });
+
+      // Notify parent component
+      if (onFileUploaded) {
+        onFileUploaded(result.url, result.path);
+      }
+
+      // Clear the file after successful upload
+      setFile(null);
+
+    } catch (error) {
+      console.error(`${type} upload failed:`, error);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : `Failed to upload ${type}`,
         variant: "destructive"
       });
     } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
+      setUploading(false);
     }
   };
-  
-  const handleClearFile = () => {
+
+  const removeFile = () => {
     setFile(null);
-    setFileName("");
-    setUploadedUrl("");
-    setUploadedPath("");
-    setUploadProgress(0);
   };
-  
-  const isUploaded = uploadedUrl !== "";
-  
+
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-medium text-nature-forest mb-2">{getTitle()}</h3>
-        <p className="text-sm text-nature-bark mb-4">{getDescription()}</p>
-        
-        <div className="flex flex-col space-y-2">
-          <Label htmlFor={`${type}-upload`}>Select {getTitle()}</Label>
+        <Label htmlFor={`${type}-upload`} className="text-sm font-medium text-nature-forest">
+          {type.charAt(0).toUpperCase() + type.slice(1)} File (Max {getMaxSize()})
+        </Label>
+        <div className="mt-1">
           <Input
             id={`${type}-upload`}
             type="file"
-            accept={getAcceptTypes()}
-            onChange={handleFileChange}
+            accept={getAcceptedTypes()}
+            onChange={handleFileSelect}
             className="cursor-pointer"
-            disabled={isUploading}
+            disabled={uploading}
           />
-          
-          {file && (
-            <div className="flex items-center mt-2">
-              <span className="text-sm text-nature-forest flex-grow">
-                {fileName} 
-                {isUploaded && <span className="text-green-500 ml-2">(Uploaded)</span>}
-              </span>
-              <div className="flex space-x-2">
-                {!isUploaded && !isUploading && (
-                  <Button 
-                    variant="default" 
-                    size="sm" 
-                    onClick={handleUploadFile}
-                    className="bg-nature-forest hover:bg-nature-leaf"
-                  >
-                    <Upload className="mr-1 h-3 w-3" />
-                    Upload
-                  </Button>
-                )}
-                {isUploading && (
-                  <Button 
-                    variant="default" 
-                    size="sm" 
-                    disabled
-                    className="bg-nature-forest"
-                  >
-                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                    Uploading...
-                  </Button>
-                )}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleClearFile}
-                  className="text-red-500 hover:text-red-700"
-                  disabled={isUploading}
-                >
-                  Clear
-                </Button>
-              </div>
-            </div>
-          )}
-          
-          {isUploading && (
-            <div className="mt-2">
-              <Progress value={uploadProgress} className="w-full h-2" />
-              <p className="text-xs text-nature-bark mt-1">{uploadProgress.toFixed(0)}% uploaded</p>
-            </div>
-          )}
-          
-          <div className={`flex items-start gap-2 mt-1 text-xs ${isUploaded ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'} p-2 rounded`}>
-            {isUploaded ? (
-              <>
-                <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">File uploaded successfully</p>
-                  <p>The file has been saved to Supabase Storage and is ready to use.</p>
-                  {uploadedUrl && (
-                    <p className="text-xs text-green-800 mt-1 break-all">URL: {uploadedUrl}</p>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Ready to upload</p>
-                  <p>Select a file and click 'Upload' to save it to Supabase Storage.</p>
-                </div>
-              </>
-            )}
-          </div>
         </div>
       </div>
-      
+
+      {file && (
+        <div className="bg-gray-50 p-3 rounded-md border">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-nature-forest">{file.name}</p>
+              <p className="text-xs text-nature-bark">
+                {(file.size / 1024 / 1024).toFixed(2)} MB • {file.type}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={removeFile}
+              disabled={uploading}
+              className="text-red-500 hover:text-red-700"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {file && (
+        <Button 
+          onClick={handleUpload}
+          disabled={uploading}
+          className="w-full bg-nature-forest hover:bg-nature-leaf"
+        >
+          {uploading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Uploading {type}...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Upload {type.charAt(0).toUpperCase() + type.slice(1)}
+            </>
+          )}
+        </Button>
+      )}
+
       {children}
     </div>
   );
