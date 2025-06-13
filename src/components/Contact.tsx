@@ -1,31 +1,29 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Phone } from "lucide-react";
-
 const Contact: React.FC = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { toast } = useToast();
-  
+  const {
+    toast
+  } = useToast();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       toast({
         title: "Message Sent!",
-        description: "Thank you for reaching out. I'll respond to your inquiry soon.",
+        description: "Thank you for reaching out. I'll respond to your inquiry soon."
       });
-      
+
       // Reset form
       setName("");
       setEmail("");
@@ -34,9 +32,7 @@ const Contact: React.FC = () => {
       setIsSubmitting(false);
     }, 1500);
   };
-  
-  return (
-    <section id="contact" className="py-20 bg-nature-forest text-white">
+  return <section id="contact" className="py-20 bg-nature-forest text-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Get in Touch</h2>
@@ -56,65 +52,31 @@ const Contact: React.FC = () => {
                 <label htmlFor="name" className="block text-sm font-medium mb-1">
                   Name
                 </label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name"
-                  required
-                  className="w-full"
-                />
+                <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required className="w-full" />
               </div>
               
               <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-1">
                   Email
                 </label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email address"
-                  required
-                  className="w-full"
-                />
+                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your email address" required className="w-full" />
               </div>
               
               <div>
                 <label htmlFor="subject" className="block text-sm font-medium mb-1">
                   Subject
                 </label>
-                <Input
-                  id="subject"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="What is this regarding?"
-                  required
-                  className="w-full"
-                />
+                <Input id="subject" value={subject} onChange={e => setSubject(e.target.value)} placeholder="What is this regarding?" required className="w-full" />
               </div>
               
               <div>
                 <label htmlFor="message" className="block text-sm font-medium mb-1">
                   Message
                 </label>
-                <Textarea
-                  id="message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Tell me about your project"
-                  rows={5}
-                  required
-                  className="w-full"
-                />
+                <Textarea id="message" value={message} onChange={e => setMessage(e.target.value)} placeholder="Tell me about your project" rows={5} required className="w-full" />
               </div>
               
-              <Button 
-                type="submit" 
-                className="w-full bg-nature-forest hover:bg-nature-leaf text-white"
-                disabled={isSubmitting}
-              >
+              <Button type="submit" className="w-full bg-nature-forest hover:bg-nature-leaf text-white" disabled={isSubmitting}>
                 {isSubmitting ? "Sending..." : "Send Message"}
               </Button>
             </form>
@@ -129,7 +91,7 @@ const Contact: React.FC = () => {
                 <Mail className="h-6 w-6 text-nature-cream mt-1" />
                 <div>
                   <h4 className="font-medium mb-1">Email</h4>
-                  <p className="text-nature-cream/90">willhall.sound@gmail.com</p>
+                  <p className="text-nature-cream/90">TerraEchoStudios@gmail.com</p>
                 </div>
               </div>
               
@@ -150,8 +112,6 @@ const Contact: React.FC = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Contact;
