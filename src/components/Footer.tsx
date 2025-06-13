@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
           {/* Logo and About */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <img alt="Sound Studio Logo" className="h-24 w-24 object-contain bg-white/90 rounded-md p-1" src="/lovable-uploads/c40f6fe7-967f-424f-be8a-11e43130d0b9.png" />
+              <img alt="Sound Studio Logo" src="/lovable-uploads/c40f6fe7-967f-424f-be8a-11e43130d0b9.png" className="h-24 w-24 /90 rounded-md p-1 object-cover" />
               <span className="text-xl font-bold">Terra Echo 
 Studios </span>
             </div>
