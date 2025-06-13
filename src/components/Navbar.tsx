@@ -49,7 +49,7 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png" alt="Frog with Speaker Logo" className="h-16 w-16 object-contain" />
+            <img alt="Frog with Speaker Logo" className="h-16 w-16 object-contain" src="/lovable-uploads/797bd198-b3f0-4c98-b3ca-43e5fc774521.png" />
             <span className="text-xl font-bold text-nature-forest my-0">Terra Echo Studios</span>
           </div>
           
