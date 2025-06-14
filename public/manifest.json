@@ -1,30 +1,77 @@
 
 {
-  "name": "Will Hall Sound Studios",
-  "short_name": "WH Sound",
-  "description": "Professional audio engineering services - Authentic Audio, Naturally Engineered",
+  "name": "Terra Echo Studios",
+  "short_name": "Terra Echo",
+  "description": "Professional Audio Engineering Services - Transform your sound with world-class mixing, mastering, and sound design.",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#065f46",
-  "background_color": "#ffffff",
+  "background_color": "#F0FFF4",
+  "theme_color": "#22543D",
   "orientation": "portrait-primary",
+  "categories": ["music", "audio", "business", "entertainment"],
+  "lang": "en-US",
+  "scope": "/",
   "icons": [
     {
-      "src": "/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png",
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/placeholder.svg",
+      "type": "image/svg+xml",
       "sizes": "192x192",
-      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png",
+      "src": "/placeholder.svg",
+      "type": "image/svg+xml", 
       "sizes": "512x512",
-      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["music", "entertainment", "business"],
-  "lang": "en",
-  "dir": "ltr",
-  "scope": "/",
-  "prefer_related_applications": false
+  "screenshots": [
+    {
+      "src": "/placeholder.svg",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Terra Echo Studios - Professional Audio Engineering"
+    },
+    {
+      "src": "/placeholder.svg",
+      "sizes": "750x1334",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Terra Echo Studios Mobile Experience"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Portfolio",
+      "short_name": "Portfolio",
+      "description": "View our professional audio engineering projects",
+      "url": "/portfolio",
+      "icons": [
+        {
+          "src": "/placeholder.svg",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Contact",
+      "short_name": "Contact",
+      "description": "Get in touch for your audio engineering needs",
+      "url": "/contact",
+      "icons": [
+        {
+          "src": "/placeholder.svg",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
 }

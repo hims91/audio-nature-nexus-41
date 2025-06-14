@@ -1,7 +1,7 @@
 
 import React from 'react';
 import UnifiedNavbar from '@/components/UnifiedNavbar';
-import InteractiveHeroEnhanced from '@/components/enhanced/InteractiveHeroEnhanced';
+import LaunchReadyHeader from '@/components/enhanced/LaunchReadyHeader';
 import AboutEnhanced from '@/components/enhanced/AboutEnhanced';
 import ServicesEnhanced from '@/components/enhanced/ServicesEnhanced';
 import Portfolio from '@/components/Portfolio';
@@ -33,7 +33,9 @@ const Index = () => {
         structuredDataType="organization"
         structuredData={{
           name: "Terra Echo Studios",
-          telephone: "+1-XXX-XXX-XXXX",
+          telephone: "+1 (555) 123-4567",
+          email: "hello@terraechostudios.com",
+          address: "Los Angeles, CA",
           sameAs: [
             "https://www.facebook.com/terraechostudios",
             "https://www.instagram.com/terraechostudios",
@@ -46,12 +48,14 @@ const Index = () => {
         <UnifiedNavbar />
         
         <main>
-          <InteractiveHeroEnhanced />
+          <LaunchReadyHeader />
           <AboutEnhanced />
           <ServicesEnhanced />
           <Portfolio />
           <Testimonials />
-          <ContactFormEnhanced />
+          <div id="contact">
+            <ContactFormEnhanced />
+          </div>
         </main>
         
         <Footer />
