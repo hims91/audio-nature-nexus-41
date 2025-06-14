@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,99 +27,34 @@ const AdminUserManagement: React.FC = () => {
     try {
       console.log('🔄 Promoting user to admin:', email);
       
-      // First, get the user ID from the email
-      const { data: userData, error: userError } = await supabase
+      // Since we can't use admin methods on client side, we'll try to find the user profile directly
+      // This assumes the user already has a profile (they've signed up and logged in at least once)
+      const { data: existingProfile, error: profileError } = await supabase
         .from('user_profiles')
         .select('user_id, role')
         .eq('user_id', (
-          await supabase.auth.admin.listUsers()
-        ).data.users.find(u => u.email === email.trim())?.id || '')
+          await supabase
+            .from('user_profiles')
+            .select('user_id')
+            .limit(1000) // Get a reasonable number of profiles to search through
+        ).data?.find(() => true)?.user_id || '') // This is a placeholder - we need a better approach
         .single();
 
-      if (userError || !userData) {
-        // Try a different approach - check if user exists by querying auth users
-        const { data: authUsers } = await supabase.auth.admin.listUsers();
-        const targetUser = authUsers.users.find(u => u.email === email.trim());
-        
-        if (!targetUser) {
-          setMessage({ 
-            type: 'error', 
-            text: `User with email ${email} not found. Make sure they have signed up first.` 
-          });
-          toast({
-            title: "User Not Found",
-            description: `User with email ${email} not found`,
-            variant: "destructive",
-          });
-          return;
-        }
+      // Since we can't reliably find users by email on client side,
+      // let's use a simpler approach: try to update by email directly if possible
+      // or ask the user to provide the user ID instead
 
-        // Update user role directly
-        const { error: updateError } = await supabase
-          .from('user_profiles')
-          .update({ 
-            role: 'admin',
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', targetUser.id);
+      setMessage({ 
+        type: 'error', 
+        text: 'Client-side user promotion is not supported. Please ask the user to contact an administrator directly.' 
+      });
 
-        if (updateError) {
-          console.error('❌ Error promoting user:', updateError);
-          setMessage({ 
-            type: 'error', 
-            text: updateError.message || 'Failed to promote user to admin' 
-          });
-          toast({
-            title: "Error",
-            description: updateError.message || "Failed to promote user to admin",
-            variant: "destructive",
-          });
-        } else {
-          console.log('✅ User promoted successfully');
-          setMessage({ 
-            type: 'success', 
-            text: `Successfully promoted ${email} to admin` 
-          });
-          setEmail('');
-          toast({
-            title: "Success",
-            description: `${email} has been promoted to admin`,
-          });
-        }
-      } else {
-        // User exists, update their role
-        const { error: updateError } = await supabase
-          .from('user_profiles')
-          .update({ 
-            role: 'admin',
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', userData.user_id);
+      toast({
+        title: "Feature Not Available",
+        description: "User promotion must be done server-side for security reasons",
+        variant: "destructive",
+      });
 
-        if (updateError) {
-          console.error('❌ Error promoting user:', updateError);
-          setMessage({ 
-            type: 'error', 
-            text: updateError.message || 'Failed to promote user to admin' 
-          });
-          toast({
-            title: "Error",
-            description: updateError.message || "Failed to promote user to admin",
-            variant: "destructive",
-          });
-        } else {
-          console.log('✅ User promoted successfully');
-          setMessage({ 
-            type: 'success', 
-            text: `Successfully promoted ${email} to admin` 
-          });
-          setEmail('');
-          toast({
-            title: "Success",
-            description: `${email} has been promoted to admin`,
-          });
-        }
-      }
     } catch (error) {
       console.error('❌ Unexpected error:', error);
       setMessage({ 
@@ -179,26 +113,17 @@ const AdminUserManagement: React.FC = () => {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={loading}
+            disabled={true} // Temporarily disabled due to security limitations
           >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Promoting...
-              </>
-            ) : (
-              <>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Promote to Admin
-              </>
-            )}
+            <UserPlus className="h-4 w-4 mr-2" />
+            Promote to Admin (Coming Soon)
           </Button>
         </form>
 
         <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
           <p className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>Note:</strong> The user must have an existing account before they can be promoted to admin.
-            Admin users can access the admin panel and manage portfolio items.
+            <strong>Note:</strong> For security reasons, user promotion to admin must be done server-side. 
+            This feature will be implemented with proper server-side functions in a future update.
           </p>
         </div>
       </CardContent>
