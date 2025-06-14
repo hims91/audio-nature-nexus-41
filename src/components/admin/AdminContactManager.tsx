@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,8 @@ const AdminContactManager: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { isAdmin } = useEnhancedAuth();
   const { toast } = useToast();
+  const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchSubmissions = async () => {
     if (!isAdmin) return;
@@ -148,14 +150,18 @@ const AdminContactManager: React.FC = () => {
 
   // Set up real-time subscription
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isAdmin || isSubscribedRef.current || channelRef.current) {
+      console.log('📧 Contact manager already subscribed or not admin, skipping...');
+      return;
+    }
 
     fetchSubmissions();
 
     // Subscribe to real-time changes
     console.log('🔄 Setting up real-time subscription for contact submissions...');
+    const channelName = `contact_submissions_${Math.random().toString(36).substr(2, 9)}`;
     const channel = supabase
-      .channel('contact_submissions_changes')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -203,11 +209,24 @@ const AdminContactManager: React.FC = () => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📧 Contact subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          isSubscribedRef.current = false;
+        }
+      });
+
+    channelRef.current = channel;
 
     return () => {
       console.log('🔄 Cleaning up contact submissions subscription...');
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      isSubscribedRef.current = false;
     };
   }, [isAdmin, toast]);
 

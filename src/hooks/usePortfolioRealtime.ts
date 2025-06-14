@@ -7,18 +7,22 @@ import { mapDBToPortfolioItem, type PortfolioItem, type PortfolioItemDB } from "
 export const usePortfolioRealtime = () => {
   const queryClient = useQueryClient();
   const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple subscriptions
+    if (isSubscribedRef.current || channelRef.current) {
+      console.log('🔄 Portfolio realtime already subscribed, skipping...');
+      return;
+    }
+
     console.log('🔄 Setting up real-time subscription for portfolio items...');
     
-    // Clean up any existing channel
-    if (channelRef.current) {
-      console.log('🧹 Cleaning up existing channel...');
-      supabase.removeChannel(channelRef.current);
-    }
+    // Create unique channel name to avoid conflicts
+    const channelName = `portfolio-realtime-${Math.random().toString(36).substr(2, 9)}`;
     
     const channel = supabase
-      .channel(`portfolio-realtime-${Date.now()}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -70,17 +74,23 @@ export const usePortfolioRealtime = () => {
         }
       )
       .subscribe((status) => {
-        console.log('📡 Subscription status:', status);
+        console.log('📡 Portfolio subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          isSubscribedRef.current = false;
+        }
       });
 
     channelRef.current = channel;
 
     return () => {
-      console.log('🔄 Cleaning up real-time subscription...');
+      console.log('🔄 Cleaning up portfolio real-time subscription...');
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
+      isSubscribedRef.current = false;
     };
   }, [queryClient]);
 };
