@@ -15,8 +15,8 @@ const Index = () => {
     <>
       <Helmet>
         <title>Terra Echo Studios | Professional Audio Engineering Services</title>
-        <meta name="description" content="Terra Echo Studios provides world-class audio engineering, mixing, mastering, and sound design services. Transform your sound with our professional expertise." />
-        <meta name="keywords" content="audio engineering, mixing, mastering, sound design, recording studio, podcasting, dolby atmos" />
+        <meta name="description" content="Terra Echo Studios provides world-class audio engineering, mixing, mastering, sound design, and Dolby Atmos services. Transform your sound with our professional expertise and state-of-the-art equipment." />
+        <meta name="keywords" content="audio engineering, mixing, mastering, sound design, recording studio, podcasting, dolby atmos, professional audio services, music production, post production audio" />
         <link rel="canonical" href="https://terraechostudios.com" />
         
         {/* Open Graph / Facebook */}
@@ -32,6 +32,49 @@ const Index = () => {
         <meta property="twitter:title" content="Terra Echo Studios | Professional Audio Engineering" />
         <meta property="twitter:description" content="Transform your sound with our professional audio engineering services." />
         <meta property="twitter:image" content="https://terraechostudios.com/og-image.jpg" />
+
+        {/* Enhanced SEO meta tags */}
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="author" content="Terra Echo Studios" />
+        <meta name="theme-color" content="#22543D" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Terra Echo Studios" />
+        
+        {/* Structured data for better SEO */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Terra Echo Studios",
+            "description": "Professional audio engineering services including mixing, mastering, sound design, and Dolby Atmos",
+            "url": "https://terraechostudios.com",
+            "logo": "https://terraechostudios.com/logo.png",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+1-XXX-XXX-XXXX",
+              "contactType": "Customer Service",
+              "email": "TerraEchoStudios@gmail.com"
+            },
+            "sameAs": [
+              "https://www.facebook.com/terraechostudios",
+              "https://www.instagram.com/terraechostudios",
+              "https://www.linkedin.com/company/terraechostudios"
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "US"
+            },
+            "serviceType": [
+              "Audio Engineering",
+              "Audio Mixing",
+              "Audio Mastering", 
+              "Sound Design",
+              "Dolby Atmos",
+              "Podcasting Services"
+            ]
+          })}
+        </script>
       </Helmet>
 
       <div className="min-h-screen bg-white dark:bg-gray-900">
