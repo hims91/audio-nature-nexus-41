@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/enhanced/BrandConsistencyManager";
+import UserProfileDropdown from "@/components/auth/UserProfileDropdown";
 import { useState } from "react";
 
 const AdminLayout: React.FC = () => {
@@ -130,10 +131,13 @@ const AdminLayout: React.FC = () => {
             <Menu className="h-5 w-5" />
           </Button>
           
-          <div className="flex items-center">
+          <div className="flex items-center justify-between w-full">
             <span className="text-sm text-gray-500 dark:text-gray-400">
               Terra Echo Audio Admin
             </span>
+            
+            {/* User Profile Dropdown in top bar */}
+            <UserProfileDropdown />
           </div>
         </div>
 

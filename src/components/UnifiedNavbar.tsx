@@ -1,17 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Shield, Settings } from 'lucide-react';
+import { Menu, X, Shield } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BrandLogo } from '@/components/enhanced/BrandConsistencyManager';
 import UserProfileDropdown from '@/components/auth/UserProfileDropdown';
-import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const UnifiedNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  const { user, isAdmin } = useEnhancedAuth();
+  const { user } = useAuth();
+
+  // Check if user is admin
+  const isAdmin = user?.email === 'TerraEchoStudios@gmail.com';
 
   useEffect(() => {
     const handleScroll = () => {

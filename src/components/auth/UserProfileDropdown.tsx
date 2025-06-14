@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Settings, LogOut, Shield, Activity, FolderOpen } from 'lucide-react';
+import { User, Settings, LogOut, Shield, FolderOpen } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,14 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import InteractiveButton from '@/components/interactive/InteractiveButton';
-import OptimizedAvatar from '@/components/performance/OptimizedAvatar';
-import { sanitizeText } from '@/utils/security';
+import { Button } from '@/components/ui/button';
 
 const UserProfileDropdown: React.FC = () => {
-  const { user, signOut, isAdmin } = useEnhancedAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -32,11 +30,14 @@ const UserProfileDropdown: React.FC = () => {
     }
   };
 
+  // Check if user is admin
+  const isAdmin = user?.email === 'TerraEchoStudios@gmail.com';
+
   const firstName = user.user_metadata?.first_name;
   const lastName = user.user_metadata?.last_name;
   const fullName = firstName && lastName 
-    ? sanitizeText(`${firstName} ${lastName}`)
-    : sanitizeText(user.user_metadata?.full_name || 'User');
+    ? `${firstName} ${lastName}`
+    : user.user_metadata?.full_name || 'User';
   
   const userInitials = firstName && lastName
     ? `${firstName[0]}${lastName[0]}`.toUpperCase()
@@ -45,19 +46,14 @@ const UserProfileDropdown: React.FC = () => {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <InteractiveButton
+        <Button
           variant="ghost"
           className="w-10 h-10 rounded-full p-0 bg-white/10 hover:bg-white/20 dark:bg-gray-800/50 dark:hover:bg-gray-700/50"
-          hapticType="selection"
         >
-          <OptimizedAvatar
-            src={user.user_metadata?.avatar_url}
-            alt={fullName}
-            fallbackText={userInitials}
-            size="md"
-            priority
-          />
-        </InteractiveButton>
+          <div className="w-8 h-8 rounded-full bg-nature-forest text-white flex items-center justify-center text-sm font-medium">
+            {userInitials}
+          </div>
+        </Button>
       </DropdownMenuTrigger>
       
       <DropdownMenuContent 
@@ -76,7 +72,7 @@ const UserProfileDropdown: React.FC = () => {
               )}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {sanitizeText(user.email || '')}
+              {user.email || ''}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -109,12 +105,11 @@ const UserProfileDropdown: React.FC = () => {
         
         <DropdownMenuItem 
           onClick={() => {
-            // For now, just close dropdown - we can add settings page later
             setIsOpen(false);
           }}
           className="flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
         >
-          <Settings className="w-4 h-4 text-gray-500" />
+          <Settings className="w-4 w-4 text-gray-500" />
           <span>Settings</span>
         </DropdownMenuItem>
         
