@@ -1,23 +1,31 @@
 
 import React, { useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 
 interface Card3DProps {
   children: React.ReactNode;
   className?: string;
   intensity?: 'low' | 'medium' | 'high';
   glowEffect?: boolean;
+  soundEnabled?: boolean;
+  hapticEnabled?: boolean;
 }
 
 const Card3D: React.FC<Card3DProps> = ({ 
   children, 
   className, 
   intensity = 'medium',
-  glowEffect = true 
+  glowEffect = true,
+  soundEnabled = false,
+  hapticEnabled = false
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [transform, setTransform] = useState('');
   const [glowPosition, setGlowPosition] = useState({ x: 50, y: 50 });
+  const { playHover } = useSoundEffects();
+  const { triggerHaptic } = useHapticFeedback();
 
   const intensityMap = {
     low: 5,
@@ -26,6 +34,11 @@ const Card3D: React.FC<Card3DProps> = ({
   };
 
   const maxRotation = intensityMap[intensity];
+
+  const handleMouseEnter = () => {
+    if (soundEnabled) playHover();
+    if (hapticEnabled) triggerHaptic('selection');
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -69,6 +82,7 @@ const Card3D: React.FC<Card3DProps> = ({
           '--tw-gradient-from-position': `${glowPosition.x}% ${glowPosition.y}%`,
         }),
       }}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import MagneticButton from "@/components/animations/MagneticButton";
+import FeedbackSettings from "@/components/interactive/FeedbackSettings";
 import { Menu, X, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -118,6 +119,7 @@ const ModernNavbarEnhanced: React.FC = () => {
               {/* Right section */}
               <div className="flex items-center space-x-3">
                 <ThemeToggle variant="floating" />
+                <FeedbackSettings />
                 
                 {/* CTA Button */}
                 <div className="hidden md:block">

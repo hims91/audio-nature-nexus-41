@@ -1,6 +1,8 @@
 
 import React, { useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 
 interface MagneticButtonProps {
   children: React.ReactNode;
@@ -8,6 +10,9 @@ interface MagneticButtonProps {
   magneticStrength?: number;
   onClick?: () => void;
   disabled?: boolean;
+  hapticType?: 'light' | 'medium' | 'heavy' | 'selection' | 'impact';
+  soundEnabled?: boolean;
+  hapticEnabled?: boolean;
 }
 
 const MagneticButton: React.FC<MagneticButtonProps> = ({
@@ -16,9 +21,14 @@ const MagneticButton: React.FC<MagneticButtonProps> = ({
   magneticStrength = 20,
   onClick,
   disabled = false,
+  hapticType = 'light',
+  soundEnabled = true,
+  hapticEnabled = true,
 }) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [transform, setTransform] = useState('translate3d(0px, 0px, 0px)');
+  const { playHover, playClick } = useSoundEffects();
+  const { triggerHaptic } = useHapticFeedback();
 
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!buttonRef.current || disabled) return;
@@ -37,8 +47,19 @@ const MagneticButton: React.FC<MagneticButtonProps> = ({
     setTransform(`translate3d(${clampedX}px, ${clampedY}px, 0px)`);
   };
 
+  const handleMouseEnter = () => {
+    if (soundEnabled) playHover();
+    if (hapticEnabled) triggerHaptic('selection');
+  };
+
   const handleMouseLeave = () => {
     setTransform('translate3d(0px, 0px, 0px)');
+  };
+
+  const handleClick = () => {
+    if (soundEnabled) playClick();
+    if (hapticEnabled) triggerHaptic(hapticType);
+    onClick?.();
   };
 
   return (
@@ -47,13 +68,15 @@ const MagneticButton: React.FC<MagneticButtonProps> = ({
       className={cn(
         'relative transition-transform duration-300 ease-out transform-gpu',
         'hover:scale-105 active:scale-95',
+        'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
         disabled && 'cursor-not-allowed opacity-50',
         className
       )}
       style={{ transform }}
       onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
     >
       {children}
