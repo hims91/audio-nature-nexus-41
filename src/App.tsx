@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from "@/components/theme-provider"
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from './pages/Index';
 import PortfolioPage from './pages/PortfolioPage';
 import ContactPage from './pages/ContactPage';
@@ -19,11 +20,13 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminPortfolio from "@/pages/admin/AdminPortfolio";
 import AdminAnalytics from "@/pages/admin/AdminAnalytics";
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
     <AuthProvider>
       <HelmetProvider>
-        <QueryClient>
+        <QueryClientProvider client={queryClient}>
           <ThemeProvider defaultTheme="light" storageKey="terra-echo-theme">
             <BrowserRouter>
               <PageTransition>
@@ -60,7 +63,7 @@ function App() {
               <Toaster />
             </BrowserRouter>
           </ThemeProvider>
-        </QueryClient>
+        </QueryClientProvider>
       </HelmetProvider>
     </AuthProvider>
   );

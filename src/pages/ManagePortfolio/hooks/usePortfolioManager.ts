@@ -3,121 +3,107 @@ import { useState } from "react";
 import { usePortfolioData } from "@/hooks/usePortfolioData";
 import { type PortfolioItem } from "@/types/portfolio";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 
 export const usePortfolioManager = () => {
-  const { user } = useAuth();
   const { toast } = useToast();
-  const { 
-    portfolioItems, 
+  const {
+    portfolioItems,
+    featuredItems,
     isLoading,
     error,
     createPortfolioItem,
     updatePortfolioItem,
     deletePortfolioItem
   } = usePortfolioData();
-  
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  
-  const selectedItem = selectedId 
-    ? portfolioItems.find(item => item.id === selectedId) || null
-    : null;
-    
-  const handleNewItem = () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to create portfolio items.",
-        variant: "destructive"
-      });
-      return;
-    }
-    setSelectedId(null);
+
+  const selectedItem = portfolioItems.find(item => item.id === selectedId) || null;
+
+  const handleCreateNew = () => {
     setIsCreating(true);
+    setSelectedId(null);
   };
-  
+
+  const handleSelectItem = (id: string) => {
+    setSelectedId(id);
+    setIsCreating(false);
+  };
+
   const handleSaveNew = async (itemData: Partial<PortfolioItem>) => {
     try {
-      const result = await createPortfolioItem.mutateAsync(itemData);
-      setSelectedId(result.id);
+      await createPortfolioItem.mutateAsync(itemData);
       setIsCreating(false);
       toast({
         title: "Success",
-        description: `"${result.title}" has been created successfully.`
+        description: "Portfolio item created successfully!",
       });
     } catch (error) {
       console.error('Failed to create portfolio item:', error);
       toast({
         title: "Error",
         description: "Failed to create portfolio item. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
-  
+
   const handleUpdate = async (item: PortfolioItem) => {
     try {
-      await updatePortfolioItem.mutateAsync({ 
-        id: item.id, 
-        updates: item
-      });
+      await updatePortfolioItem.mutateAsync({ id: item.id, updates: item });
       toast({
         title: "Success",
-        description: `"${item.title}" has been updated successfully.`
+        description: "Portfolio item updated successfully!",
       });
     } catch (error) {
       console.error('Failed to update portfolio item:', error);
       toast({
         title: "Error",
         description: "Failed to update portfolio item. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
-  
+
   const handleDelete = async (id: string) => {
     try {
       await deletePortfolioItem.mutateAsync(id);
       setSelectedId(null);
+      setIsCreating(false);
       toast({
         title: "Success",
-        description: "Portfolio item has been deleted successfully."
+        description: "Portfolio item deleted successfully!",
       });
     } catch (error) {
       console.error('Failed to delete portfolio item:', error);
       toast({
         title: "Error",
         description: "Failed to delete portfolio item. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
-  
+
   const handleCancel = () => {
     setIsCreating(false);
     setSelectedId(null);
   };
 
-  const handleSelectItem = (id: string) => {
-    setIsCreating(false);
-    setSelectedId(id);
-  };
-
   return {
-    user,
     portfolioItems,
-    isLoading,
-    error,
+    featuredItems,
     selectedId,
     selectedItem,
     isCreating,
-    handleNewItem,
+    isLoading,
+    error,
+    handleCreateNew,
+    handleSelectItem,
     handleSaveNew,
     handleUpdate,
     handleDelete,
     handleCancel,
-    handleSelectItem,
     createPortfolioItem,
     updatePortfolioItem,
     deletePortfolioItem

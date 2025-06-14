@@ -7,12 +7,14 @@ interface PortfolioHeaderProps {
   userEmail?: string;
   onCreateNew: () => void;
   isCreating: boolean;
+  isLoading?: boolean;
 }
 
 const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({ 
   userEmail, 
   onCreateNew, 
-  isCreating 
+  isCreating,
+  isLoading = false
 }) => {
   return (
     <div className="mb-8">
@@ -28,7 +30,7 @@ const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({
         <Button 
           onClick={onCreateNew}
           className="bg-nature-forest hover:bg-nature-leaf"
-          disabled={isCreating}
+          disabled={isCreating || isLoading}
         >
           <PlusCircle className="mr-2 h-4 w-4" />
           {isCreating ? 'Creating...' : 'New Portfolio Item'}

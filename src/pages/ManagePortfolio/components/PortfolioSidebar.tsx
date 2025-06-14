@@ -7,14 +7,16 @@ import PortfolioItemsList from "./PortfolioItemsList";
 
 interface PortfolioSidebarProps {
   portfolioItems: PortfolioItem[];
-  selectedId: string | null;
+  selectedItem: PortfolioItem | null;
   onSelectItem: (id: string) => void;
+  isCreating: boolean;
 }
 
 const PortfolioSidebar: React.FC<PortfolioSidebarProps> = ({
   portfolioItems,
-  selectedId,
-  onSelectItem
+  selectedItem,
+  onSelectItem,
+  isCreating
 }) => {
   const navigate = useNavigate();
 
@@ -23,7 +25,7 @@ const PortfolioSidebar: React.FC<PortfolioSidebarProps> = ({
       <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
         <PortfolioItemsList 
           items={portfolioItems} 
-          selectedId={selectedId}
+          selectedId={selectedItem?.id || null}
           onSelectItem={onSelectItem} 
         />
       </div>
