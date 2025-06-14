@@ -68,6 +68,8 @@ export default {
 					'forest': '#2D5E40',
 					'leaf': '#4A7856',
 					'moss': '#8BA888',
+					'sage': '#9CAF88',
+					'mist': '#E8F2E8',
 					'bark': '#5E4B3E',
 					'earth': '#8A6552',
 					'sky': '#6B9AC4',
