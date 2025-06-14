@@ -28,32 +28,98 @@ const AdminUserManagement: React.FC = () => {
     try {
       console.log('🔄 Promoting user to admin:', email);
       
-      const { data, error } = await supabase.rpc('promote_user_to_admin', {
-        user_email: email.trim()
-      });
+      // First, get the user ID from the email
+      const { data: userData, error: userError } = await supabase
+        .from('user_profiles')
+        .select('user_id, role')
+        .eq('user_id', (
+          await supabase.auth.admin.listUsers()
+        ).data.users.find(u => u.email === email.trim())?.id || '')
+        .single();
 
-      if (error) {
-        console.error('❌ Error promoting user:', error);
-        setMessage({ 
-          type: 'error', 
-          text: error.message || 'Failed to promote user to admin' 
-        });
-        toast({
-          title: "Error",
-          description: error.message || "Failed to promote user to admin",
-          variant: "destructive",
-        });
+      if (userError || !userData) {
+        // Try a different approach - check if user exists by querying auth users
+        const { data: authUsers } = await supabase.auth.admin.listUsers();
+        const targetUser = authUsers.users.find(u => u.email === email.trim());
+        
+        if (!targetUser) {
+          setMessage({ 
+            type: 'error', 
+            text: `User with email ${email} not found. Make sure they have signed up first.` 
+          });
+          toast({
+            title: "User Not Found",
+            description: `User with email ${email} not found`,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Update user role directly
+        const { error: updateError } = await supabase
+          .from('user_profiles')
+          .update({ 
+            role: 'admin',
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', targetUser.id);
+
+        if (updateError) {
+          console.error('❌ Error promoting user:', updateError);
+          setMessage({ 
+            type: 'error', 
+            text: updateError.message || 'Failed to promote user to admin' 
+          });
+          toast({
+            title: "Error",
+            description: updateError.message || "Failed to promote user to admin",
+            variant: "destructive",
+          });
+        } else {
+          console.log('✅ User promoted successfully');
+          setMessage({ 
+            type: 'success', 
+            text: `Successfully promoted ${email} to admin` 
+          });
+          setEmail('');
+          toast({
+            title: "Success",
+            description: `${email} has been promoted to admin`,
+          });
+        }
       } else {
-        console.log('✅ User promoted successfully:', data);
-        setMessage({ 
-          type: 'success', 
-          text: `Successfully promoted ${email} to admin` 
-        });
-        setEmail('');
-        toast({
-          title: "Success",
-          description: `${email} has been promoted to admin`,
-        });
+        // User exists, update their role
+        const { error: updateError } = await supabase
+          .from('user_profiles')
+          .update({ 
+            role: 'admin',
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userData.user_id);
+
+        if (updateError) {
+          console.error('❌ Error promoting user:', updateError);
+          setMessage({ 
+            type: 'error', 
+            text: updateError.message || 'Failed to promote user to admin' 
+          });
+          toast({
+            title: "Error",
+            description: updateError.message || "Failed to promote user to admin",
+            variant: "destructive",
+          });
+        } else {
+          console.log('✅ User promoted successfully');
+          setMessage({ 
+            type: 'success', 
+            text: `Successfully promoted ${email} to admin` 
+          });
+          setEmail('');
+          toast({
+            title: "Success",
+            description: `${email} has been promoted to admin`,
+          });
+        }
       }
     } catch (error) {
       console.error('❌ Unexpected error:', error);
