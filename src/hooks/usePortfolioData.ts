@@ -1,5 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { mapDBToPortfolioItem, mapPortfolioItemToDB, type PortfolioItem, type PortfolioItemDB } from "@/types/portfolio";
@@ -53,6 +54,34 @@ export const usePortfolioData = () => {
     enabled: !isLoading,
     retry: 3,
   });
+
+  // Set up real-time subscription for portfolio updates - only once per hook instance
+  useEffect(() => {
+    console.log('🔄 Setting up real-time subscription for portfolio items...');
+    
+    const channel = supabase
+      .channel(`portfolio-changes-${Date.now()}`) // Use unique channel name
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'portfolio_items'
+        },
+        (payload) => {
+          console.log('📡 Real-time update received:', payload);
+          // Invalidate queries to refetch data
+          queryClient.invalidateQueries({ queryKey: ['portfolio-items'] });
+          queryClient.invalidateQueries({ queryKey: ['featured-portfolio-items'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🔄 Cleaning up real-time subscription...');
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const createPortfolioItem = useMutation({
     mutationFn: async (item: Partial<PortfolioItem>) => {

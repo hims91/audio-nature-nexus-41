@@ -1,6 +1,5 @@
 
-import React, { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import React, { useState } from "react";
 import { usePortfolioData } from "@/hooks/usePortfolioData";
 import { type PortfolioItem } from "@/types/portfolio";
 import LoadingSpinner from "../animations/LoadingSpinner";
@@ -19,32 +18,6 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
 }) => {
   const { portfolioItems, featuredItems, isLoading, error } = usePortfolioData();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-
-  // Set up real-time subscription for portfolio updates
-  useEffect(() => {
-    console.log('🔄 Setting up real-time subscription for portfolio items...');
-    
-    const channel = supabase
-      .channel('portfolio-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'portfolio_items'
-        },
-        (payload) => {
-          console.log('📡 Real-time update received:', payload);
-          // React Query will automatically refresh data
-        }
-      )
-      .subscribe();
-
-    return () => {
-      console.log('🔄 Cleaning up real-time subscription...');
-      supabase.removeChannel(channel);
-    };
-  }, []);
 
   const items = showFeaturedOnly ? featuredItems : portfolioItems;
   const displayItems = limit ? items.slice(0, limit) : items;
