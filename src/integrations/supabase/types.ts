@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      auth_sessions: {
+        Row: {
+          created_at: string | null
+          device_info: Json | null
+          id: string
+          ip_address: unknown | null
+          is_active: boolean | null
+          location: string | null
+          login_method: string
+          session_end: string | null
+          session_start: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          location?: string | null
+          login_method: string
+          session_end?: string | null
+          session_start?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          location?: string | null
+          login_method?: string
+          session_end?: string | null
+          session_start?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -45,6 +87,33 @@ export type Database = {
           replied_at?: string | null
           status?: string | null
           subject?: string
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          action: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          resource: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          resource: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          resource?: string
         }
         Relationships: []
       }
@@ -120,42 +189,104 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          permission_id: string | null
+          role: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission_id?: string | null
+          role: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission_id?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
           bio: string | null
+          company: string | null
           created_at: string
           first_name: string | null
           id: string
           last_name: string | null
+          location: string | null
+          notification_preferences: Json | null
+          onboarding_completed: boolean | null
+          phone: string | null
           preferences: Json | null
+          privacy_settings: Json | null
+          profile_completed_at: string | null
           role: string | null
+          social_links: Json | null
+          timezone: string | null
           updated_at: string
           user_id: string
+          username: string | null
+          website: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          company?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
+          location?: string | null
+          notification_preferences?: Json | null
+          onboarding_completed?: boolean | null
+          phone?: string | null
           preferences?: Json | null
+          privacy_settings?: Json | null
+          profile_completed_at?: string | null
           role?: string | null
+          social_links?: Json | null
+          timezone?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
+          website?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          company?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
+          location?: string | null
+          notification_preferences?: Json | null
+          onboarding_completed?: boolean | null
+          phone?: string | null
           preferences?: Json | null
+          privacy_settings?: Json | null
+          profile_completed_at?: string | null
           role?: string | null
+          social_links?: Json | null
+          timezone?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -167,6 +298,20 @@ export type Database = {
       get_user_role: {
         Args: { user_id: string }
         Returns: string
+      }
+      track_login_session: {
+        Args: {
+          p_user_id: string
+          p_login_method: string
+          p_ip_address?: unknown
+          p_user_agent?: string
+          p_device_info?: Json
+        }
+        Returns: string
+      }
+      user_has_permission: {
+        Args: { user_id: string; permission_name: string }
+        Returns: boolean
       }
     }
     Enums: {
