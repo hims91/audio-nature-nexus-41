@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +10,7 @@ import {
   MessageSquare, 
   CheckCircle, 
   Clock,
-  Refresh,
+  RefreshCw,
   ExternalLink
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,7 +54,13 @@ const AdminContactManager: React.FC = () => {
       }
 
       console.log('✅ Contact submissions fetched:', data?.length || 0);
-      setSubmissions(data || []);
+      // Type cast the status field to ensure TypeScript compatibility
+      const typedSubmissions = data?.map(submission => ({
+        ...submission,
+        status: submission.status as 'new' | 'read' | 'replied' | 'closed'
+      })) || [];
+      
+      setSubmissions(typedSubmissions);
       setError(null);
     } catch (error: any) {
       console.error('❌ Error fetching contact submissions:', error);
@@ -156,7 +161,10 @@ const AdminContactManager: React.FC = () => {
           console.log('📧 Real-time contact submission change:', payload);
           
           if (payload.eventType === 'INSERT') {
-            const newSubmission = payload.new as ContactSubmission;
+            const newSubmission = {
+              ...payload.new,
+              status: payload.new.status as 'new' | 'read' | 'replied' | 'closed'
+            } as ContactSubmission;
             setSubmissions(prev => [newSubmission, ...prev.slice(0, 9)]); // Keep latest 10
             
             toast({
@@ -164,7 +172,10 @@ const AdminContactManager: React.FC = () => {
               description: `From ${newSubmission.name}: ${newSubmission.subject}`,
             });
           } else if (payload.eventType === 'UPDATE') {
-            const updatedSubmission = payload.new as ContactSubmission;
+            const updatedSubmission = {
+              ...payload.new,
+              status: payload.new.status as 'new' | 'read' | 'replied' | 'closed'
+            } as ContactSubmission;
             setSubmissions(prev => 
               prev.map(sub => 
                 sub.id === updatedSubmission.id ? updatedSubmission : sub
@@ -222,7 +233,7 @@ const AdminContactManager: React.FC = () => {
             onClick={fetchSubmissions}
             disabled={loading}
           >
-            <Refresh className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
         </div>
