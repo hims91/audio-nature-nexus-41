@@ -1,140 +1,162 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { Moon, Sun, Menu, X, Settings } from 'lucide-react';
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-const Navbar: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const {
-    user,
-    signOut
-  } = useAuth();
-  const navigate = useNavigate();
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-  const scrollToSection = (id: string) => {
-    // Only scroll if we're on the home page
-    if (window.location.pathname === '/') {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({
-          behavior: "smooth"
-        });
-      }
-    } else {
-      // Navigate to home page first, then scroll
-      navigate('/', {
-        state: {
-          scrollTo: id
-        }
-      });
-    }
-    setIsMenuOpen(false);
-  };
+import { LazyUserProfileDropdown } from "./auth/LazyProfileComponents";
+
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const { user, signOut } = useAuth();
+  
+  // Check if user is admin (in production, this should check user_profiles.role)
+  const isAdmin = user?.email === 'TerraEchoStudios@gmail.com';
+
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
-    setIsMenuOpen(false);
+    setIsOpen(false);
   };
-  const handleAuthClick = () => {
-    navigate('/auth');
-    setIsMenuOpen(false);
-  };
-  const handlePortfolioManagement = () => {
-    navigate('/manage-portfolio');
-    setIsMenuOpen(false);
-  };
-  return <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-sm z-50 shadow-sm">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img alt="Frog with Speaker Logo" className="h-16 w-16 object-contain" src="/lovable-uploads/797bd198-b3f0-4c98-b3ca-43e5fc774521.png" />
-            <span className="text-xl font-bold text-nature-forest my-0">Terra Echo Studios</span>
+
+  const navItems = [
+    { name: "Home", href: "#home" },
+    { name: "About", href: "#about" },
+    { name: "Services", href: "#services" },
+    { name: "Portfolio", href: "#portfolio" },
+    { name: "Contact", href: "#contact" },
+  ];
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <Link to="/" className="flex items-center">
+              <div className="w-10 h-10 bg-nature-forest rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">TE</span>
+              </div>
+              <span className="ml-2 text-xl font-bold text-nature-forest dark:text-white">
+                Terra Echo
+              </span>
+            </Link>
           </div>
-          
+
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <button onClick={() => scrollToSection("about")} className="text-nature-bark hover:text-nature-forest transition-colors">
-              About
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-8">
+              {navItems.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="text-gray-700 dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf transition-colors duration-200 px-3 py-2 text-sm font-medium"
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf transition-colors"
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
-            <button onClick={() => scrollToSection("services")} className="text-nature-bark hover:text-nature-forest transition-colors">
-              Services
-            </button>
-            <button onClick={() => scrollToSection("live-events")} className="text-nature-bark hover:text-nature-forest transition-colors">
-              Live Events
-            </button>
-            <button onClick={() => scrollToSection("portfolio")} className="text-nature-bark hover:text-nature-forest transition-colors">
-              Portfolio
-            </button>
-            <button onClick={() => scrollToSection("testimonials")} className="text-nature-bark hover:text-nature-forest transition-colors">
-              Testimonials
-            </button>
-            
-            {user ? <div className="flex items-center space-x-4">
-                <Button onClick={handlePortfolioManagement} variant="outline" className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
-                  <User className="mr-2 h-4 w-4" />
-                  Manage Portfolio
-                </Button>
-                <Button onClick={handleSignOut} variant="outline" className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </Button>
-              </div> : <div className="flex items-center space-x-4">
-                <Button onClick={() => scrollToSection("contact")} className="bg-nature-forest hover:bg-nature-leaf text-white">
-                  Contact
-                </Button>
-                <Button onClick={handleAuthClick} variant="outline" className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
+
+            {user ? (
+              <div className="flex items-center space-x-3">
+                {isAdmin && (
+                  <Link
+                    to="/admin/dashboard"
+                    className="flex items-center px-3 py-2 rounded-lg bg-nature-forest text-white hover:bg-nature-leaf transition-colors text-sm font-medium"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Admin Panel
+                  </Link>
+                )}
+                <LazyUserProfileDropdown user={user} onSignOut={handleSignOut} />
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button className="bg-nature-forest hover:bg-nature-leaf text-white">
                   Sign In
                 </Button>
-              </div>}
+              </Link>
+            )}
           </div>
-          
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button onClick={toggleMenu} className="text-nature-forest focus:outline-none">
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center space-x-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+            >
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
-        
-        {/* Mobile Menu */}
-        {isMenuOpen && <div className="md:hidden pt-4 pb-6 space-y-4 animate-fade-in">
-            <button onClick={() => scrollToSection("about")} className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors">
-              About
-            </button>
-            <button onClick={() => scrollToSection("services")} className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors">
-              Services
-            </button>
-            <button onClick={() => scrollToSection("live-events")} className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors">
-              Live Events
-            </button>
-            <button onClick={() => scrollToSection("portfolio")} className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors">
-              Portfolio
-            </button>
-            <button onClick={() => scrollToSection("testimonials")} className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors">
-              Testimonials
-            </button>
-            
-            {user ? <div className="space-y-2">
-                <Button onClick={handlePortfolioManagement} className="w-full bg-nature-forest hover:bg-nature-leaf text-white">
-                  <User className="mr-2 h-4 w-4" />
-                  Manage Portfolio
-                </Button>
-                <Button onClick={handleSignOut} variant="outline" className="w-full border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </Button>
-              </div> : <div className="space-y-2">
-                <Button onClick={() => scrollToSection("contact")} className="w-full bg-nature-forest hover:bg-nature-leaf text-white">
-                  Contact
-                </Button>
-                <Button onClick={handleAuthClick} variant="outline" className="w-full border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
-                  Sign In
-                </Button>
-              </div>}
-          </div>}
       </div>
-    </nav>;
+
+      {/* Mobile Navigation */}
+      {isOpen && (
+        <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {navItems.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf"
+                onClick={() => setIsOpen(false)}
+              >
+                {item.name}
+              </a>
+            ))}
+            
+            {user ? (
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+                {isAdmin && (
+                  <Link
+                    to="/admin/dashboard"
+                    className="flex items-center px-3 py-2 text-base font-medium text-nature-forest dark:text-nature-leaf"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Admin Panel
+                  </Link>
+                )}
+                <button
+                  onClick={handleSignOut}
+                  className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+                <Link
+                  to="/auth"
+                  className="block px-3 py-2 text-base font-medium text-nature-forest dark:text-nature-leaf"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Sign In
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </nav>
+  );
 };
+
 export default Navbar;

@@ -1,81 +1,68 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import { ThemeProvider } from "@/components/theme-provider"
+import { QueryClient } from "@tanstack/react-query";
+import Index from './pages/Index';
+import PortfolioPage from './pages/PortfolioPage';
+import ContactPage from './pages/ContactPage';
+import NotFound from './pages/NotFound';
+import AuthEnhanced from './pages/AuthEnhanced';
+import { AuthProvider } from '@/contexts/AuthContext';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import PageTransition from '@/components/animations/PageTransition';
+import { Toaster } from "@/components/ui/toaster"
 
-import { Helmet } from "react-helmet-async";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/toaster";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { AuthProvider } from "@/contexts/AuthContext";
-import HelmetProvider from "@/components/SEO/HelmetProvider";
-import ErrorBoundary from "@/components/security/ErrorBoundary";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import AuthEnhanced from "./pages/AuthEnhanced";
-import ContactPage from "./pages/ContactPage";
-import PortfolioPage from "./pages/PortfolioPage";
-import ManagePortfolio from "./pages/ManagePortfolio";
-import NotFound from "./pages/NotFound";
-import ProtectedRoute from "./components/ProtectedRoute";
-import "./App.css";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      refetchOnWindowFocus: false,
-      retry: (failureCount, error) => {
-        // Don't retry on auth errors
-        if (error?.message?.includes('401') || error?.message?.includes('403')) {
-          return false;
-        }
-        return failureCount < 3;
-      },
-    },
-  },
-});
+import AdminGuard from "@/components/admin/AdminGuard";
+import AdminLayout from "@/components/admin/AdminLayout";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminPortfolio from "@/pages/admin/AdminPortfolio";
+import AdminAnalytics from "@/pages/admin/AdminAnalytics";
 
 function App() {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <HelmetProvider>
-          <ThemeProvider>
-            <AuthProvider>
-              <TooltipProvider>
-                <Router>
-                  <div className="min-h-screen">
-                    <Helmet>
-                      <title>Terra Echo Studios</title>
-                      <meta name="description" content="Professional audio engineering and production services" />
-                      <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https:; media-src 'self' blob: https:;" />
-                    </Helmet>
-                    
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/auth-enhanced" element={<AuthEnhanced />} />
-                      <Route path="/contact" element={<ContactPage />} />
-                      <Route path="/portfolio" element={<PortfolioPage />} />
-                      <Route 
-                        path="/manage-portfolio" 
-                        element={
-                          <ProtectedRoute>
-                            <ManagePortfolio />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                    
-                    <Toaster />
-                  </div>
-                </Router>
-              </TooltipProvider>
-            </AuthProvider>
+    <AuthProvider>
+      <HelmetProvider>
+        <QueryClient>
+          <ThemeProvider defaultTheme="light" storageKey="terra-echo-theme">
+            <BrowserRouter>
+              <PageTransition>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/portfolio" element={<PortfolioPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/auth" element={<AuthEnhanced />} />
+                  
+                  {/* Admin Routes */}
+                  <Route path="/admin" element={
+                    <AdminGuard>
+                      <AdminLayout />
+                    </AdminGuard>
+                  }>
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="portfolio" element={<AdminPortfolio />} />
+                    <Route path="analytics" element={<AdminAnalytics />} />
+                    <Route path="users" element={<div className="p-6 text-center text-gray-500">User management coming soon</div>} />
+                    <Route path="settings" element={<div className="p-6 text-center text-gray-500">Settings coming soon</div>} />
+                  </Route>
+                  
+                  {/* Legacy portfolio management route - redirect to admin */}
+                  <Route path="/manage-portfolio" element={
+                    <ProtectedRoute>
+                      <Navigate to="/admin/portfolio" replace />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </PageTransition>
+              <Toaster />
+            </BrowserRouter>
           </ThemeProvider>
-        </HelmetProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+        </QueryClient>
+      </HelmetProvider>
+    </AuthProvider>
   );
 }
 
