@@ -25,23 +25,23 @@ export const SocialButtonSkeleton = () => (
 );
 
 // Lazy wrapped components with suspense boundaries
-export const LazyUserProfileDropdown = React.forwardRef<any, any>((props, ref) => (
+export const LazyUserProfileDropdown: React.FC<any> = (props) => (
   <Suspense fallback={<ProfileDropdownSkeleton />}>
-    <UserProfileDropdown {...props} ref={ref} />
+    <UserProfileDropdown {...props} />
   </Suspense>
-));
+);
 
-export const LazyAuthCard = React.forwardRef<any, any>((props, ref) => (
+export const LazyAuthCard: React.FC<any> = (props) => (
   <Suspense fallback={<AuthCardSkeleton />}>
-    <AuthCard {...props} ref={ref} />
+    <AuthCard {...props} />
   </Suspense>
-));
+);
 
-export const LazySocialButton = React.forwardRef<any, any>((props, ref) => (
+export const LazySocialButton: React.FC<any> = (props) => (
   <Suspense fallback={<SocialButtonSkeleton />}>
-    <SocialButton {...props} ref={ref} />
+    <SocialButton {...props} />
   </Suspense>
-));
+);
 
 LazyUserProfileDropdown.displayName = 'LazyUserProfileDropdown';
 LazyAuthCard.displayName = 'LazyAuthCard';

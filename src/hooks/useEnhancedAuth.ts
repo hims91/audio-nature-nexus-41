@@ -62,7 +62,6 @@ export const useEnhancedAuth = () => {
       });
 
       if (error) {
-        authRateLimit.recordAttempt();
         toast({
           title: "Google Sign In Error",
           description: error.message,
@@ -73,7 +72,6 @@ export const useEnhancedAuth = () => {
 
       return { error: null };
     } catch (error: any) {
-      authRateLimit.recordAttempt();
       toast({
         title: "Error",
         description: "An unexpected error occurred during Google sign in.",
@@ -107,7 +105,6 @@ export const useEnhancedAuth = () => {
       });
 
       if (error) {
-        authRateLimit.recordAttempt();
         toast({
           title: "X Sign In Error",
           description: error.message,
@@ -118,7 +115,6 @@ export const useEnhancedAuth = () => {
 
       return { error: null };
     } catch (error: any) {
-      authRateLimit.recordAttempt();
       toast({
         title: "Error",
         description: "An unexpected error occurred during X sign in.",
