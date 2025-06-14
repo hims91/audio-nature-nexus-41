@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import { usePortfolioData } from "@/hooks/usePortfolioData";
@@ -8,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AdminUserManagement from "@/components/admin/AdminUserManagement";
 import AdminContactManager from "@/components/admin/AdminContactManager";
+import AdminSetupGuide from "@/components/admin/AdminSetupGuide";
 import { 
   BarChart3, 
   FolderOpen, 
@@ -21,13 +21,33 @@ import {
 import { Link } from "react-router-dom";
 
 const AdminDashboard: React.FC = () => {
-  const { user, userProfile } = useEnhancedAuth();
+  const { user, userProfile, isAdmin } = useEnhancedAuth();
   const { portfolioItems, featuredItems, isLoading } = usePortfolioData();
   const { trackPageView } = useAdminMonitoring();
 
   useEffect(() => {
     trackPageView('dashboard');
   }, [trackPageView]);
+
+  // Show setup guide if not admin
+  if (!isAdmin) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Admin access required to view this dashboard
+            </p>
+          </div>
+        </div>
+        
+        <AdminSetupGuide />
+      </div>
+    );
+  }
 
   const stats = [
     {

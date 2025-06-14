@@ -39,6 +39,7 @@ const AuthEnhanced: React.FC = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
+      console.log('User authenticated, redirecting to home');
       navigate('/');
     }
   }, [user, navigate]);
@@ -84,15 +85,19 @@ const AuthEnhanced: React.FC = () => {
     try {
       let result;
       if (isLogin) {
+        console.log('Attempting sign in for:', email);
         result = await signIn(email, password);
         if (!result.error) {
+          console.log('Sign in successful, tracking session');
           await trackLoginSession('email');
         }
       } else {
+        console.log('Attempting sign up for:', email);
         result = await signUp(email, password);
       }
 
       if (result.error) {
+        console.error('Auth error:', result.error);
         toast({
           title: "Authentication Error",
           description: result.error.message,
@@ -113,6 +118,7 @@ const AuthEnhanced: React.FC = () => {
         }
       }
     } catch (error) {
+      console.error('Unexpected auth error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred.",
@@ -125,6 +131,7 @@ const AuthEnhanced: React.FC = () => {
 
   const handleSocialLogin = async (provider: 'google' | 'twitter') => {
     try {
+      console.log(`Attempting ${provider} login`);
       let result;
       if (provider === 'google') {
         result = await signInWithGoogle();

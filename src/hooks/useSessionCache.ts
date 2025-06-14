@@ -24,15 +24,15 @@ export const useSessionCache = <T = AuthSession[]>(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Get cache key with user context
+  // Get cache key with user context - fixed to be stable
   const getCacheKey = useCallback(() => `session_cache_${key}`, [key]);
 
-  // Check if cache entry is valid
+  // Check if cache entry is valid - fixed dependencies
   const isCacheValid = useCallback((entry: CacheEntry<T>) => {
     return Date.now() - entry.timestamp < maxAge;
   }, [maxAge]);
 
-  // Get data from cache
+  // Get data from cache - now properly memoized
   const getFromCache = useCallback((): T | null => {
     try {
       const cacheKey = getCacheKey();
@@ -47,7 +47,7 @@ export const useSessionCache = <T = AuthSession[]>(
     }
   }, [getCacheKey, isCacheValid]);
 
-  // Set data to cache
+  // Set data to cache - now properly memoized
   const setToCache = useCallback((data: T) => {
     try {
       const cacheKey = getCacheKey();
@@ -72,7 +72,7 @@ export const useSessionCache = <T = AuthSession[]>(
     }
   }, [getCacheKey, maxItems]);
 
-  // Fetch data with caching
+  // Fetch data with caching - fixed to prevent infinite loops
   const fetchData = useCallback(async (force = false) => {
     // Check cache first unless forced refresh
     if (!force) {
@@ -100,16 +100,32 @@ export const useSessionCache = <T = AuthSession[]>(
     }
   }, [fetcher, getFromCache, setToCache]);
 
-  // Invalidate cache
+  // Invalidate cache - now properly memoized
   const invalidateCache = useCallback(() => {
     const cacheKey = getCacheKey();
     localStorage.removeItem(cacheKey);
   }, [getCacheKey]);
 
-  // Load initial data
+  // Load initial data - fixed to prevent re-renders
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let mounted = true;
+    
+    const loadData = async () => {
+      try {
+        await fetchData();
+      } catch (error) {
+        if (mounted) {
+          console.error('Failed to load initial data:', error);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [key]); // Only depend on key, not fetchData to prevent loops
 
   return {
     data,

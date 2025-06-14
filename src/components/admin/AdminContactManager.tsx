@@ -1,26 +1,23 @@
 
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Mail, 
-  Search, 
-  Filter, 
-  User, 
   Calendar, 
-  FileText,
-  CheckCircle,
+  User, 
+  MessageSquare, 
+  CheckCircle, 
   Clock,
-  AlertCircle
-} from "lucide-react";
-import FadeInView from "../animations/FadeInView";
-import LoadingSpinner from "../animations/LoadingSpinner";
+  Refresh,
+  ExternalLink
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
+import LoadingSpinner from '@/components/animations/LoadingSpinner';
 
 interface ContactSubmission {
   id: string;
@@ -28,7 +25,7 @@ interface ContactSubmission {
   email: string;
   subject: string;
   message: string;
-  status: string;
+  status: 'new' | 'read' | 'replied' | 'closed';
   created_at: string;
   read_at?: string;
   replied_at?: string;
@@ -36,316 +33,297 @@ interface ContactSubmission {
 }
 
 const AdminContactManager: React.FC = () => {
+  const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { isAdmin } = useEnhancedAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
-  const [replyMessage, setReplyMessage] = useState("");
 
-  const { data: submissions = [], isLoading } = useQuery({
-    queryKey: ['contact-submissions'],
-    queryFn: async () => {
+  const fetchSubmissions = async () => {
+    if (!isAdmin) return;
+    
+    try {
+      console.log('📧 Fetching contact submissions...');
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as ContactSubmission[];
-    }
-  });
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-  const markAsReadMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('contact_submissions')
-        .update({ 
-          read_at: new Date().toISOString(),
-          status: 'read'
-        })
-        .eq('id', id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contact-submissions'] });
-      toast({
-        title: "Marked as Read",
-        description: "Contact submission has been marked as read."
-      });
-    }
-  });
+      if (error) {
+        throw error;
+      }
 
-  const replyMutation = useMutation({
-    mutationFn: async ({ id, message }: { id: string; message: string }) => {
-      // In a real implementation, this would send an email
-      const { error } = await supabase
-        .from('contact_submissions')
-        .update({ 
-          replied_at: new Date().toISOString(),
-          status: 'replied'
-        })
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      // Here you would integrate with an email service
-      console.log('Reply sent:', { id, message });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contact-submissions'] });
-      setSelectedSubmission(null);
-      setReplyMessage("");
-      toast({
-        title: "Reply Sent",
-        description: "Your reply has been sent successfully."
-      });
-    }
-  });
-
-  const filteredSubmissions = submissions.filter(submission => {
-    const matchesSearch = 
-      submission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      submission.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      submission.subject.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === "all" || submission.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'new': return <AlertCircle className="h-4 w-4 text-blue-500" />;
-      case 'read': return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'replied': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      default: return <AlertCircle className="h-4 w-4 text-gray-500" />;
+      console.log('✅ Contact submissions fetched:', data?.length || 0);
+      setSubmissions(data || []);
+      setError(null);
+    } catch (error: any) {
+      console.error('❌ Error fetching contact submissions:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'read': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'replied': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+  const markAsRead = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .update({ 
+          status: 'read', 
+          read_at: new Date().toISOString() 
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Update local state
+      setSubmissions(prev => 
+        prev.map(sub => 
+          sub.id === id 
+            ? { ...sub, status: 'read' as const, read_at: new Date().toISOString() }
+            : sub
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Contact submission marked as read.",
+      });
+    } catch (error: any) {
+      console.error('Error marking as read:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update submission status.",
+        variant: "destructive",
+      });
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+  const markAsReplied = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .update({ 
+          status: 'replied', 
+          replied_at: new Date().toISOString() 
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Update local state
+      setSubmissions(prev => 
+        prev.map(sub => 
+          sub.id === id 
+            ? { ...sub, status: 'replied' as const, replied_at: new Date().toISOString() }
+            : sub
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Contact submission marked as replied.",
+      });
+    } catch (error: any) {
+      console.error('Error marking as replied:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update submission status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Set up real-time subscription
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    fetchSubmissions();
+
+    // Subscribe to real-time changes
+    console.log('🔄 Setting up real-time subscription for contact submissions...');
+    const channel = supabase
+      .channel('contact_submissions_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'contact_submissions'
+        },
+        (payload) => {
+          console.log('📧 Real-time contact submission change:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            const newSubmission = payload.new as ContactSubmission;
+            setSubmissions(prev => [newSubmission, ...prev.slice(0, 9)]); // Keep latest 10
+            
+            toast({
+              title: "New Contact Submission",
+              description: `From ${newSubmission.name}: ${newSubmission.subject}`,
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedSubmission = payload.new as ContactSubmission;
+            setSubmissions(prev => 
+              prev.map(sub => 
+                sub.id === updatedSubmission.id ? updatedSubmission : sub
+              )
+            );
+          } else if (payload.eventType === 'DELETE') {
+            const deletedId = payload.old.id;
+            setSubmissions(prev => prev.filter(sub => sub.id !== deletedId));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🔄 Cleaning up contact submissions subscription...');
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin, toast]);
+
+  if (!isAdmin) {
+    return null;
   }
 
+  const getStatusBadge = (status: string) => {
+    const variants = {
+      'new': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+      'read': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
+      'replied': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+      'closed': 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
+    };
+    
+    return (
+      <Badge className={variants[status as keyof typeof variants] || variants.new}>
+        {status}
+      </Badge>
+    );
+  };
+
   return (
-    <div className="space-y-6">
-      <FadeInView direction="up">
+    <Card>
+      <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Contact Management
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Manage and respond to contact submissions
+            <CardTitle className="flex items-center">
+              <Mail className="h-5 w-5 mr-2 text-nature-forest" />
+              Contact Submissions
+            </CardTitle>
+            <CardDescription>
+              Recent contact form submissions and inquiries
+            </CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchSubmissions}
+            disabled={loading}
+          >
+            <Refresh className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <LoadingSpinner size="md" />
+          </div>
+        ) : error ? (
+          <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+            <AlertDescription className="text-red-800 dark:text-red-200">
+              <strong>Error loading submissions:</strong> {error}
+            </AlertDescription>
+          </Alert>
+        ) : submissions.length === 0 ? (
+          <div className="text-center py-8">
+            <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400">
+              No contact submissions yet. When users submit the contact form, they'll appear here.
             </p>
           </div>
-          <Badge variant="outline" className="text-sm">
-            {submissions.length} Total Submissions
-          </Badge>
-        </div>
-      </FadeInView>
-
-      {/* Filters */}
-      <FadeInView direction="up" delay={0.1}>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search by name, email, or subject..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+        ) : (
+          <div className="space-y-4">
+            {submissions.map((submission) => (
+              <div 
+                key={submission.id}
+                className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <User className="h-4 w-4 text-gray-500" />
+                    <span className="font-medium">{submission.name}</span>
+                    <span className="text-gray-500 text-sm">({submission.email})</span>
+                  </div>
+                  {getStatusBadge(submission.status)}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant={statusFilter === "all" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter("all")}
-                >
-                  All
-                </Button>
-                <Button
-                  variant={statusFilter === "new" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter("new")}
-                >
-                  New
-                </Button>
-                <Button
-                  variant={statusFilter === "read" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter("read")}
-                >
-                  Read
-                </Button>
-                <Button
-                  variant={statusFilter === "replied" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter("replied")}
-                >
-                  Replied
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </FadeInView>
-
-      {/* Submissions List */}
-      <div className="grid gap-4">
-        {filteredSubmissions.map((submission, index) => (
-          <FadeInView key={submission.id} direction="up" delay={0.1 * index}>
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-gray-500" />
-                        <span className="font-medium text-gray-900 dark:text-white">
-                          {submission.name}
-                        </span>
-                      </div>
-                      <Badge className={getStatusColor(submission.status)}>
-                        {getStatusIcon(submission.status)}
-                        <span className="ml-1 capitalize">{submission.status}</span>
-                      </Badge>
+                
+                <div className="mb-3">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                    {submission.subject}
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
+                    {submission.message}
+                  </p>
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {new Date(submission.created_at).toLocaleDateString()}
                     </div>
-                    
-                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
-                      <div className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
-                        {submission.email}
+                    {submission.file_attachments && submission.file_attachments.length > 0 && (
+                      <div className="flex items-center">
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        {submission.file_attachments.length} file(s)
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(submission.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                    
-                    <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                      {submission.subject}
-                    </h3>
-                    
-                    <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
-                      {submission.message}
-                    </p>
+                    )}
                   </div>
                   
-                  <div className="flex gap-2 ml-4">
+                  <div className="flex space-x-2">
                     {submission.status === 'new' && (
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => markAsReadMutation.mutate(submission.id)}
+                        onClick={() => markAsRead(submission.id)}
+                        className="text-xs h-6"
                       >
+                        <CheckCircle className="h-3 w-3 mr-1" />
                         Mark Read
+                      </Button>
+                    )}
+                    {submission.status === 'read' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => markAsReplied(submission.id)}
+                        className="text-xs h-6"
+                      >
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        Mark Replied
                       </Button>
                     )}
                     <Button
                       size="sm"
-                      onClick={() => setSelectedSubmission(submission)}
+                      variant="outline"
+                      onClick={() => window.open(`mailto:${submission.email}?subject=Re: ${submission.subject}`, '_blank')}
+                      className="text-xs h-6"
                     >
-                      View Details
+                      <Mail className="h-3 w-3 mr-1" />
+                      Reply
                     </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </FadeInView>
-        ))}
-      </div>
-
-      {filteredSubmissions.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              No submissions found
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              {searchTerm || statusFilter !== "all" 
-                ? "Try adjusting your search or filter criteria." 
-                : "No contact submissions have been received yet."}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Reply Modal would go here */}
-      {selectedSubmission && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <CardHeader>
-              <CardTitle>Contact Submission Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-medium mb-2">From: {selectedSubmission.name}</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{selectedSubmission.email}</p>
               </div>
-              
-              <div>
-                <h4 className="font-medium mb-2">Subject</h4>
-                <p>{selectedSubmission.subject}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-medium mb-2">Message</h4>
-                <p className="whitespace-pre-wrap">{selectedSubmission.message}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-medium mb-2">Reply</h4>
-                <Textarea
-                  value={replyMessage}
-                  onChange={(e) => setReplyMessage(e.target.value)}
-                  placeholder="Type your reply here..."
-                  rows={4}
-                />
-              </div>
-              
-              <div className="flex gap-2 justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedSubmission(null)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => replyMutation.mutate({ 
-                    id: selectedSubmission.id, 
-                    message: replyMessage 
-                  })}
-                  disabled={!replyMessage.trim()}
-                >
-                  Send Reply
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
