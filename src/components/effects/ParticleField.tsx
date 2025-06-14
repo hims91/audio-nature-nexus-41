@@ -1,6 +1,5 @@
-
 import React, { useRef, useEffect } from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/components/theme-provider';
 
 interface Particle {
   x: number;
@@ -27,7 +26,8 @@ const ParticleField: React.FC<ParticleFieldProps> = ({
   const animationRef = useRef<number>();
   const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: 0, y: 0 });
-  const { isDark } = useTheme();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     const canvas = canvasRef.current;

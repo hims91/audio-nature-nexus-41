@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Moon, Sun, Menu, X, Settings } from 'lucide-react';
-import { useTheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { LazyUserProfileDropdown } from "./auth/LazyProfileComponents";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   
   // Check if user is admin (in production, this should check user_profiles.role)
@@ -17,6 +17,10 @@ const Navbar = () => {
   const handleSignOut = async () => {
     await signOut();
     setIsOpen(false);
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const navItems = [
