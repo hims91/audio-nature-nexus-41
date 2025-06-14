@@ -1,17 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Shield, Settings } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BrandLogo } from '@/components/enhanced/BrandConsistencyManager';
 import UserProfileDropdown from '@/components/auth/UserProfileDropdown';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
 
 const UnifiedNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, isAdmin } = useEnhancedAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,10 +63,27 @@ const UnifiedNavbar = () => {
             ))}
           </div>
 
-          {/* Right side - Auth */}
+          {/* Right side - Auth and Admin */}
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
-              <UserProfileDropdown />
+              <div className="flex items-center space-x-3">
+                {/* Admin Panel Button */}
+                {isAdmin && (
+                  <Link to="/admin/dashboard">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="flex items-center space-x-2 border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white dark:border-nature-leaf dark:text-nature-leaf dark:hover:bg-nature-leaf dark:hover:text-gray-900"
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span>Admin Panel</span>
+                    </Button>
+                  </Link>
+                )}
+                
+                {/* User Profile Dropdown */}
+                <UserProfileDropdown />
+              </div>
             ) : (
               <Link to="/auth">
                 <Button 
@@ -112,9 +129,32 @@ const UnifiedNavbar = () => {
               ))}
               
               {/* Mobile Auth */}
-              <div className="px-3 py-2">
+              <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700 mt-3 pt-3">
                 {user ? (
-                  <UserProfileDropdown />
+                  <div className="space-y-2">
+                    {/* Admin Panel for Mobile */}
+                    {isAdmin && (
+                      <Link 
+                        to="/admin/dashboard" 
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-nature-forest dark:text-nature-leaf hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
+                      >
+                        <Shield className="h-4 w-4" />
+                        <span>Admin Panel</span>
+                      </Link>
+                    )}
+                    
+                    {/* Profile Links for Mobile */}
+                    <Link 
+                      to="/manage-portfolio" 
+                      onClick={() => setIsOpen(false)}
+                      className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
+                    >
+                      Manage Portfolio
+                    </Link>
+                    
+                    <UserProfileDropdown />
+                  </div>
                 ) : (
                   <Link to="/auth" onClick={() => setIsOpen(false)}>
                     <Button 

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
 import { useToast } from '@/hooks/use-toast';
-import Navbar from '@/components/Navbar';
+import UnifiedNavbar from '@/components/UnifiedNavbar';
 import Footer from '@/components/Footer';
 import AuthCard from '@/components/auth/AuthCard';
 import SocialButton from '@/components/auth/SocialButton';
@@ -90,10 +90,22 @@ const AuthEnhanced: React.FC = () => {
         if (!result.error) {
           console.log('Sign in successful, tracking session');
           await trackLoginSession('email');
+          toast({
+            title: "Welcome back!",
+            description: "You have been successfully signed in.",
+          });
+          navigate('/');
         }
       } else {
         console.log('Attempting sign up for:', email);
         result = await signUp(email, password);
+        if (!result.error) {
+          toast({
+            title: "Account created!",
+            description: "Please check your email to verify your account.",
+          });
+          setIsLogin(true); // Switch to login mode after successful signup
+        }
       }
 
       if (result.error) {
@@ -103,19 +115,6 @@ const AuthEnhanced: React.FC = () => {
           description: result.error.message,
           variant: "destructive",
         });
-      } else {
-        if (isLogin) {
-          toast({
-            title: "Welcome back!",
-            description: "You have been successfully signed in.",
-          });
-          navigate('/');
-        } else {
-          toast({
-            title: "Account created!",
-            description: "Please check your email to verify your account.",
-          });
-        }
       }
     } catch (error) {
       console.error('Unexpected auth error:', error);
@@ -153,7 +152,7 @@ const AuthEnhanced: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-nature-cream/30 via-white to-nature-sage/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <Navbar />
+      <UnifiedNavbar />
       
       <main className="flex-grow py-16 flex items-center justify-center px-4">
         <div className="w-full max-w-md">

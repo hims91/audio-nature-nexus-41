@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Settings, LogOut, Shield, Activity } from 'lucide-react';
+import { User, Settings, LogOut, Shield, Activity, FolderOpen } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,22 +9,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useEnhancedAuth } from '@/hooks/useEnhancedAuth';
+import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
 import { useNavigate } from 'react-router-dom';
 import InteractiveButton from '@/components/interactive/InteractiveButton';
 import OptimizedAvatar from '@/components/performance/OptimizedAvatar';
 import { sanitizeText } from '@/utils/security';
 
 const UserProfileDropdown: React.FC = () => {
-  const { user, signOut } = useEnhancedAuth();
+  const { user, signOut, isAdmin } = useEnhancedAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   if (!user) return null;
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    try {
+      await signOut();
+      navigate('/');
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const firstName = user.user_metadata?.first_name;
@@ -64,6 +69,11 @@ const UserProfileDropdown: React.FC = () => {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {fullName}
+              {isAdmin && (
+                <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-nature-forest text-white">
+                  Admin
+                </span>
+              )}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
               {sanitizeText(user.email || '')}
@@ -75,46 +85,37 @@ const UserProfileDropdown: React.FC = () => {
         
         <DropdownMenuItem 
           onClick={() => {
-            navigate('/profile');
-            setIsOpen(false);
-          }}
-          className="flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-        >
-          <User className="w-4 h-4 text-gray-500" />
-          <span>Profile</span>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem 
-          onClick={() => {
             navigate('/manage-portfolio');
             setIsOpen(false);
           }}
           className="flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
         >
-          <Shield className="w-4 h-4 text-gray-500" />
+          <FolderOpen className="w-4 h-4 text-gray-500" />
           <span>Manage Portfolio</span>
         </DropdownMenuItem>
+
+        {isAdmin && (
+          <DropdownMenuItem 
+            onClick={() => {
+              navigate('/admin/dashboard');
+              setIsOpen(false);
+            }}
+            className="flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+          >
+            <Shield className="w-4 h-4 text-nature-forest" />
+            <span>Admin Dashboard</span>
+          </DropdownMenuItem>
+        )}
         
         <DropdownMenuItem 
           onClick={() => {
-            navigate('/settings');
+            // For now, just close dropdown - we can add settings page later
             setIsOpen(false);
           }}
           className="flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
         >
           <Settings className="w-4 h-4 text-gray-500" />
           <span>Settings</span>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem 
-          onClick={() => {
-            navigate('/sessions');
-            setIsOpen(false);
-          }}
-          className="flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-        >
-          <Activity className="w-4 h-4 text-gray-500" />
-          <span>Active Sessions</span>
         </DropdownMenuItem>
         
         <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />

@@ -1,19 +1,20 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
+import LoadingSpinner from '@/components/animations/LoadingSpinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useEnhancedAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-nature-forest">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
