@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
@@ -9,13 +8,14 @@ import FloatingElement from "../animations/FloatingElement";
 import ParticleField from "../effects/ParticleField";
 import MagneticButton from "../animations/MagneticButton";
 import Card3D from "../effects/Card3D";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useTheme } from "@/components/theme-provider";
 
 const InteractiveHeroEnhanced: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const { isDark } = useTheme();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     const interval = setInterval(() => {
