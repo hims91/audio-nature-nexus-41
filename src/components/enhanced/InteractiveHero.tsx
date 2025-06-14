@@ -40,11 +40,13 @@ const InteractiveHero: React.FC = () => {
       {/* Animated Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-nature-forest via-nature-leaf to-nature-sage opacity-90" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="7" cy="7" r="1"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] animate-pulse" />
+        <div className="absolute inset-0 opacity-20">
+          <div className="w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+        </div>
         
         {/* Floating Elements */}
         <FloatingElement intensity="light" delay={0} className="absolute top-20 left-10">
-          <div className="w-3 h-3 bg-white/30 rounded-full" />
+          <div className="w-3 h-3 bg-white/30 rounded-full animate-glow" />
         </FloatingElement>
         <FloatingElement intensity="medium" delay={1} className="absolute top-40 right-20">
           <div className="w-2 h-2 bg-nature-cream/40 rounded-full" />

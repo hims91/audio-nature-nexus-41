@@ -1,0 +1,209 @@
+
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
+import FadeInView from "../animations/FadeInView";
+import FloatingElement from "../animations/FloatingElement";
+import { Badge } from "@/components/ui/badge";
+import { User, Award, Clock, Target } from "lucide-react";
+
+const AboutEnhanced: React.FC = () => {
+  const [activeTab, setActiveTab] = useState("story");
+
+  const tabs = [
+    { id: "story", label: "My Story", icon: User },
+    { id: "education", label: "Education", icon: Award },
+    { id: "experience", label: "Experience", icon: Clock },
+    { id: "approach", label: "Approach", icon: Target },
+  ];
+
+  const skills = [
+    { name: "Audio Engineering", level: 95 },
+    { name: "Sound Design", level: 90 },
+    { name: "Mixing & Mastering", level: 98 },
+    { name: "Podcast Production", level: 92 },
+    { name: "Dolby Atmos", level: 85 },
+    { name: "Live Recording", level: 88 },
+  ];
+
+  return (
+    <section id="about" className="py-20 bg-gradient-to-br from-nature-cream/30 via-white to-nature-mist/50 relative overflow-hidden">
+      {/* Background Elements */}
+      <FloatingElement intensity="light" delay={0} className="absolute top-10 right-10">
+        <div className="w-8 h-8 bg-nature-forest/20 rounded-full animate-pulse-slow" />
+      </FloatingElement>
+      <FloatingElement intensity="medium" delay={2} className="absolute bottom-20 left-10">
+        <div className="w-6 h-6 bg-nature-leaf/30 rounded-full" />
+      </FloatingElement>
+
+      <div className="container mx-auto px-4">
+        <FadeInView direction="up" delay={0.2}>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-nature-forest mb-4 font-playfair">
+              About <span className="text-gradient">Will Hall</span>
+            </h2>
+            <p className="text-lg text-nature-bark max-w-2xl mx-auto">
+              Crafting sonic landscapes that resonate with authenticity and technical excellence
+            </p>
+            <div className="w-24 h-1 bg-gradient-to-r from-nature-forest to-nature-leaf mx-auto mt-6 rounded-full" />
+          </div>
+        </FadeInView>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          {/* Image Side with Enhanced Design */}
+          <FadeInView direction="left" delay={0.4}>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-nature-forest/20 to-nature-leaf/20 rounded-2xl transform rotate-3 group-hover:rotate-6 transition-transform duration-500" />
+              <div className="relative bg-white p-2 rounded-2xl shadow-2xl">
+                <img 
+                  src="/lovable-uploads/40101aee-c085-43b1-a83a-03ed8d362687.png" 
+                  alt="Will Hall holding a speaker in nature" 
+                  className="rounded-xl w-full h-auto object-cover"
+                />
+                <div className="absolute top-4 right-4">
+                  <Badge className="bg-nature-forest text-white shadow-lg">
+                    Audio Engineer
+                  </Badge>
+                </div>
+              </div>
+              
+              {/* Floating Stats */}
+              <GlassCard className="absolute -bottom-6 -right-6 p-4 bg-white/90">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-nature-forest">7+</div>
+                  <div className="text-sm text-nature-bark">Years Experience</div>
+                </div>
+              </GlassCard>
+            </div>
+          </FadeInView>
+
+          {/* Content Side */}
+          <FadeInView direction="right" delay={0.6}>
+            <div className="space-y-8">
+              {/* Tab Navigation */}
+              <div className="flex flex-wrap gap-2">
+                {tabs.map((tab) => {
+                  const IconComponent = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center px-4 py-2 rounded-full transition-all duration-300 ${
+                        activeTab === tab.id
+                          ? 'bg-nature-forest text-white shadow-lg transform scale-105'
+                          : 'bg-white/50 text-nature-bark hover:bg-white/80 hover:scale-102'
+                      }`}
+                    >
+                      <IconComponent className="w-4 h-4 mr-2" />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Tab Content */}
+              <div className="min-h-[300px]">
+                {activeTab === "story" && (
+                  <FadeInView direction="up" delay={0.2}>
+                    <GlassCard className="p-6 bg-white/70">
+                      <h3 className="text-2xl font-semibold text-nature-forest mb-4">Hi, I'm Will</h3>
+                      <p className="text-nature-bark leading-relaxed mb-4">
+                        I'm an audio engineer and sound designer obsessed with the power of sonic storytelling. 
+                        With a passion for blending natural soundscapes with modern production techniques, I 
+                        specialize in crafting immersive audio experiences.
+                      </p>
+                      <p className="text-nature-bark leading-relaxed">
+                        I bring a deep love for sound and a detail-driven approach to every project, ensuring 
+                        that each piece resonates with both technical excellence and emotional depth.
+                      </p>
+                    </GlassCard>
+                  </FadeInView>
+                )}
+
+                {activeTab === "education" && (
+                  <FadeInView direction="up" delay={0.2}>
+                    <GlassCard className="p-6 bg-white/70">
+                      <h3 className="text-2xl font-semibold text-nature-forest mb-4">Education & Certifications</h3>
+                      <div className="space-y-4">
+                        <div className="border-l-4 border-nature-forest pl-4">
+                          <h4 className="font-semibold text-nature-forest">Bachelor of Science in Audio Engineering</h4>
+                          <p className="text-nature-bark">Belmont University</p>
+                          <p className="text-sm text-nature-stone">Minor in Music Business</p>
+                        </div>
+                        <div className="border-l-4 border-nature-leaf pl-4">
+                          <h4 className="font-semibold text-nature-forest">Dante Level 3 Certification</h4>
+                          <p className="text-nature-bark">Advanced Audio Networking</p>
+                          <p className="text-sm text-nature-stone">Expert in digital audio signal flow</p>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </FadeInView>
+                )}
+
+                {activeTab === "experience" && (
+                  <FadeInView direction="up" delay={0.2}>
+                    <GlassCard className="p-6 bg-white/70">
+                      <h3 className="text-2xl font-semibold text-nature-forest mb-4">Professional Experience</h3>
+                      <p className="text-nature-bark leading-relaxed mb-4">
+                        With over seven years of freelance experience, I've worked on short films, commercials, 
+                        150+ podcast episodes, and countless band projects—from tracking and mixing to mastering 
+                        and post-production.
+                      </p>
+                      <p className="text-nature-bark leading-relaxed">
+                        I've had the privilege of collaborating with talented artists like Spookie, Nashville Tour Stop, 
+                        and Grace Pelle, helping shape their sonic identity through expert audio engineering.
+                      </p>
+                    </GlassCard>
+                  </FadeInView>
+                )}
+
+                {activeTab === "approach" && (
+                  <FadeInView direction="up" delay={0.2}>
+                    <GlassCard className="p-6 bg-white/70">
+                      <h3 className="text-2xl font-semibold text-nature-forest mb-4">My Philosophy on Sound</h3>
+                      <p className="text-nature-bark leading-relaxed mb-4">
+                        Sound is more than just vibration—it's emotion, movement, and memory. A single note can 
+                        transport you, a well-placed sound can shift a mood, and a carefully crafted mix can make 
+                        the intangible feel real.
+                      </p>
+                      <p className="text-nature-bark leading-relaxed">
+                        I strive to create sonic landscapes that don't just sound good but feel alive, blending 
+                        natural and live-recorded elements with the warmth of electronic production.
+                      </p>
+                    </GlassCard>
+                  </FadeInView>
+                )}
+              </div>
+
+              {/* Skills Section */}
+              <GlassCard className="p-6 bg-white/70">
+                <h4 className="text-xl font-semibold text-nature-forest mb-4">Expertise</h4>
+                <div className="space-y-3">
+                  {skills.map((skill, index) => (
+                    <div key={skill.name}>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium text-nature-bark">{skill.name}</span>
+                        <span className="text-sm text-nature-stone">{skill.level}%</span>
+                      </div>
+                      <div className="w-full bg-nature-cream/50 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-nature-forest to-nature-leaf h-2 rounded-full transition-all duration-1000 ease-out"
+                          style={{ 
+                            width: `${skill.level}%`,
+                            animationDelay: `${index * 200}ms`
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+            </div>
+          </FadeInView>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default AboutEnhanced;
