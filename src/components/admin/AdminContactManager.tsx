@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -54,10 +55,15 @@ const AdminContactManager: React.FC = () => {
       }
 
       console.log('✅ Contact submissions fetched:', data?.length || 0);
-      // Type cast the status field to ensure TypeScript compatibility
+      // Type cast the fields to ensure TypeScript compatibility
       const typedSubmissions = data?.map(submission => ({
         ...submission,
-        status: submission.status as 'new' | 'read' | 'replied' | 'closed'
+        status: submission.status as 'new' | 'read' | 'replied' | 'closed',
+        file_attachments: Array.isArray(submission.file_attachments) 
+          ? submission.file_attachments 
+          : submission.file_attachments 
+            ? [submission.file_attachments] 
+            : []
       })) || [];
       
       setSubmissions(typedSubmissions);
@@ -163,7 +169,12 @@ const AdminContactManager: React.FC = () => {
           if (payload.eventType === 'INSERT') {
             const newSubmission = {
               ...payload.new,
-              status: payload.new.status as 'new' | 'read' | 'replied' | 'closed'
+              status: payload.new.status as 'new' | 'read' | 'replied' | 'closed',
+              file_attachments: Array.isArray(payload.new.file_attachments) 
+                ? payload.new.file_attachments 
+                : payload.new.file_attachments 
+                  ? [payload.new.file_attachments] 
+                  : []
             } as ContactSubmission;
             setSubmissions(prev => [newSubmission, ...prev.slice(0, 9)]); // Keep latest 10
             
@@ -174,7 +185,12 @@ const AdminContactManager: React.FC = () => {
           } else if (payload.eventType === 'UPDATE') {
             const updatedSubmission = {
               ...payload.new,
-              status: payload.new.status as 'new' | 'read' | 'replied' | 'closed'
+              status: payload.new.status as 'new' | 'read' | 'replied' | 'closed',
+              file_attachments: Array.isArray(payload.new.file_attachments) 
+                ? payload.new.file_attachments 
+                : payload.new.file_attachments 
+                  ? [payload.new.file_attachments] 
+                  : []
             } as ContactSubmission;
             setSubmissions(prev => 
               prev.map(sub => 
