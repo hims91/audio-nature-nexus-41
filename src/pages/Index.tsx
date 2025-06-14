@@ -7,9 +7,11 @@ import About from "@/components/About";
 import Services from "@/components/Services";
 import LiveEventWork from "@/components/LiveEventWork";
 import Portfolio from "@/components/Portfolio";
+import StatsCounter from "@/components/enhanced/StatsCounter";
 import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import PageTransition from "@/components/animations/PageTransition";
 
 const Index = () => {
   return (
@@ -43,17 +45,20 @@ const Index = () => {
         </script>
       </Helmet>
       
-      <div className="min-h-screen">
-        <Navbar />
-        <Hero />
-        <About />
-        <Services />
-        <LiveEventWork />
-        <Portfolio />
-        <Testimonials />
-        <Contact />
-        <Footer />
-      </div>
+      <PageTransition>
+        <div className="min-h-screen">
+          <Navbar />
+          <Hero />
+          <About />
+          <Services />
+          <LiveEventWork />
+          <Portfolio />
+          <StatsCounter />
+          <Testimonials />
+          <Contact />
+          <Footer />
+        </div>
+      </PageTransition>
     </>
   );
 };
