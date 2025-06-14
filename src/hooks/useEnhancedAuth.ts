@@ -6,14 +6,16 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface AuthSession {
   id: string;
+  user_id: string;
   login_method: string;
-  ip_address?: string;
-  user_agent?: string;
-  location?: string;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  location?: string | null;
   device_info?: any;
   session_start: string;
-  session_end?: string;
+  session_end?: string | null;
   is_active: boolean;
+  created_at: string;
 }
 
 export const useEnhancedAuth = () => {
@@ -130,7 +132,13 @@ export const useEnhancedAuth = () => {
         return [];
       }
 
-      return data || [];
+      return (data || []).map(session => ({
+        ...session,
+        ip_address: session.ip_address as string | null,
+        user_agent: session.user_agent as string | null,
+        location: session.location as string | null,
+        session_end: session.session_end as string | null,
+      }));
     } catch (error) {
       console.error('Error fetching sessions:', error);
       return [];

@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { HelmetProvider } from "@/components/SEO/HelmetProvider";
+import HelmetProvider from "@/components/SEO/HelmetProvider";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AuthEnhanced from "./pages/AuthEnhanced";
