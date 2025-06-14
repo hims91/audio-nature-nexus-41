@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/theme-provider"
@@ -12,6 +13,8 @@ import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminPortfolio from './pages/admin/AdminPortfolio';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminSettings from './pages/admin/AdminSettings';
 import AdminGuard from './components/admin/AdminGuard';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { EnhancedAuthProvider } from '@/contexts/EnhancedAuthContext';
@@ -67,6 +70,8 @@ function App() {
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="portfolio" element={<AdminPortfolio />} />
                     <Route path="analytics" element={<AdminAnalytics />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="settings" element={<AdminSettings />} />
                   </Route>
                   
                   <Route path="*" element={<NotFound />} />
