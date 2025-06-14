@@ -1,5 +1,6 @@
 
 import React, { useEffect } from "react";
+import { usePortfolioData } from "@/hooks/usePortfolioData";
 
 interface SitemapEntry {
   url: string;
@@ -9,6 +10,8 @@ interface SitemapEntry {
 }
 
 const SitemapGenerator: React.FC = () => {
+  const { portfolioItems } = usePortfolioData();
+
   useEffect(() => {
     const generateSitemap = () => {
       const baseUrl = window.location.origin;
@@ -33,6 +36,16 @@ const SitemapGenerator: React.FC = () => {
         }
       ];
 
+      // Add individual portfolio items if they have unique URLs in the future
+      portfolioItems.forEach(item => {
+        entries.push({
+          url: `${baseUrl}/portfolio#${item.id}`,
+          lastmod: item.updatedAt || item.createdAt,
+          changefreq: 'monthly',
+          priority: item.featured ? 0.7 : 0.6
+        });
+      });
+
       const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${entries.map(entry => `  <url>
@@ -46,11 +59,19 @@ ${entries.map(entry => `  <url>
       // Store sitemap in localStorage for development
       localStorage.setItem('sitemap.xml', sitemapXml);
       
-      console.log('Sitemap generated:', sitemapXml);
+      console.log('📄 Sitemap generated with', entries.length, 'entries');
+      
+      // In production, this could be sent to a server endpoint
+      if (process.env.NODE_ENV === 'production') {
+        // Could implement server-side sitemap generation here
+        console.log('Production sitemap ready for deployment');
+      }
     };
 
-    generateSitemap();
-  }, []);
+    if (portfolioItems.length > 0) {
+      generateSitemap();
+    }
+  }, [portfolioItems]);
 
   return null; // This component doesn't render anything
 };

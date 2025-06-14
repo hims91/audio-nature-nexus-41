@@ -1,7 +1,8 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import { usePortfolioData } from "@/hooks/usePortfolioData";
+import { useAdminMonitoring } from "@/hooks/useAdminMonitoring";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AdminUserManagement from "@/components/admin/AdminUserManagement";
@@ -17,6 +18,11 @@ import {
 const AdminDashboard: React.FC = () => {
   const { user, userProfile } = useEnhancedAuth();
   const { portfolioItems, featuredItems, isLoading } = usePortfolioData();
+  const { trackPageView } = useAdminMonitoring();
+
+  useEffect(() => {
+    trackPageView('dashboard');
+  }, [trackPageView]);
 
   const stats = [
     {
