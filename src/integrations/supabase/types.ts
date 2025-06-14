@@ -9,54 +9,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      portfolio_items: {
-        Row: {
-          audio_url: string | null
-          category: string
-          client: string
-          cover_image_url: string | null
-          created_at: string
-          description: string
-          external_links: Json | null
-          featured: boolean | null
-          id: string
-          title: string
-          updated_at: string
-          user_id: string | null
-          video_url: string | null
-        }
-        Insert: {
-          audio_url?: string | null
-          category: string
-          client: string
-          cover_image_url?: string | null
-          created_at?: string
-          description: string
-          external_links?: Json | null
-          featured?: boolean | null
-          id?: string
-          title: string
-          updated_at?: string
-          user_id?: string | null
-          video_url?: string | null
-        }
-        Update: {
-          audio_url?: string | null
-          category?: string
-          client?: string
-          cover_image_url?: string | null
-          created_at?: string
-          description?: string
-          external_links?: Json | null
-          featured?: boolean | null
-          id?: string
-          title?: string
-          updated_at?: string
-          user_id?: string | null
-          video_url?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
