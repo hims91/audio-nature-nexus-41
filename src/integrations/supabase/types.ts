@@ -9,13 +9,165 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      contact_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          file_attachments: Json | null
+          id: string
+          message: string
+          name: string
+          read_at: string | null
+          replied_at: string | null
+          status: string | null
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          file_attachments?: Json | null
+          id?: string
+          message: string
+          name: string
+          read_at?: string | null
+          replied_at?: string | null
+          status?: string | null
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          file_attachments?: Json | null
+          id?: string
+          message?: string
+          name?: string
+          read_at?: string | null
+          replied_at?: string | null
+          status?: string | null
+          subject?: string
+        }
+        Relationships: []
+      }
+      portfolio_items: {
+        Row: {
+          audio_url: string | null
+          category: string
+          client: string
+          cover_image_url: string | null
+          created_at: string
+          description: string
+          external_links: Json | null
+          featured: boolean | null
+          id: string
+          title: string
+          updated_at: string
+          user_id: string | null
+          video_url: string | null
+        }
+        Insert: {
+          audio_url?: string | null
+          category: string
+          client: string
+          cover_image_url?: string | null
+          created_at?: string
+          description: string
+          external_links?: Json | null
+          featured?: boolean | null
+          id?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          audio_url?: string | null
+          category?: string
+          client?: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string
+          external_links?: Json | null
+          featured?: boolean | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      project_categories: {
+        Row: {
+          color_theme: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color_theme?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color_theme?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          preferences: Json | null
+          role: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          preferences?: Json | null
+          role?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          preferences?: Json | null
+          role?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

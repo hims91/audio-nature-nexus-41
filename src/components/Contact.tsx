@@ -1,117 +1,36 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone } from "lucide-react";
-const Contact: React.FC = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const {
-    toast
-  } = useToast();
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Message Sent!",
-        description: "Thank you for reaching out. I'll respond to your inquiry soon."
-      });
+import React from "react";
+import ContactFormEnhanced from "./enhanced/ContactFormEnhanced";
 
-      // Reset form
-      setName("");
-      setEmail("");
-      setSubject("");
-      setMessage("");
-      setIsSubmitting(false);
-    }, 1500);
-  };
-  return <section id="contact" className="py-20 bg-nature-forest text-white">
-      <div className="container mx-auto px-4">
+const Contact = () => {
+  return (
+    <section id="contact" className="py-20 bg-gradient-to-br from-nature-mist to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Get in Touch</h2>
-          <p className="text-lg text-nature-cream/90 max-w-3xl mx-auto">
-            Interested in working together? Reach out to discuss your project and how I can help bring your audio vision to life.
+          <h2 className="text-4xl font-bold text-nature-forest mb-4">
+            Let's Create Something Amazing
+          </h2>
+          <p className="text-xl text-nature-bark max-w-3xl mx-auto">
+            Ready to bring your audio vision to life? Get in touch and let's discuss your project.
           </p>
-          <div className="w-20 h-1 bg-nature-cream mx-auto mt-4"></div>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Contact Form */}
-          <div className="bg-white rounded-lg p-8 shadow-xl text-nature-bark">
-            <h3 className="text-2xl font-semibold text-nature-forest mb-6">Send a Message</h3>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-1">
-                  Name
-                </label>
-                <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required className="w-full" />
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-1">
-                  Email
-                </label>
-                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your email address" required className="w-full" />
-              </div>
-              
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium mb-1">
-                  Subject
-                </label>
-                <Input id="subject" value={subject} onChange={e => setSubject(e.target.value)} placeholder="What is this regarding?" required className="w-full" />
-              </div>
-              
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-1">
-                  Message
-                </label>
-                <Textarea id="message" value={message} onChange={e => setMessage(e.target.value)} placeholder="Tell me about your project" rows={5} required className="w-full" />
-              </div>
-              
-              <Button type="submit" className="w-full bg-nature-forest hover:bg-nature-leaf text-white" disabled={isSubmitting}>
-                {isSubmitting ? "Sending..." : "Send Message"}
-              </Button>
-            </form>
-          </div>
-          
-          {/* Contact Information */}
-          <div className="flex flex-col justify-center">
-            <div className="space-y-10">
-              <h3 className="text-2xl font-semibold mb-6">Contact Information</h3>
-              
-              <div className="flex items-start space-x-4">
-                <Mail className="h-6 w-6 text-nature-cream mt-1" />
-                <div>
-                  <h4 className="font-medium mb-1">Email</h4>
-                  <p className="text-nature-cream/90">TerraEchoStudios@gmail.com</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <Phone className="h-6 w-6 text-nature-cream mt-1" />
-                <div>
-                  <h4 className="font-medium mb-1">Phone</h4>
-                  <p className="text-nature-cream/90">(828) 773-1570</p>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-medium mb-3">Studio Hours</h4>
-                <p className="text-nature-cream/90 mb-1">Monday - Friday: 9:00 AM - 6:00 PM</p>
-                <p className="text-nature-cream/90">Weekends: By appointment only</p>
-              </div>
-            </div>
-          </div>
+        <ContactFormEnhanced />
+        
+        <div className="mt-16 text-center">
+          <p className="text-nature-bark mb-4">
+            Or reach out directly at:
+          </p>
+          <a 
+            href="mailto:TerraEchoStudios@gmail.com"
+            className="text-nature-forest font-semibold hover:text-nature-leaf transition-colors"
+          >
+            TerraEchoStudios@gmail.com
+          </a>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default Contact;
