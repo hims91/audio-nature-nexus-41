@@ -1,7 +1,6 @@
 
 import React from "react";
-import { ShuffleCards } from "@/components/ui/testimonial-cards";
-import { testimonials } from "@/data/testimonials";
+import TestimonialCarousel from "./interactive/TestimonialCarousel";
 
 const Testimonials = () => {
   return (
@@ -14,12 +13,9 @@ const Testimonials = () => {
           <p className="text-xl text-nature-bark max-w-3xl mx-auto">
             Don't just take our word for it. Hear from artists and professionals who have experienced the Terra Echo difference.
           </p>
-          <p className="text-sm text-nature-stone mt-4 italic">
-            Drag the front card to see more testimonials
-          </p>
         </div>
 
-        <ShuffleCards testimonials={testimonials} />
+        <TestimonialCarousel />
       </div>
     </section>
   );
