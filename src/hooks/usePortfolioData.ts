@@ -102,7 +102,7 @@ export const usePortfolioData = () => {
         cover_image_url: updates.coverImageUrl,
         audio_url: updates.audioUrl,
         video_url: updates.videoUrl,
-        external_links: updates.externalLinks,
+        external_links: (updates.externalLinks || []) as any,
         featured: updates.featured
       };
       

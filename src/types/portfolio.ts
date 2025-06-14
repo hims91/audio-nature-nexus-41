@@ -6,9 +6,9 @@ export type PortfolioItemDB = Database['public']['Tables']['portfolio_items']['R
 export type PortfolioItemInsert = Database['public']['Tables']['portfolio_items']['Insert'];
 export type PortfolioItemUpdate = Database['public']['Tables']['portfolio_items']['Update'];
 
-// External link type for the application
+// External link type for the application - compatible with both old and new systems
 export interface ExternalLink {
-  type: 'spotify' | 'apple' | 'youtube' | 'soundcloud' | 'bandcamp' | 'website' | 'other';
+  type: 'spotify' | 'apple' | 'appleMusic' | 'youtube' | 'soundcloud' | 'bandcamp' | 'website' | 'vimeo' | 'other';
   url: string;
   title?: string;
 }
@@ -33,6 +33,19 @@ export interface PortfolioItem {
 
 // Mapper function to convert database format to application format
 export const mapDBToPortfolioItem = (dbItem: PortfolioItemDB): PortfolioItem => {
+  let externalLinks: ExternalLink[] = [];
+  
+  // Safely parse external_links from JSON
+  if (dbItem.external_links) {
+    try {
+      const parsed = dbItem.external_links as any;
+      externalLinks = Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.warn('Failed to parse external_links:', error);
+      externalLinks = [];
+    }
+  }
+
   return {
     id: dbItem.id,
     title: dbItem.title,
@@ -42,7 +55,7 @@ export const mapDBToPortfolioItem = (dbItem: PortfolioItemDB): PortfolioItem => 
     coverImageUrl: dbItem.cover_image_url,
     audioUrl: dbItem.audio_url,
     videoUrl: dbItem.video_url,
-    externalLinks: (dbItem.external_links as ExternalLink[]) || [],
+    externalLinks,
     featured: dbItem.featured || false,
     createdAt: dbItem.created_at,
     updatedAt: dbItem.updated_at,
@@ -60,7 +73,7 @@ export const mapPortfolioItemToDB = (item: Partial<PortfolioItem>): PortfolioIte
     cover_image_url: item.coverImageUrl,
     audio_url: item.audioUrl,
     video_url: item.videoUrl,
-    external_links: item.externalLinks || [],
+    external_links: (item.externalLinks || []) as any,
     featured: item.featured || false,
     user_id: item.userId
   };
