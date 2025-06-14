@@ -23,9 +23,10 @@ const AdminPortfolio: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="flex h-screen">
-        {/* Sidebar */}
-        <div className="w-80 bg-white dark:bg-gray-800 shadow-lg overflow-hidden">
+      {/* Mobile-first responsive layout */}
+      <div className="flex flex-col lg:flex-row h-screen">
+        {/* Sidebar - Full width on mobile, fixed width on desktop */}
+        <div className="w-full lg:w-80 bg-white dark:bg-gray-800 shadow-lg overflow-hidden">
           <PortfolioHeader 
             userEmail={user?.email}
             onCreateNew={handleCreateNew}
@@ -33,40 +34,44 @@ const AdminPortfolio: React.FC = () => {
             isLoading={isLoading}
           />
           
-          <PortfolioSidebar
-            portfolioItems={portfolioItems}
-            selectedItem={selectedItem}
-            onSelectItem={handleSelectItem}
-            isCreating={isCreating}
-          />
+          <div className="max-h-60 lg:max-h-none overflow-y-auto">
+            <PortfolioSidebar
+              portfolioItems={portfolioItems}
+              selectedItem={selectedItem}
+              onSelectItem={handleSelectItem}
+              isCreating={isCreating}
+            />
+          </div>
         </div>
 
-        {/* Main Content */}
+        {/* Main Content - Responsive padding and layout */}
         <div className="flex-1 overflow-auto">
-          <div className="p-6">
-            <div className="mb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="p-4 lg:p-6">
+            <div className="mb-4 lg:mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div className="mb-4 sm:mb-0">
+                  <h1 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
                     Portfolio Management
                   </h1>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">
                     Create and manage your portfolio items
                   </p>
                 </div>
               </div>
             </div>
 
-            <PortfolioMainContent
-              isCreating={isCreating}
-              selectedItem={selectedItem}
-              onSaveNew={handleSaveNew}
-              onUpdate={handleUpdate}
-              onDelete={handleDelete}
-              onCancel={handleCancel}
-              onCreateNew={handleCreateNew}
-              isLoading={isLoading}
-            />
+            <div className="w-full overflow-hidden">
+              <PortfolioMainContent
+                isCreating={isCreating}
+                selectedItem={selectedItem}
+                onSaveNew={handleSaveNew}
+                onUpdate={handleUpdate}
+                onDelete={handleDelete}
+                onCancel={handleCancel}
+                onCreateNew={handleCreateNew}
+                isLoading={isLoading}
+              />
+            </div>
           </div>
         </div>
       </div>

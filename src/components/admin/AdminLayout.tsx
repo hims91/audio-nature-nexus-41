@@ -12,6 +12,7 @@ import {
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/enhanced/BrandConsistencyManager";
 import { useState } from "react";
 
 const AdminLayout: React.FC = () => {
@@ -63,9 +64,7 @@ const AdminLayout: React.FC = () => {
       )}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-nature-forest rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">TE</span>
-            </div>
+            <BrandLogo size="sm" showText={false} />
             <span className="ml-2 text-lg font-semibold text-gray-900 dark:text-white">
               Admin Panel
             </span>
@@ -121,7 +120,7 @@ const AdminLayout: React.FC = () => {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <div className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6">
+        <div className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-6">
           <Button
             variant="ghost"
             size="sm"
@@ -133,13 +132,13 @@ const AdminLayout: React.FC = () => {
           
           <div className="flex items-center">
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              Terra Echo Studios Admin
+              Terra Echo Audio Admin
             </span>
           </div>
         </div>
 
         {/* Page content */}
-        <main className="p-6">
+        <main className="p-4 lg:p-6">
           <Outlet />
         </main>
       </div>

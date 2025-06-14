@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { FileUploadService } from "./fileUpload";
 
 interface ContactFormData {
   name: string;
@@ -31,7 +30,7 @@ export class ContactService {
       }
 
       // Submit contact form to database
-      const { error } = await supabase
+      const { data: submission, error: dbError } = await supabase
         .from('contact_submissions')
         .insert({
           name: formData.name,
@@ -39,11 +38,32 @@ export class ContactService {
           subject: formData.subject,
           message: formData.message,
           file_attachments: fileAttachments
-        });
+        })
+        .select()
+        .single();
 
-      if (error) {
-        console.error('Contact form submission error:', error);
-        return { success: false, error: error.message };
+      if (dbError) {
+        console.error('Contact form submission error:', dbError);
+        return { success: false, error: dbError.message };
+      }
+
+      // Send emails via Edge Function
+      const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-contact-email', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+          submissionId: submission.id
+        }
+      });
+
+      if (emailError) {
+        console.error('Email sending error:', emailError);
+        // Don't fail the whole submission if email fails
+        console.warn('Contact form submitted successfully but email notification failed');
+      } else {
+        console.log('Emails sent successfully:', emailResult);
       }
 
       return { success: true };
