@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 
 interface ThemeToggleProps {
@@ -11,7 +11,13 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ className, variant = 'default' }) => {
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { theme, setTheme } = useTheme();
+  
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+  
+  const isDark = theme === 'dark';
 
   return (
     <Button
