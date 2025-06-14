@@ -1,7 +1,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { mapPortfolioItemToDB, type PortfolioItem } from "@/types/portfolio";
+import { mapPortfolioItemToDB, mapDBToPortfolioItem, type PortfolioItem } from "@/types/portfolio";
 import type { Database } from "@/integrations/supabase/types";
 
 type PortfolioItemUpdate = Database['public']['Tables']['portfolio_items']['Update'];
