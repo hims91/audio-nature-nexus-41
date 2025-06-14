@@ -1,8 +1,7 @@
-
 import React from "react";
 import { Helmet } from "react-helmet-async";
-import ModernNavbar from "@/components/enhanced/ModernNavbar";
-import InteractiveHero from "@/components/enhanced/InteractiveHero";
+import ModernNavbarEnhanced from "@/components/enhanced/ModernNavbarEnhanced";
+import InteractiveHeroEnhanced from "@/components/enhanced/InteractiveHeroEnhanced";
 import About from "@/components/About";
 import Services from "@/components/Services";
 import LiveEventWork from "@/components/LiveEventWork";
@@ -41,9 +40,9 @@ const Index = () => {
       <SitemapGenerator />
       
       <PageTransition>
-        <div className="min-h-screen">
-          <ModernNavbar />
-          <InteractiveHero />
+        <div className="min-h-screen transition-colors duration-500">
+          <ModernNavbarEnhanced />
+          <InteractiveHeroEnhanced />
           <About />
           <Services />
           <LiveEventWork />
