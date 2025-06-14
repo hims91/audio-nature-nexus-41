@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Helmet } from "react-helmet-async";
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
+import ModernNavbar from "@/components/enhanced/ModernNavbar";
+import InteractiveHero from "@/components/enhanced/InteractiveHero";
 import About from "@/components/About";
 import Services from "@/components/Services";
 import LiveEventWork from "@/components/LiveEventWork";
@@ -21,9 +21,9 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Will Hall Sound Studios | Professional Audio Engineering & Production</title>
+        <title>Terra Echo Studios | Professional Audio Engineering & Production</title>
         <meta name="description" content="Professional audio engineering services including mixing, mastering, sound design, podcasting, and Dolby Atmos. Authentic Audio, Naturally Engineered." />
-        <meta name="keywords" content="audio engineering, mixing, mastering, sound design, podcasting, Dolby Atmos, professional audio, Will Hall" />
+        <meta name="keywords" content="audio engineering, mixing, mastering, sound design, podcasting, Dolby Atmos, professional audio, Terra Echo Studios" />
         <link rel="canonical" href={window.location.origin} />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#065f46" />
@@ -33,7 +33,7 @@ const Index = () => {
       <StructuredData type="organization" />
       
       <SocialMeta
-        title="Will Hall Sound Studios | Professional Audio Engineering"
+        title="Terra Echo Studios | Professional Audio Engineering"
         description="Authentic Audio, Naturally Engineered. Professional mixing, mastering, and audio production services."
         url={window.location.origin}
       />
@@ -42,8 +42,8 @@ const Index = () => {
       
       <PageTransition>
         <div className="min-h-screen">
-          <Navbar />
-          <Hero />
+          <ModernNavbar />
+          <InteractiveHero />
           <About />
           <Services />
           <LiveEventWork />
