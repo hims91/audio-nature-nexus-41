@@ -4,7 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, ExternalLink, Calendar, User, Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { usePortfolioData } from "@/hooks/usePortfolioData";
+import { type PortfolioItem } from "@/types/portfolio";
 import AudioPlayer from "@/components/AudioPlayer";
 import VideoPlayer from "@/components/VideoPlayer";
 import HoverSoundPreview from "../interactive/HoverSoundPreview";
@@ -125,15 +127,15 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
           >
             {/* Cover Image with Hover Sound Preview */}
             <div className="relative h-48 overflow-hidden">
-              {item.audio_url ? (
+              {item.audioUrl ? (
                 <HoverSoundPreview
-                  audioUrl={item.audio_url}
+                  audioUrl={item.audioUrl}
                   title={item.title}
                   className="h-full w-full"
                 >
-                  {item.cover_image_url ? (
+                  {item.coverImageUrl ? (
                     <img
-                      src={item.cover_image_url}
+                      src={item.coverImageUrl}
                       alt={item.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
@@ -147,9 +149,9 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
                 </HoverSoundPreview>
               ) : (
                 <>
-                  {item.cover_image_url ? (
+                  {item.coverImageUrl ? (
                     <img
-                      src={item.cover_image_url}
+                      src={item.coverImageUrl}
                       alt={item.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
@@ -191,7 +193,7 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
                     <User className="w-4 h-4 mr-1" />
                     {item.client}
                     <Calendar className="w-4 h-4 ml-4 mr-1" />
-                    {formatDate(item.created_at)}
+                    {formatDate(item.createdAt)}
                   </div>
                 </div>
 
@@ -200,22 +202,22 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
                 </p>
 
                 {/* Media Players */}
-                {playingAudio === item.id && item.audio_url && (
+                {playingAudio === item.id && item.audioUrl && (
                   <div className="mt-4 animate-fade-in">
-                    <AudioPlayer audioUrl={item.audio_url} />
+                    <AudioPlayer audioUrl={item.audioUrl} />
                   </div>
                 )}
 
-                {item.video_url && (
+                {item.videoUrl && (
                   <div className="mt-4 animate-fade-in">
-                    <VideoPlayer videoUrl={item.video_url} />
+                    <VideoPlayer videoUrl={item.videoUrl} />
                   </div>
                 )}
 
                 {/* External Links */}
-                {item.external_links && Array.isArray(item.external_links) && item.external_links.length > 0 && (
+                {item.externalLinks && item.externalLinks.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-4">
-                    {item.external_links.map((link: any, index: number) => (
+                    {item.externalLinks.map((link, index) => (
                       <Button
                         key={index}
                         variant="outline"

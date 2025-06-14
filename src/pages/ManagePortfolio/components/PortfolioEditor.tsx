@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import { PortfolioItem, ExternalLink } from "@/data/portfolio";
+import { PortfolioItem, ExternalLink } from "@/types/portfolio";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ interface PortfolioEditorProps {
   onSave: (item: any) => void;
   onDelete?: () => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
 const CATEGORIES = [
@@ -35,7 +37,8 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
   item, 
   onSave, 
   onDelete,
-  onCancel
+  onCancel,
+  isLoading = false
 }) => {
   const { toast } = useToast();
   
@@ -143,7 +146,11 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
           {mode === "edit" && onDelete && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600">
+                <Button 
+                  variant="outline" 
+                  className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+                  disabled={isLoading}
+                >
                   <Trash2 className="h-4 w-4 mr-1" />
                   Delete
                 </Button>
@@ -198,6 +205,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                     value={formData.title}
                     onChange={handleInputChange}
                     required
+                    disabled={isLoading}
                   />
                 </div>
                 
@@ -209,6 +217,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                     value={formData.client}
                     onChange={handleInputChange}
                     required
+                    disabled={isLoading}
                   />
                 </div>
                 
@@ -217,6 +226,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                   <Select 
                     value={formData.category} 
                     onValueChange={handleCategoryChange}
+                    disabled={isLoading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
@@ -240,6 +250,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                     onChange={handleInputChange}
                     rows={4}
                     required
+                    disabled={isLoading}
                   />
                 </div>
                 
@@ -248,6 +259,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                     id="featured"
                     checked={formData.featured}
                     onCheckedChange={handleFeaturedChange}
+                    disabled={isLoading}
                   />
                   <Label htmlFor="featured" className="cursor-pointer">
                     Feature this item in the portfolio
@@ -306,6 +318,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
               type="button"
               variant="outline"
               onClick={onCancel}
+              disabled={isLoading}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Cancel
@@ -314,9 +327,10 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
             <Button 
               type="submit"
               className="bg-nature-forest hover:bg-nature-leaf"
+              disabled={isLoading}
             >
               <Save className="mr-2 h-4 w-4" />
-              {mode === "create" ? "Create Item" : "Save Changes"}
+              {isLoading ? 'Saving...' : mode === "create" ? "Create Item" : "Save Changes"}
             </Button>
           </div>
         </form>

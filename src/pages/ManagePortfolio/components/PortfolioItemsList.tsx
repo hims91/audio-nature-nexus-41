@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PortfolioItem } from "@/data/portfolio";
+import { PortfolioItem } from "@/types/portfolio";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

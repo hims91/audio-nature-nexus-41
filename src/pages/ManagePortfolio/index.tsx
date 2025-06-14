@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { usePortfolioData } from "@/hooks/usePortfolioData";
+import { type PortfolioItem } from "@/types/portfolio";
 import PortfolioItemsList from "./components/PortfolioItemsList";
 import PortfolioEditor from "./components/PortfolioEditor";
 import EmptyState from "./components/EmptyState";
@@ -46,7 +47,7 @@ const ManagePortfolio: React.FC = () => {
     setIsCreating(true);
   };
   
-  const handleSaveNew = async (itemData: any) => {
+  const handleSaveNew = async (itemData: Partial<PortfolioItem>) => {
     try {
       const result = await createPortfolioItem.mutateAsync(itemData);
       setSelectedId(result.id);
@@ -65,21 +66,11 @@ const ManagePortfolio: React.FC = () => {
     }
   };
   
-  const handleUpdate = async (item: any) => {
+  const handleUpdate = async (item: PortfolioItem) => {
     try {
       await updatePortfolioItem.mutateAsync({ 
         id: item.id, 
-        updates: {
-          title: item.title,
-          client: item.client,
-          category: item.category,
-          description: item.description,
-          cover_image_url: item.cover_image_url,
-          audio_url: item.audio_url,
-          video_url: item.video_url,
-          external_links: item.external_links,
-          featured: item.featured
-        }
+        updates: item
       });
       toast({
         title: "Success",

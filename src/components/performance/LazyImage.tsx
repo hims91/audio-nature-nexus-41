@@ -52,9 +52,25 @@ const LazyImage: React.FC<LazyImageProps> = ({
     onError?.();
   };
 
+  // Check WebP support using a more reliable method
+  const checkWebPSupport = () => {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return false;
+      
+      const dataURL = canvas.toDataURL('image/webp');
+      return dataURL.indexOf('data:image/webp') === 0;
+    } catch (e) {
+      return false;
+    }
+  };
+
   // Generate WebP source if supported
   const webpSrc = src.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-  const shouldUseWebP = 'webp' in document.createElement('canvas').getContext('2d').__proto__;
+  const shouldUseWebP = checkWebPSupport();
 
   return (
     <div ref={imgRef} className={`relative ${className}`}>

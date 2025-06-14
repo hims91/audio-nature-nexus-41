@@ -2,8 +2,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { mapDBToPortfolioItem, mapPortfolioItemToDB, type PortfolioItem, type PortfolioItemDB } from "@/types/portfolio";
 
-type PortfolioItem = Database['public']['Tables']['portfolio_items']['Row'];
 type PortfolioItemInsert = Database['public']['Tables']['portfolio_items']['Insert'];
 type PortfolioItemUpdate = Database['public']['Tables']['portfolio_items']['Update'];
 
@@ -12,7 +12,7 @@ export const usePortfolioData = () => {
 
   const { data: portfolioItems = [], isLoading, error } = useQuery({
     queryKey: ['portfolio-items'],
-    queryFn: async () => {
+    queryFn: async (): Promise<PortfolioItem[]> => {
       console.log('🔍 Fetching portfolio items from Supabase...');
       const { data, error } = await supabase
         .from('portfolio_items')
@@ -25,7 +25,7 @@ export const usePortfolioData = () => {
       }
       
       console.log(`✅ Successfully fetched ${data.length} portfolio items`);
-      return data as PortfolioItem[];
+      return data.map(mapDBToPortfolioItem);
     },
     retry: 3,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -33,7 +33,7 @@ export const usePortfolioData = () => {
 
   const { data: featuredItems = [] } = useQuery({
     queryKey: ['featured-portfolio-items'],
-    queryFn: async () => {
+    queryFn: async (): Promise<PortfolioItem[]> => {
       console.log('🔍 Fetching featured portfolio items...');
       const { data, error } = await supabase
         .from('portfolio_items')
@@ -48,28 +48,28 @@ export const usePortfolioData = () => {
       }
       
       console.log(`✅ Successfully fetched ${data.length} featured items`);
-      return data as PortfolioItem[];
+      return data.map(mapDBToPortfolioItem);
     },
     enabled: !isLoading,
     retry: 3,
   });
 
   const createPortfolioItem = useMutation({
-    mutationFn: async (item: PortfolioItemInsert) => {
+    mutationFn: async (item: Partial<PortfolioItem>) => {
       console.log('📝 Creating new portfolio item:', item.title);
       
       // Ensure user_id is set if not provided
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
       
-      const itemWithUserId = {
+      const dbItem = mapPortfolioItemToDB({
         ...item,
-        user_id: item.user_id || user.id
-      };
+        userId: item.userId || user.id
+      });
       
       const { data, error } = await supabase
         .from('portfolio_items')
-        .insert(itemWithUserId)
+        .insert(dbItem)
         .select()
         .single();
       
@@ -79,7 +79,7 @@ export const usePortfolioData = () => {
       }
       
       console.log('✅ Portfolio item created successfully:', data.id);
-      return data;
+      return mapDBToPortfolioItem(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['portfolio-items'] });
@@ -91,12 +91,24 @@ export const usePortfolioData = () => {
   });
 
   const updatePortfolioItem = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: PortfolioItemUpdate }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<PortfolioItem> }) => {
       console.log('🔄 Updating portfolio item:', id);
+      
+      const dbUpdates: PortfolioItemUpdate = {
+        title: updates.title,
+        client: updates.client,
+        category: updates.category,
+        description: updates.description,
+        cover_image_url: updates.coverImageUrl,
+        audio_url: updates.audioUrl,
+        video_url: updates.videoUrl,
+        external_links: updates.externalLinks,
+        featured: updates.featured
+      };
       
       const { data, error } = await supabase
         .from('portfolio_items')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', id)
         .select()
         .single();
@@ -107,7 +119,7 @@ export const usePortfolioData = () => {
       }
       
       console.log('✅ Portfolio item updated successfully:', id);
-      return data;
+      return mapDBToPortfolioItem(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['portfolio-items'] });
