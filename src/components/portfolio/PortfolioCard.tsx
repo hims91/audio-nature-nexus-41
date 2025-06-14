@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { PortfolioItem } from "@/data/portfolio";
+import { type PortfolioItem } from "@/types/portfolio";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
