@@ -5,11 +5,15 @@ declare global {
   }
 }
 
-export const GA_TRACKING_ID = 'G-XXXXXXXXXX'; // Replace with actual GA4 tracking ID
+// TODO: Replace with your actual Google Analytics tracking ID
+export const GA_TRACKING_ID = process.env.NODE_ENV === 'production' ? 'G-XXXXXXXXXX' : '';
 
 // Initialize Google Analytics
 export const initGA = () => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || !GA_TRACKING_ID) {
+    console.log('📊 Google Analytics not initialized - missing tracking ID or running in SSR');
+    return;
+  }
 
   // Load GA script
   const script = document.createElement('script');
@@ -27,19 +31,27 @@ export const initGA = () => {
   window.gtag('config', GA_TRACKING_ID, {
     page_title: document.title,
     page_location: window.location.href,
-    anonymize_ip: true
+    anonymize_ip: true,
+    send_page_view: false // We'll send manually
   });
+
+  console.log('📊 Google Analytics initialized with ID:', GA_TRACKING_ID);
 };
 
 // Track page views
 export const trackPageView = (path: string, title?: string) => {
-  if (typeof window === 'undefined' || !window.gtag) return;
+  if (typeof window === 'undefined' || !window.gtag || !GA_TRACKING_ID) {
+    console.log('📊 Page view not tracked - GA not initialized');
+    return;
+  }
 
   window.gtag('config', GA_TRACKING_ID, {
     page_path: path,
     page_title: title || document.title,
     page_location: window.location.href
   });
+
+  console.log('📊 Page view tracked:', path);
 };
 
 // Track events
@@ -49,13 +61,18 @@ export const trackEvent = (
   label?: string,
   value?: number
 ) => {
-  if (typeof window === 'undefined' || !window.gtag) return;
+  if (typeof window === 'undefined' || !window.gtag || !GA_TRACKING_ID) {
+    console.log('📊 Event not tracked - GA not initialized');
+    return;
+  }
 
   window.gtag('event', action, {
     event_category: category,
     event_label: label,
     value: value
   });
+
+  console.log('📊 Event tracked:', { action, category, label, value });
 };
 
 // Track audio plays

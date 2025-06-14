@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,9 +19,35 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
   showFeaturedOnly = false, 
   limit 
 }) => {
-  const { portfolioItems, featuredItems, isLoading } = usePortfolioData();
+  const { portfolioItems, featuredItems, isLoading, error } = usePortfolioData();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+
+  // Set up real-time subscription for portfolio updates
+  useEffect(() => {
+    console.log('🔄 Setting up real-time subscription for portfolio items...');
+    
+    const channel = supabase
+      .channel('portfolio-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'portfolio_items'
+        },
+        (payload) => {
+          console.log('📡 Real-time update received:', payload);
+          // React Query will automatically refresh data
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🔄 Cleaning up real-time subscription...');
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const items = showFeaturedOnly ? featuredItems : portfolioItems;
   const displayItems = limit ? items.slice(0, limit) : items;
@@ -54,6 +80,17 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
     return (
       <div className="flex items-center justify-center py-20">
         <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Failed to load portfolio items</p>
+          <p className="text-sm text-gray-500">{error.message}</p>
+        </div>
       </div>
     );
   }
