@@ -1,59 +1,53 @@
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import ModernNavbarEnhanced from "@/components/enhanced/ModernNavbarEnhanced";
-import InteractiveHeroEnhanced from "@/components/enhanced/InteractiveHeroEnhanced";
-import About from "@/components/About";
-import Services from "@/components/Services";
-import LiveEventWork from "@/components/LiveEventWork";
-import Portfolio from "@/components/Portfolio";
-import StatsCounter from "@/components/enhanced/StatsCounter";
-import Testimonials from "@/components/Testimonials";
-import Contact from "@/components/Contact";
-import Footer from "@/components/Footer";
-import PageTransition from "@/components/animations/PageTransition";
-import StructuredData from "@/components/SEO/StructuredData";
-import SocialMeta from "@/components/SEO/SocialMeta";
-import PWAInstaller from "@/components/performance/PWAInstaller";
-import SitemapGenerator from "@/components/SEO/SitemapGenerator";
+
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
+import UnifiedNavbar from '@/components/UnifiedNavbar';
+import InteractiveHeroEnhanced from '@/components/enhanced/InteractiveHeroEnhanced';
+import AboutEnhanced from '@/components/enhanced/AboutEnhanced';
+import ServicesEnhanced from '@/components/enhanced/ServicesEnhanced';
+import Portfolio from '@/components/Portfolio';
+import Testimonials from '@/components/Testimonials';
+import ContactFormEnhanced from '@/components/enhanced/ContactFormEnhanced';
+import Footer from '@/components/Footer';
 
 const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Terra Echo Studios | Professional Audio Engineering & Production</title>
-        <meta name="description" content="Professional audio engineering services including mixing, mastering, sound design, podcasting, and Dolby Atmos. Authentic Audio, Naturally Engineered." />
-        <meta name="keywords" content="audio engineering, mixing, mastering, sound design, podcasting, Dolby Atmos, professional audio, Terra Echo Studios" />
-        <link rel="canonical" href={window.location.origin} />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#065f46" />
+        <title>Terra Echo Studios | Professional Audio Engineering Services</title>
+        <meta name="description" content="Terra Echo Studios provides world-class audio engineering, mixing, mastering, and sound design services. Transform your sound with our professional expertise." />
+        <meta name="keywords" content="audio engineering, mixing, mastering, sound design, recording studio, podcasting, dolby atmos" />
+        <link rel="canonical" href="https://terraechostudios.com" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://terraechostudios.com/" />
+        <meta property="og:title" content="Terra Echo Studios | Professional Audio Engineering Services" />
+        <meta property="og:description" content="Transform your sound with our professional audio engineering, mixing, mastering, and sound design services." />
+        <meta property="og:image" content="https://terraechostudios.com/og-image.jpg" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://terraechostudios.com/" />
+        <meta property="twitter:title" content="Terra Echo Studios | Professional Audio Engineering" />
+        <meta property="twitter:description" content="Transform your sound with our professional audio engineering services." />
+        <meta property="twitter:image" content="https://terraechostudios.com/og-image.jpg" />
       </Helmet>
 
-      <StructuredData type="website" />
-      <StructuredData type="organization" />
-      
-      <SocialMeta
-        title="Terra Echo Studios | Professional Audio Engineering"
-        description="Authentic Audio, Naturally Engineered. Professional mixing, mastering, and audio production services."
-        url={window.location.origin}
-      />
-
-      <SitemapGenerator />
-      
-      <PageTransition>
-        <div className="min-h-screen transition-colors duration-500">
-          <ModernNavbarEnhanced />
+      <div className="min-h-screen bg-white dark:bg-gray-900">
+        <UnifiedNavbar />
+        
+        <main>
           <InteractiveHeroEnhanced />
-          <About />
-          <Services />
-          <LiveEventWork />
+          <AboutEnhanced />
+          <ServicesEnhanced />
           <Portfolio />
-          <StatsCounter />
           <Testimonials />
-          <Contact />
-          <Footer />
-          <PWAInstaller />
-        </div>
-      </PageTransition>
+          <ContactFormEnhanced />
+        </main>
+        
+        <Footer />
+      </div>
     </>
   );
 };
