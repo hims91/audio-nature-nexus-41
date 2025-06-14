@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +12,7 @@ import InteractiveButton from './InteractiveButton';
 const FeedbackSettings: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { toggleSounds, isEnabled: soundsEnabled, playSuccess } = useSoundEffects();
-  const { toggleHaptics, isEnabled: hapticsEnabled, triggerNotification } = useHapticFeedback();
+  const { toggleHaptics, isEnabled: hapticsEnabled, triggerImpact } = useHapticFeedback();
   
   const [localSoundsEnabled, setLocalSoundsEnabled] = useState(soundsEnabled);
   const [localHapticsEnabled, setLocalHapticsEnabled] = useState(hapticsEnabled);
@@ -27,7 +26,7 @@ const FeedbackSettings: React.FC = () => {
   const handleHapticToggle = () => {
     const newState = toggleHaptics();
     setLocalHapticsEnabled(newState);
-    if (newState) triggerNotification();
+    if (newState) triggerImpact();
   };
 
   const testSound = () => {
@@ -35,7 +34,7 @@ const FeedbackSettings: React.FC = () => {
   };
 
   const testHaptic = () => {
-    triggerNotification();
+    triggerImpact();
   };
 
   return (
@@ -112,7 +111,7 @@ const FeedbackSettings: React.FC = () => {
                   onClick={testHaptic}
                   size="sm"
                   variant="outline"
-                  hapticType="notification"
+                  hapticType="impact"
                   soundEnabled={false}
                   className="w-full"
                 >
