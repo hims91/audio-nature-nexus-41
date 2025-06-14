@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SEOHelmetProvider from "@/components/SEO/HelmetProvider";
+import { useServiceWorker } from "@/hooks/useServiceWorker";
+import { useEffect } from "react";
+import { initGA, trackPageView } from "@/utils/analytics";
 import Index from "./pages/Index";
 import PortfolioPage from "./pages/PortfolioPage";
 import ContactPage from "./pages/ContactPage";
@@ -16,6 +19,48 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  const { hasUpdate, updateServiceWorker } = useServiceWorker();
+
+  useEffect(() => {
+    // Initialize Google Analytics
+    initGA();
+    
+    // Track initial page view
+    trackPageView(window.location.pathname);
+  }, []);
+
+  // Show update notification
+  useEffect(() => {
+    if (hasUpdate) {
+      const shouldUpdate = window.confirm(
+        'A new version is available. Would you like to update now?'
+      );
+      if (shouldUpdate) {
+        updateServiceWorker();
+      }
+    }
+  }, [hasUpdate, updateServiceWorker]);
+
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/portfolio" element={<PortfolioPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route 
+        path="/manage-portfolio" 
+        element={
+          <ProtectedRoute>
+            <ManagePortfolio />
+          </ProtectedRoute>
+        } 
+      />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <SEOHelmetProvider>
@@ -24,21 +69,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/portfolio" element={<PortfolioPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route 
-                path="/manage-portfolio" 
-                element={
-                  <ProtectedRoute>
-                    <ManagePortfolio />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AppContent />
           </BrowserRouter>
         </AuthProvider>
       </TooltipProvider>

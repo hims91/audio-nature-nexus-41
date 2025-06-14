@@ -12,6 +12,10 @@ import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/animations/PageTransition";
+import StructuredData from "@/components/SEO/StructuredData";
+import SocialMeta from "@/components/SEO/SocialMeta";
+import PWAInstaller from "@/components/performance/PWAInstaller";
+import SitemapGenerator from "@/components/SEO/SitemapGenerator";
 
 const Index = () => {
   return (
@@ -20,30 +24,21 @@ const Index = () => {
         <title>Will Hall Sound Studios | Professional Audio Engineering & Production</title>
         <meta name="description" content="Professional audio engineering services including mixing, mastering, sound design, podcasting, and Dolby Atmos. Authentic Audio, Naturally Engineered." />
         <meta name="keywords" content="audio engineering, mixing, mastering, sound design, podcasting, Dolby Atmos, professional audio, Will Hall" />
-        <meta property="og:title" content="Will Hall Sound Studios | Professional Audio Engineering" />
-        <meta property="og:description" content="Authentic Audio, Naturally Engineered. Professional mixing, mastering, and audio production services." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={window.location.origin} />
         <link rel="canonical" href={window.location.origin} />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "ProfessionalService",
-            "name": "Will Hall Sound Studios",
-            "description": "Professional audio engineering services including mixing, mastering, sound design, and Dolby Atmos production",
-            "url": window.location.origin,
-            "telephone": "Contact via website",
-            "email": "TerraEchoStudios@gmail.com",
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "Remote Services",
-              "addressCountry": "US"
-            },
-            "serviceType": ["Audio Mixing", "Audio Mastering", "Sound Design", "Podcasting", "Dolby Atmos"],
-            "areaServed": "Worldwide"
-          })}
-        </script>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#065f46" />
       </Helmet>
+
+      <StructuredData type="website" />
+      <StructuredData type="organization" />
+      
+      <SocialMeta
+        title="Will Hall Sound Studios | Professional Audio Engineering"
+        description="Authentic Audio, Naturally Engineered. Professional mixing, mastering, and audio production services."
+        url={window.location.origin}
+      />
+
+      <SitemapGenerator />
       
       <PageTransition>
         <div className="min-h-screen">
@@ -57,6 +52,7 @@ const Index = () => {
           <Testimonials />
           <Contact />
           <Footer />
+          <PWAInstaller />
         </div>
       </PageTransition>
     </>

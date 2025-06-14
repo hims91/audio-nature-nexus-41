@@ -5,6 +5,8 @@ import Footer from "@/components/Footer";
 import ContactFormEnhanced from "@/components/enhanced/ContactFormEnhanced";
 import { Helmet } from "react-helmet-async";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import StructuredData from "@/components/SEO/StructuredData";
+import SocialMeta from "@/components/SEO/SocialMeta";
 
 const ContactPage: React.FC = () => {
   return (
@@ -15,6 +17,14 @@ const ContactPage: React.FC = () => {
         <meta name="keywords" content="contact audio engineer, professional audio services, audio consultation, mixing mastering quote" />
         <link rel="canonical" href={`${window.location.origin}/contact`} />
       </Helmet>
+
+      <StructuredData type="service" />
+      
+      <SocialMeta
+        title="Contact - Will Hall Sound Studios"
+        description="Contact Will Hall Sound Studios for professional audio engineering services. Get in touch to discuss your next project."
+        url={`${window.location.origin}/contact`}
+      />
       
       <div className="min-h-screen bg-gradient-to-br from-white via-nature-mist/30 to-nature-sage/20">
         <Navbar />

@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { PortfolioItem as PortfolioItemType } from "@/data/portfolio";
 import AudioPlayer from "./AudioPlayer";
 import VideoPlayer from "./VideoPlayer";
+import LazyImage from "./performance/LazyImage";
 import { FileVideo, Music, Link as LinkIcon } from "lucide-react";
 import { Youtube, Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
+import { trackPortfolioView } from "@/utils/analytics";
 
 interface PortfolioItemProps {
   item: PortfolioItemType;
@@ -46,18 +48,19 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
     hasValidUrl(item.audioUrl) && 
     item.title !== "Louie, Louie";
 
+  // Track portfolio view
+  React.useEffect(() => {
+    trackPortfolioView(item.title, item.category);
+  }, [item.title, item.category]);
+
   return (
     <Card className="overflow-hidden bg-white h-full shadow-md hover:shadow-xl transition-shadow duration-300">
       {hasValidUrl(item.coverImageUrl) && (
         <div className="relative h-52 overflow-hidden">
-          <img 
-            src={item.coverImageUrl} 
-            alt={item.title} 
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-            onError={(e) => {
-              e.currentTarget.src = "/placeholder.svg";
-              e.currentTarget.className = "w-full h-full object-contain p-4";
-            }}
+          <LazyImage
+            src={item.coverImageUrl}
+            alt={item.title}
+            className="w-full h-full transition-transform duration-500 hover:scale-105"
           />
           <Badge 
             className="absolute top-3 right-3 bg-nature-forest text-white hover:bg-nature-leaf"

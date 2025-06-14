@@ -1,0 +1,30 @@
+
+{
+  "name": "Will Hall Sound Studios",
+  "short_name": "WH Sound",
+  "description": "Professional audio engineering services - Authentic Audio, Naturally Engineered",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#065f46",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment", "business"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}

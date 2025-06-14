@@ -4,6 +4,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PortfolioGridEnhanced from "@/components/enhanced/PortfolioGridEnhanced";
 import { Helmet } from "react-helmet-async";
+import StructuredData from "@/components/SEO/StructuredData";
+import SocialMeta from "@/components/SEO/SocialMeta";
 
 const PortfolioPage: React.FC = () => {
   return (
@@ -14,6 +16,14 @@ const PortfolioPage: React.FC = () => {
         <meta name="keywords" content="audio portfolio, mixing examples, mastering samples, sound design, Dolby Atmos, professional audio" />
         <link rel="canonical" href={`${window.location.origin}/portfolio`} />
       </Helmet>
+
+      <StructuredData type="portfolio" />
+      
+      <SocialMeta
+        title="Portfolio - Will Hall Sound Studios"
+        description="Explore our portfolio of professional audio engineering projects including mixing, mastering, sound design, and Dolby Atmos work."
+        url={`${window.location.origin}/portfolio`}
+      />
       
       <div className="min-h-screen bg-gradient-to-br from-white via-nature-mist/30 to-nature-sage/20">
         <Navbar />
