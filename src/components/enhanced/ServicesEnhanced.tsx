@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import FadeInView from "../animations/FadeInView";
+import Card3D from "../effects/Card3D";
+import MagneticButton from "../animations/MagneticButton";
 import { AudioWaveform, Headphones, Music, Folder, Mic, Image, Star, Volume2, Wand2, ArrowRight, Play } from "lucide-react";
 
 const ServicesEnhanced: React.FC = () => {
@@ -84,25 +86,25 @@ const ServicesEnhanced: React.FC = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      "Production": "bg-blue-100 text-blue-800",
-      "Creative": "bg-purple-100 text-purple-800",
-      "Content": "bg-green-100 text-green-800",
-      "Premium": "bg-amber-100 text-amber-800",
-      "Live": "bg-red-100 text-red-800",
-      "Restoration": "bg-gray-100 text-gray-800"
+      "Production": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      "Creative": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+      "Content": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      "Premium": "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
+      "Live": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      "Restoration": "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
     };
-    return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800";
+    return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
   };
 
   return (
-    <section id="services" className="py-20 bg-white relative overflow-hidden">
+    <section id="services" className="py-20 bg-white dark:bg-gray-900 relative overflow-hidden">
       <div className="container mx-auto px-4">
         <FadeInView direction="up" delay={0.2}>
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-nature-forest mb-4 font-playfair">
+            <h2 className="text-4xl md:text-5xl font-bold text-nature-forest dark:text-white mb-4 font-playfair">
               Professional <span className="text-gradient">Services</span>
             </h2>
-            <p className="text-lg text-nature-bark max-w-3xl mx-auto">
+            <p className="text-lg text-nature-bark dark:text-gray-300 max-w-3xl mx-auto">
               Comprehensive audio engineering services that blend technical excellence with natural inspiration 
               to bring your sonic vision to life.
             </p>
@@ -113,7 +115,9 @@ const ServicesEnhanced: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
             <FadeInView key={service.id} direction="up" delay={0.1 * index}>
-              <div
+              <Card3D
+                intensity={hoveredService === service.id ? "high" : "medium"}
+                glowEffect={true}
                 className="group h-full"
                 onMouseEnter={() => setHoveredService(service.id)}
                 onMouseLeave={() => setHoveredService(null)}
@@ -121,20 +125,20 @@ const ServicesEnhanced: React.FC = () => {
                 <GlassCard 
                   className={`h-full p-6 transition-all duration-500 cursor-pointer ${
                     hoveredService === service.id 
-                      ? 'bg-white/90 backdrop-blur-lg shadow-2xl transform -translate-y-2 scale-102' 
-                      : 'bg-white/70 hover:bg-white/80'
+                      ? 'bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg shadow-2xl' 
+                      : 'bg-white/70 dark:bg-gray-800/70 hover:bg-white/80 dark:hover:bg-gray-800/80'
                   }`}
                 >
                   <CardContent className="p-0 flex flex-col h-full">
                     {/* Header */}
                     <div className="flex items-start justify-between mb-4">
-                      <div className={`p-3 rounded-xl transition-all duration-300 ${
+                      <MagneticButton className={`p-3 rounded-xl transition-all duration-300 ${
                         hoveredService === service.id 
                           ? 'bg-nature-forest text-white transform scale-110' 
-                          : 'bg-nature-moss/20 text-nature-forest'
+                          : 'bg-nature-moss/20 dark:bg-gray-700 text-nature-forest dark:text-white'
                       }`}>
                         {getIcon(service.icon)}
-                      </div>
+                      </MagneticButton>
                       <div className="text-right">
                         <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(service.category)}`}>
                           {service.category}
@@ -144,17 +148,17 @@ const ServicesEnhanced: React.FC = () => {
 
                     {/* Content */}
                     <div className="flex-grow">
-                      <h3 className="text-xl font-semibold text-nature-forest mb-3 group-hover:text-nature-leaf transition-colors">
+                      <h3 className="text-xl font-semibold text-nature-forest dark:text-white mb-3 group-hover:text-nature-leaf dark:group-hover:text-blue-400 transition-colors">
                         {service.title}
                       </h3>
-                      <p className="text-nature-bark mb-4 leading-relaxed">
+                      <p className="text-nature-bark dark:text-gray-300 mb-4 leading-relaxed">
                         {service.description}
                       </p>
 
                       {/* Features */}
                       <div className="space-y-2 mb-6">
                         {service.features.map((feature, idx) => (
-                          <div key={idx} className="flex items-center text-sm text-nature-stone">
+                          <div key={idx} className="flex items-center text-sm text-nature-stone dark:text-gray-400">
                             <div className="w-1.5 h-1.5 bg-nature-leaf rounded-full mr-2" />
                             {feature}
                           </div>
@@ -163,38 +167,42 @@ const ServicesEnhanced: React.FC = () => {
                     </div>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-4 border-t border-nature-moss/20">
-                      <div className="text-lg font-semibold text-nature-forest">
+                    <div className="flex items-center justify-between pt-4 border-t border-nature-moss/20 dark:border-gray-700">
+                      <div className="text-lg font-semibold text-nature-forest dark:text-white">
                         {service.price}
                       </div>
-                      <Button
-                        size="sm"
-                        className={`rounded-full transition-all duration-300 ${
-                          hoveredService === service.id
-                            ? 'bg-nature-forest hover:bg-nature-leaf text-white transform scale-105'
-                            : 'bg-nature-moss/20 hover:bg-nature-moss/30 text-nature-forest'
-                        }`}
-                      >
-                        Learn More
-                        <ArrowRight className="w-4 h-4 ml-1" />
-                      </Button>
+                      <MagneticButton>
+                        <Button
+                          size="sm"
+                          className={`rounded-full transition-all duration-300 ${
+                            hoveredService === service.id
+                              ? 'bg-nature-forest hover:bg-nature-leaf text-white transform scale-105'
+                              : 'bg-nature-moss/20 hover:bg-nature-moss/30 dark:bg-gray-700 dark:hover:bg-gray-600 text-nature-forest dark:text-white'
+                          }`}
+                        >
+                          Learn More
+                          <ArrowRight className="w-4 h-4 ml-1" />
+                        </Button>
+                      </MagneticButton>
                     </div>
 
                     {/* Audio Preview Button */}
                     {hoveredService === service.id && (
                       <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="bg-white/90 hover:bg-white text-nature-forest rounded-full w-8 h-8 p-0"
-                        >
-                          <Play className="w-3 h-3" />
-                        </Button>
+                        <MagneticButton>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 text-nature-forest dark:text-white rounded-full w-8 h-8 p-0"
+                          >
+                            <Play className="w-3 h-3" />
+                          </Button>
+                        </MagneticButton>
                       </div>
                     )}
                   </CardContent>
                 </GlassCard>
-              </div>
+              </Card3D>
             </FadeInView>
           ))}
         </div>
@@ -202,25 +210,29 @@ const ServicesEnhanced: React.FC = () => {
         {/* Call to Action */}
         <FadeInView direction="up" delay={0.8}>
           <div className="text-center mt-16">
-            <GlassCard className="max-w-2xl mx-auto p-8 bg-gradient-to-r from-nature-forest/10 to-nature-leaf/10">
-              <h3 className="text-2xl font-semibold text-nature-forest mb-4">
-                Ready to elevate your audio?
-              </h3>
-              <p className="text-nature-bark mb-6">
-                Let's discuss your project and create something extraordinary together.
-              </p>
-              <Button 
-                size="lg"
-                className="bg-nature-forest hover:bg-nature-leaf text-white px-8 py-3 rounded-full transform hover:scale-105 transition-all duration-300"
-                onClick={() => {
-                  const element = document.getElementById("contact");
-                  if (element) element.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                Start Your Project
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </GlassCard>
+            <Card3D intensity="medium">
+              <GlassCard className="max-w-2xl mx-auto p-8 bg-gradient-to-r from-nature-forest/10 to-nature-leaf/10 dark:from-blue-900/20 dark:to-purple-900/20">
+                <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-4">
+                  Ready to elevate your audio?
+                </h3>
+                <p className="text-nature-bark dark:text-gray-300 mb-6">
+                  Let's discuss your project and create something extraordinary together.
+                </p>
+                <MagneticButton>
+                  <Button 
+                    size="lg"
+                    className="bg-nature-forest hover:bg-nature-leaf text-white px-8 py-3 rounded-full transform hover:scale-105 transition-all duration-300"
+                    onClick={() => {
+                      const element = document.getElementById("contact");
+                      if (element) element.scrollIntoView({ behavior: "smooth" });
+                    }}
+                  >
+                    Start Your Project
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </MagneticButton>
+              </GlassCard>
+            </Card3D>
           </div>
         </FadeInView>
       </div>

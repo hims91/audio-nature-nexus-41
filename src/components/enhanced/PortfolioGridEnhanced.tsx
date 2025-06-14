@@ -5,7 +5,8 @@ import { usePortfolioData } from "@/hooks/usePortfolioData";
 import { type PortfolioItem } from "@/types/portfolio";
 import LoadingSpinner from "../animations/LoadingSpinner";
 import PortfolioFilters from "./PortfolioFilters";
-import PortfolioGrid from "./PortfolioGrid";
+import PortfolioCard from "./PortfolioCard";
+import FadeInView from "../animations/FadeInView";
 
 interface PortfolioGridEnhancedProps {
   showFeaturedOnly?: boolean;
@@ -83,11 +84,17 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
         />
       )}
 
-      <PortfolioGrid items={filteredItems} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {filteredItems.map((item, index) => (
+          <FadeInView key={item.id} direction="up" delay={0.1 * index}>
+            <PortfolioCard item={item} />
+          </FadeInView>
+        ))}
+      </div>
 
       {filteredItems.length === 0 && (
         <div className="text-center py-12 animate-fade-in">
-          <p className="text-nature-bark text-lg">No projects found in this category.</p>
+          <p className="text-nature-bark dark:text-gray-300 text-lg">No projects found in this category.</p>
         </div>
       )}
     </div>
