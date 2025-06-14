@@ -3,6 +3,9 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useRateLimiting } from './useRateLimiting';
+import { useSessionCache } from './useSessionCache';
+import { validateEmail, validatePassword, sanitizeText, generateCSRFToken, setCSRFToken } from '@/utils/security';
 
 export interface AuthSession {
   id: string;
@@ -23,18 +26,43 @@ export const useEnhancedAuth = () => {
   const { toast } = useToast();
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
 
+  // Rate limiting for auth attempts
+  const authRateLimit = useRateLimiting({
+    maxAttempts: 5,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    blockDurationMs: 30 * 60 * 1000 // 30 minutes
+  });
+
+  // Session caching
+  const sessionsCache = useSessionCache(
+    `sessions_${user?.id}`,
+    () => getActiveSessionsInternal(),
+    { maxAge: 2 * 60 * 1000 } // 2 minutes cache
+  );
+
   const signInWithGoogle = async () => {
+    if (!authRateLimit.checkRateLimit()) return { error: new Error('Rate limit exceeded') };
+    
     setSocialLoading('google');
     try {
       const redirectUrl = `${window.location.origin}/`;
+      
+      // Generate CSRF token for OAuth flow
+      const csrfToken = generateCSRFToken();
+      setCSRFToken(csrfToken);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
+          queryParams: {
+            state: csrfToken
+          }
         },
       });
 
       if (error) {
+        authRateLimit.recordAttempt();
         toast({
           title: "Google Sign In Error",
           description: error.message,
@@ -45,6 +73,7 @@ export const useEnhancedAuth = () => {
 
       return { error: null };
     } catch (error: any) {
+      authRateLimit.recordAttempt();
       toast({
         title: "Error",
         description: "An unexpected error occurred during Google sign in.",
@@ -57,17 +86,28 @@ export const useEnhancedAuth = () => {
   };
 
   const signInWithTwitter = async () => {
+    if (!authRateLimit.checkRateLimit()) return { error: new Error('Rate limit exceeded') };
+    
     setSocialLoading('twitter');
     try {
       const redirectUrl = `${window.location.origin}/`;
+      
+      // Generate CSRF token for OAuth flow
+      const csrfToken = generateCSRFToken();
+      setCSRFToken(csrfToken);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'twitter',
         options: {
           redirectTo: redirectUrl,
+          queryParams: {
+            state: csrfToken
+          }
         },
       });
 
       if (error) {
+        authRateLimit.recordAttempt();
         toast({
           title: "X Sign In Error",
           description: error.message,
@@ -78,6 +118,7 @@ export const useEnhancedAuth = () => {
 
       return { error: null };
     } catch (error: any) {
+      authRateLimit.recordAttempt();
       toast({
         title: "Error",
         description: "An unexpected error occurred during X sign in.",
@@ -87,6 +128,42 @@ export const useEnhancedAuth = () => {
     } finally {
       setSocialLoading(null);
     }
+  };
+
+  // Enhanced sign in with validation and rate limiting
+  const enhancedSignIn = async (email: string, password: string) => {
+    return authRateLimit.attemptAction(async () => {
+      // Validate inputs
+      const sanitizedEmail = sanitizeText(email);
+      if (!validateEmail(sanitizedEmail)) {
+        throw new Error('Invalid email format');
+      }
+
+      const { isValid, errors } = validatePassword(password);
+      if (!isValid) {
+        throw new Error(errors[0]);
+      }
+
+      return await signIn(sanitizedEmail, password);
+    });
+  };
+
+  // Enhanced sign up with validation
+  const enhancedSignUp = async (email: string, password: string) => {
+    return authRateLimit.attemptAction(async () => {
+      // Validate inputs
+      const sanitizedEmail = sanitizeText(email);
+      if (!validateEmail(sanitizedEmail)) {
+        throw new Error('Invalid email format');
+      }
+
+      const { isValid, errors } = validatePassword(password);
+      if (!isValid) {
+        throw new Error(errors.join(', '));
+      }
+
+      return await signUp(sanitizedEmail, password);
+    });
   };
 
   const trackLoginSession = async (loginMethod: string) => {
@@ -111,12 +188,15 @@ export const useEnhancedAuth = () => {
       if (error) {
         console.warn('Failed to track login session:', error);
       }
+
+      // Invalidate sessions cache to refresh data
+      sessionsCache.invalidate();
     } catch (error) {
       console.warn('Error tracking login session:', error);
     }
   };
 
-  const getActiveSessions = async (): Promise<AuthSession[]> => {
+  const getActiveSessionsInternal = async (): Promise<AuthSession[]> => {
     if (!user) return [];
 
     try {
@@ -145,6 +225,13 @@ export const useEnhancedAuth = () => {
     }
   };
 
+  const getActiveSessions = async (): Promise<AuthSession[]> => {
+    const cached = sessionsCache.data;
+    if (cached) return cached;
+    
+    return getActiveSessionsInternal();
+  };
+
   const terminateSession = async (sessionId: string) => {
     try {
       const { error } = await supabase
@@ -164,6 +251,9 @@ export const useEnhancedAuth = () => {
         return { error };
       }
 
+      // Invalidate cache to refresh data
+      sessionsCache.invalidate();
+
       toast({
         title: "Session Terminated",
         description: "The session has been successfully terminated.",
@@ -182,8 +272,8 @@ export const useEnhancedAuth = () => {
 
   return {
     // Original auth methods
-    signIn,
-    signUp,
+    signIn: enhancedSignIn,
+    signUp: enhancedSignUp,
     signOut,
     user,
     session,
@@ -198,5 +288,13 @@ export const useEnhancedAuth = () => {
     trackLoginSession,
     getActiveSessions,
     terminateSession,
+    
+    // Rate limiting info
+    isRateLimited: authRateLimit.isBlocked,
+    rateLimitRemaining: authRateLimit.getRemainingTime,
+    
+    // Session cache
+    sessionsLoading: sessionsCache.loading,
+    refreshSessions: sessionsCache.refetch
   };
 };

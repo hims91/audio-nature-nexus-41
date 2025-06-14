@@ -5,13 +5,16 @@ import { GlassCard } from "@/components/ui/glass-card";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import MagneticButton from "@/components/animations/MagneticButton";
 import FeedbackSettings from "@/components/interactive/FeedbackSettings";
+import { LazyUserProfileDropdown } from "@/components/auth/LazyProfileComponents";
 import { Menu, X, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEnhancedAuth } from "@/hooks/useEnhancedAuth";
 
 const ModernNavbarEnhanced: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const { user } = useEnhancedAuth();
 
   const navItems = [
     { name: "Home", href: "#", id: "home" },
@@ -121,14 +124,18 @@ const ModernNavbarEnhanced: React.FC = () => {
                 <ThemeToggle variant="floating" />
                 <FeedbackSettings />
                 
-                {/* CTA Button */}
-                <div className="hidden md:block">
-                  <MagneticButton onClick={() => scrollToSection("contact")}>
-                    <Button className="bg-gradient-to-r from-nature-forest to-nature-leaf hover:from-nature-leaf hover:to-nature-forest text-white border-0 shadow-lg hover:shadow-xl transform transition-all duration-300 px-6 py-2 rounded-full">
-                      Get Started
-                    </Button>
-                  </MagneticButton>
-                </div>
+                {/* User Profile or CTA Button */}
+                {user ? (
+                  <LazyUserProfileDropdown />
+                ) : (
+                  <div className="hidden md:block">
+                    <MagneticButton onClick={() => scrollToSection("contact")}>
+                      <Button className="bg-gradient-to-r from-nature-forest to-nature-leaf hover:from-nature-leaf hover:to-nature-forest text-white border-0 shadow-lg hover:shadow-xl transform transition-all duration-300 px-6 py-2 rounded-full">
+                        Get Started
+                      </Button>
+                    </MagneticButton>
+                  </div>
+                )}
 
                 {/* Mobile menu button */}
                 <div className="md:hidden">
@@ -173,11 +180,15 @@ const ModernNavbarEnhanced: React.FC = () => {
                 ))}
                 
                 <div className="pt-4 border-t border-nature-moss/20 dark:border-gray-700">
-                  <MagneticButton onClick={() => scrollToSection("contact")} className="w-full">
-                    <Button className="w-full bg-gradient-to-r from-nature-forest to-nature-leaf text-white rounded-xl py-3">
-                      Get Started
-                    </Button>
-                  </MagneticButton>
+                  {user ? (
+                    <LazyUserProfileDropdown />
+                  ) : (
+                    <MagneticButton onClick={() => scrollToSection("contact")} className="w-full">
+                      <Button className="w-full bg-gradient-to-r from-nature-forest to-nature-leaf text-white rounded-xl py-3">
+                        Get Started
+                      </Button>
+                    </MagneticButton>
+                  )}
                 </div>
               </div>
             </GlassCard>
