@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesUpdate } from '@/integrations/supabase/types';
@@ -33,6 +32,7 @@ const fetchSettings = async (): Promise<SiteSettings> => {
     maintenance_mode: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    social_links: [],
   };
 };
 

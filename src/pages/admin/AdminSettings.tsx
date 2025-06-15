@@ -1,21 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Settings, 
-  Palette, 
-  Mail, 
-  Users, 
   Save,
   RefreshCw,
-  Globe,
-  Shield,
-  Share2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
@@ -24,6 +13,10 @@ import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TablesUpdate, Tables } from '@/integrations/supabase/types';
 import SocialLinksManager, { SocialLink } from '@/components/admin/SocialLinksManager';
+import GeneralSettings from '@/components/admin/settings/GeneralSettings';
+import PortfolioSettings from '@/components/admin/settings/PortfolioSettings';
+import UserSettings from '@/components/admin/settings/UserSettings';
+import EmailSettings from '@/components/admin/settings/EmailSettings';
 
 interface AdminSettingsData {
   siteName: string;
@@ -199,64 +192,7 @@ const AdminSettings: React.FC = () => {
         </TabsList>
 
         <TabsContent value="general">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Globe className="h-5 w-5 mr-2 text-nature-forest" />
-                General Settings
-              </CardTitle>
-              <CardDescription>
-                Basic site configuration and branding
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="siteName">Site Name</Label>
-                  <Input
-                    id="siteName"
-                    value={settings.siteName}
-                    onChange={(e) => handleSettingChange('siteName', e.target.value)}
-                    placeholder="Enter site name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contactEmail">Contact Email</Label>
-                  <Input
-                    id="contactEmail"
-                    type="email"
-                    value={settings.contactEmail}
-                    onChange={(e) => handleSettingChange('contactEmail', e.target.value)}
-                    placeholder="Enter contact email"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="siteDescription">Site Description</Label>
-                <Textarea
-                  id="siteDescription"
-                  value={settings.siteDescription}
-                  onChange={(e) => handleSettingChange('siteDescription', e.target.value)}
-                  placeholder="Enter site description"
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <Label>Maintenance Mode</Label>
-                  <p className="text-sm text-gray-500">
-                    Put the site in maintenance mode for updates
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.maintenanceMode}
-                  onCheckedChange={(checked) => handleSettingChange('maintenanceMode', checked)}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <GeneralSettings settings={settings} handleSettingChange={handleSettingChange} />
         </TabsContent>
 
         <TabsContent value="social">
@@ -267,102 +203,15 @@ const AdminSettings: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="portfolio">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Palette className="h-5 w-5 mr-2 text-nature-forest" />
-                Portfolio Settings
-              </CardTitle>
-              <CardDescription>
-                Configure portfolio display and management options
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="featuredLimit">Featured Items Limit</Label>
-                <Input
-                  id="featuredLimit"
-                  type="number"
-                  min="1"
-                  max="12"
-                  value={settings.featuredItemsLimit}
-                  onChange={(e) => handleSettingChange('featuredItemsLimit', parseInt(e.target.value))}
-                />
-                <p className="text-sm text-gray-500">
-                  Maximum number of featured items to display on the homepage
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <Label>Auto-approve Portfolio Items</Label>
-                  <p className="text-sm text-gray-500">
-                    Automatically publish new portfolio items without review
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.portfolioAutoApprove}
-                  onCheckedChange={(checked) => handleSettingChange('portfolioAutoApprove', checked)}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <PortfolioSettings settings={settings} handleSettingChange={handleSettingChange} />
         </TabsContent>
 
         <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2 text-nature-forest" />
-                User Management
-              </CardTitle>
-              <CardDescription>
-                Configure user registration and account settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <Label>Allow User Registration</Label>
-                  <p className="text-sm text-gray-500">
-                    Allow new users to register for accounts
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.allowUserRegistration}
-                  onCheckedChange={(checked) => handleSettingChange('allowUserRegistration', checked)}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <UserSettings settings={settings} handleSettingChange={handleSettingChange} />
         </TabsContent>
 
         <TabsContent value="email">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Mail className="h-5 w-5 mr-2 text-nature-forest" />
-                Email Settings
-              </CardTitle>
-              <CardDescription>
-                Configure email notifications and communication
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <Label>Email Notifications</Label>
-                  <p className="text-sm text-gray-500">
-                    Send email notifications for important events
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.emailNotifications}
-                  onCheckedChange={(checked) => handleSettingChange('emailNotifications', checked)}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <EmailSettings settings={settings} handleSettingChange={handleSettingChange} />
         </TabsContent>
       </Tabs>
     </div>
