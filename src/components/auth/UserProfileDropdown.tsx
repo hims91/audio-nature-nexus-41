@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { User, Settings, LogOut, Shield, FolderOpen } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,12 +8,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const UserProfileDropdown: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useEnhancedAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -29,9 +28,6 @@ const UserProfileDropdown: React.FC = () => {
       console.error('Error signing out:', error);
     }
   };
-
-  // Check if user is admin
-  const isAdmin = user?.email === 'TerraEchoStudios@gmail.com';
 
   const firstName = user.user_metadata?.first_name;
   const lastName = user.user_metadata?.last_name;
@@ -79,16 +75,6 @@ const UserProfileDropdown: React.FC = () => {
         
         <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
         
-        <DropdownMenuItem 
-          onClick={() => {
-            navigate('/manage-portfolio');
-            setIsOpen(false);
-          }}
-          className="flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-        >
-          <FolderOpen className="w-4 h-4 text-gray-500" />
-          <span>Manage Portfolio</span>
-        </DropdownMenuItem>
 
         {isAdmin && (
           <DropdownMenuItem 
@@ -98,20 +84,11 @@ const UserProfileDropdown: React.FC = () => {
             }}
             className="flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
           >
-            <Shield className="w-4 h-4 text-nature-forest" />
+            <User className="w-4 h-4 text-nature-forest" />
             <span>Admin Dashboard</span>
           </DropdownMenuItem>
         )}
         
-        <DropdownMenuItem 
-          onClick={() => {
-            setIsOpen(false);
-          }}
-          className="flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-        >
-          <Settings className="w-4 w-4 text-gray-500" />
-          <span>Settings</span>
-        </DropdownMenuItem>
         
         <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
         

@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, LogOut } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
+import UserProfileDropdown from "./auth/UserProfileDropdown";
 
 const UnifiedNavbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useEnhancedAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -48,8 +48,8 @@ const UnifiedNavbar: React.FC = () => {
     setIsMenuOpen(false);
   };
 
-  const handlePortfolioManagement = () => {
-    navigate('/manage-portfolio');
+  const handleAdminDashboard = () => {
+    navigate('/admin/dashboard');
     setIsMenuOpen(false);
   };
 
@@ -78,14 +78,7 @@ const UnifiedNavbar: React.FC = () => {
             
             {user ? (
               <div className="flex items-center space-x-4">
-                <Button onClick={handlePortfolioManagement} variant="outline" className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
-                  <User className="mr-2 h-4 w-4" />
-                  Manage Portfolio
-                </Button>
-                <Button onClick={handleSignOut} variant="outline" className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </Button>
+                <UserProfileDropdown />
               </div>
             ) : (
               <div className="flex items-center space-x-4">
@@ -122,18 +115,20 @@ const UnifiedNavbar: React.FC = () => {
             </button>
             
             {user ? (
-              <div className="space-y-2">
-                <Button onClick={handlePortfolioManagement} className="w-full bg-nature-forest hover:bg-nature-leaf text-white">
-                  <User className="mr-2 h-4 w-4" />
-                  Manage Portfolio
-                </Button>
+              <div className="space-y-2 border-t pt-4 mt-4">
+                {isAdmin && (
+                  <Button onClick={handleAdminDashboard} className="w-full bg-nature-forest hover:bg-nature-leaf text-white">
+                    <User className="mr-2 h-4 w-4" />
+                    Admin Dashboard
+                  </Button>
+                )}
                 <Button onClick={handleSignOut} variant="outline" className="w-full border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </Button>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 border-t pt-4 mt-4">
                 <Button onClick={() => scrollToSection("contact")} className="w-full bg-nature-forest hover:bg-nature-leaf text-white">
                   Contact
                 </Button>

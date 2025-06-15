@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/theme-provider"
@@ -6,7 +5,6 @@ import Index from './pages/Index';
 import PortfolioPage from './pages/PortfolioPage';
 import ContactPage from './pages/ContactPage';
 import AuthEnhanced from './pages/AuthEnhanced';
-import ManagePortfolio from './pages/ManagePortfolio';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/admin/AdminLayout';
@@ -45,14 +43,6 @@ function App() {
                       <AuthErrorBoundary>
                         <AuthEnhanced />
                       </AuthErrorBoundary>
-                    } 
-                  />
-                  <Route 
-                    path="/manage-portfolio" 
-                    element={
-                      <ProtectedRoute>
-                        <ManagePortfolio />
-                      </ProtectedRoute>
                     } 
                   />
                   
