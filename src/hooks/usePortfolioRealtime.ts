@@ -1,26 +1,16 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export const usePortfolioRealtime = () => {
   const queryClient = useQueryClient();
-  const channelRef = useRef<any>(null);
 
   useEffect(() => {
-    // Clean up any existing channel first
-    if (channelRef.current) {
-      console.log('🔄 Cleaning up portfolio real-time subscription...');
-      console.log('📡 Portfolio subscription status:', channelRef.current.state);
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
-
-    // Create new channel with unique name
-    const channelName = `portfolio_changes_${Date.now()}`;
-    console.log('🔄 Setting up real-time subscription for portfolio items...');
+    // Create new channel with a more unique name to avoid strict mode issues
+    const channelName = `portfolio_changes_${Math.random().toString(36).substring(2, 9)}`;
     
-    channelRef.current = supabase
+    const channel = supabase
       .channel(channelName)
       .on(
         'postgres_changes',
@@ -36,15 +26,14 @@ export const usePortfolioRealtime = () => {
           queryClient.invalidateQueries({ queryKey: ['featured_portfolio_items'] });
         }
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        if (error) {
+          console.error(`Subscription error on channel ${channelName}:`, error);
+        }
+      });
 
     return () => {
-      if (channelRef.current) {
-        console.log('🔄 Cleaning up portfolio real-time subscription...');
-        console.log('📡 Portfolio subscription status:', channelRef.current.state);
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
+      supabase.removeChannel(channel);
     };
   }, [queryClient]);
 };

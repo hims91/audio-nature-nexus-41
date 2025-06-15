@@ -1,6 +1,5 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesUpdate } from '@/integrations/supabase/types';
 
@@ -43,19 +42,13 @@ const fetchSettings = async (): Promise<SiteSettings> => {
 // Custom hook to get settings with real-time updates
 export const useSettings = () => {
   const queryClient = useQueryClient();
-  const channelRef = useRef<any>(null);
 
   // Set up real-time subscription
   useEffect(() => {
-    // Clean up any existing channel first
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
+    // Create new channel with a more unique name to avoid strict mode issues
+    const channelName = `site_settings_changes_${Math.random().toString(36).substring(2, 9)}`;
 
-    // Create new channel with unique name
-    const channelName = `site_settings_changes_${Date.now()}`;
-    channelRef.current = supabase
+    const channel = supabase
       .channel(channelName)
       .on(
         'postgres_changes',
@@ -67,18 +60,19 @@ export const useSettings = () => {
         (payload) => {
           console.log('🔄 Settings updated in real-time:', payload);
           // Update the query cache with new data
-          if (payload.new) {
-            queryClient.setQueryData(SETTINGS_QUERY_KEY, payload.new);
+          if (payload.new && 'id' in payload.new) {
+            queryClient.setQueryData(SETTINGS_QUERY_KEY, payload.new as SiteSettings);
           }
         }
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        if (error) {
+          console.error(`Subscription error on channel ${channelName}:`, error);
+        }
+      });
 
     return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
+      supabase.removeChannel(channel);
     };
   }, [queryClient]);
 
