@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +14,8 @@ export interface BaseMediaUploaderProps {
   toast: any;
   children?: React.ReactNode;
   onFileUploaded?: (url: string, path: string) => void;
+  onUploadStart?: () => void;
+  onUploadError?: (error: string) => void;
 }
 
 export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
@@ -24,7 +25,9 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   setFile,
   toast,
   children,
-  onFileUploaded
+  onFileUploaded,
+  onUploadStart,
+  onUploadError
 }) => {
   const [fileName, setFileName] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -114,9 +117,10 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
     const selectedFile = files[0];
     
     if (!validateFileType(selectedFile)) {
+      const errorMsg = `Please select a valid ${type} file. ${type === 'audio' ? 'Supported formats: MP3, WAV, OGG, M4A, AAC, FLAC, WebM' : ''}`;
       toast({
         title: "Invalid File Type",
-        description: `Please select a valid ${type} file. ${type === 'audio' ? 'Supported formats: MP3, WAV, OGG, M4A, AAC, FLAC, WebM' : ''}`,
+        description: errorMsg,
         variant: "destructive"
       });
       return;
@@ -162,6 +166,11 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
     setIsUploading(true);
     setUploadProgress(0);
     
+    // Notify upload start
+    if (onUploadStart) {
+      onUploadStart();
+    }
+    
     try {
       console.log(`🚀 Starting ${type} upload:`, file.name);
       
@@ -179,7 +188,7 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
         
         console.log(`✅ ${type} upload successful:`, result.url);
         
-        // Notify parent component immediately
+        // Notify parent component immediately with URL
         if (onFileUploaded) {
           onFileUploaded(result.url, result.path);
         }
@@ -192,10 +201,17 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
         throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload file";
       console.error(`❌ ${type} upload error:`, error);
+      
+      // Notify error
+      if (onUploadError) {
+        onUploadError(errorMessage);
+      }
+      
       toast({
         title: "Upload Failed",
-        description: error instanceof Error ? error.message : "Failed to upload file",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

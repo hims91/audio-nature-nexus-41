@@ -1,39 +1,46 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Save, ArrowLeft } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface EditorActionsProps {
   mode: "create" | "edit";
   onCancel: () => void;
-  isLoading: boolean;
+  isLoading?: boolean;
+  canSave?: boolean;
 }
 
 const EditorActions: React.FC<EditorActionsProps> = ({
   mode,
   onCancel,
-  isLoading
+  isLoading = false,
+  canSave = true
 }) => {
   return (
-    <div className="flex justify-between mt-8">
-      <Button 
+    <div className="flex justify-end space-x-4 mt-6 pt-4 border-t border-gray-200">
+      <Button
         type="button"
         variant="outline"
         onClick={onCancel}
         disabled={isLoading}
       >
-        <ArrowLeft className="mr-2 h-4 w-4" />
         Cancel
       </Button>
       
-      <Button 
+      <Button
         type="submit"
+        disabled={isLoading || !canSave}
         className="bg-nature-forest hover:bg-nature-leaf"
-        disabled={isLoading}
       >
-        <Save className="mr-2 h-4 w-4" />
-        {isLoading ? 'Saving...' : mode === "create" ? "Create Item" : "Save Changes"}
+        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {mode === "create" ? "Create Portfolio Item" : "Save Changes"}
       </Button>
+      
+      {!canSave && !isLoading && (
+        <p className="text-xs text-amber-600 mt-1">
+          Please complete all uploads before saving
+        </p>
+      )}
     </div>
   );
 };

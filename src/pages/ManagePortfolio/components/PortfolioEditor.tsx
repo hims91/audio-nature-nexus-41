@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { PortfolioItem, ExternalLink } from "@/types/portfolio";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,6 +39,16 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   
+  // Upload status tracking
+  const [isAnyUploading, setIsAnyUploading] = useState<boolean>(false);
+  const [canSave, setCanSave] = useState<boolean>(true);
+  
+  // Handle upload status changes
+  const handleUploadStatusChange = (uploading: boolean, saveAllowed: boolean) => {
+    setIsAnyUploading(uploading);
+    setCanSave(saveAllowed);
+  };
+  
   // Handle text input changes
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -73,9 +82,19 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
     }));
   };
   
-  // Handle form submission
+  // Handle form submission with upload validation
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if any uploads are in progress
+    if (isAnyUploading) {
+      toast({
+        title: "Upload in Progress",
+        description: "Please wait for all file uploads to complete before saving.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     const validationError = validateFormData(formData);
     if (validationError) {
@@ -167,6 +186,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
               videoFile={videoFile}
               setVideoFile={setVideoFile}
               toast={toast}
+              onUploadStatusChange={handleUploadStatusChange}
             />
             
             {/* External Links Tab */}
@@ -182,7 +202,8 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
           <EditorActions
             mode={mode}
             onCancel={onCancel}
-            isLoading={isLoading}
+            isLoading={isLoading || isAnyUploading}
+            canSave={canSave}
           />
         </form>
       </CardContent>

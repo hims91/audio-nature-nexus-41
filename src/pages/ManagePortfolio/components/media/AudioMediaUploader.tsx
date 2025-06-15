@@ -1,33 +1,29 @@
 
 import React from "react";
-import { BaseMediaUploader, BaseMediaUploaderProps } from "./BaseMediaUploader";
-import AudioPlayer from "@/components/AudioPlayer";
+import { AudioUploadManager } from "@/components/audio/AudioUploadManager";
 
-type AudioMediaUploaderProps = Omit<BaseMediaUploaderProps, 'type' | 'children'>;
+interface AudioMediaUploaderProps {
+  currentUrl?: string;
+  file: File | null;
+  setFile: React.Dispatch<React.SetStateAction<File | null>>;
+  toast: any;
+  onFileUploaded?: (url: string, path: string) => void;
+}
 
 export const AudioMediaUploader: React.FC<AudioMediaUploaderProps> = ({
   currentUrl,
   file,
   setFile,
-  toast
+  toast,
+  onFileUploaded
 }) => {
-  const hasCurrentMedia = (url?: string) => url && url.trim() !== '';
-  
   return (
-    <BaseMediaUploader
-      type="audio"
+    <AudioUploadManager
       currentUrl={currentUrl}
       file={file}
       setFile={setFile}
       toast={toast}
-    >
-      {hasCurrentMedia(currentUrl) && (
-        <div className="mt-4">
-          <h4 className="text-sm font-medium text-nature-forest mb-2">Current Audio:</h4>
-          <AudioPlayer audioUrl={currentUrl} />
-          <p className="text-xs text-nature-bark mt-1">{currentUrl}</p>
-        </div>
-      )}
-    </BaseMediaUploader>
+      onUploadComplete={onFileUploaded}
+    />
   );
 };
