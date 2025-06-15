@@ -1,6 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesUpdate } from '@/integrations/supabase/types';
 
@@ -43,11 +43,20 @@ const fetchSettings = async (): Promise<SiteSettings> => {
 // Custom hook to get settings with real-time updates
 export const useSettings = () => {
   const queryClient = useQueryClient();
+  const channelRef = useRef<any>(null);
 
   // Set up real-time subscription
   useEffect(() => {
-    const channel = supabase
-      .channel('site_settings_changes')
+    // Clean up any existing channel first
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
+    // Create new channel with unique name
+    const channelName = `site_settings_changes_${Date.now()}`;
+    channelRef.current = supabase
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -66,7 +75,10 @@ export const useSettings = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [queryClient]);
 

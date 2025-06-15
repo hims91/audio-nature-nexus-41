@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,11 +56,23 @@ const AdminSettings: React.FC = () => {
       id: crypto.randomUUID(),
     }));
 
-    const brandColors = (s.brand_colors as BrandColors) || { 
+    // Safely parse brand_colors with proper type checking
+    let brandColors: BrandColors = { 
       primary: "#10b981", 
       secondary: "#059669", 
       accent: "#34d399" 
     };
+    
+    if (s.brand_colors && typeof s.brand_colors === 'object' && !Array.isArray(s.brand_colors)) {
+      const colors = s.brand_colors as Record<string, any>;
+      if (colors.primary && colors.secondary && colors.accent) {
+        brandColors = {
+          primary: String(colors.primary),
+          secondary: String(colors.secondary),
+          accent: String(colors.accent)
+        };
+      }
+    }
 
     return {
       siteName: s.site_name,
@@ -110,7 +121,7 @@ const AdminSettings: React.FC = () => {
         maintenance_mode: settings.maintenanceMode,
         social_links: socialLinksToSave,
         logo_url: settings.logoUrl,
-        brand_colors: settings.brandColors,
+        brand_colors: settings.brandColors as any, // Cast to any for JSON compatibility
     };
 
     updateSettings(settingsToUpdate, {
