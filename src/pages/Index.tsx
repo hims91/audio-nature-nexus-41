@@ -1,7 +1,7 @@
 
 import React from 'react';
 import UnifiedNavbar from '@/components/UnifiedNavbar';
-import LaunchReadyHeader from '@/components/enhanced/LaunchReadyHeader';
+import Hero from '@/components/Hero';
 import AboutEnhanced from '@/components/enhanced/AboutEnhanced';
 import ServicesEnhanced from '@/components/enhanced/ServicesEnhanced';
 import Portfolio from '@/components/Portfolio';
@@ -48,10 +48,14 @@ const Index = () => {
         <UnifiedNavbar />
         
         <main>
-          <LaunchReadyHeader />
-          <AboutEnhanced />
+          <Hero />
+          <div id="about">
+            <AboutEnhanced />
+          </div>
           <ServicesEnhanced />
-          <Portfolio />
+          <div id="portfolio">
+            <Portfolio />
+          </div>
           <Testimonials />
           <div id="contact">
             <ContactFormEnhanced />
