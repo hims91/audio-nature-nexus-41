@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,16 +46,6 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
   const handleListenNow = () => {
     console.log('🎵 Listen Now clicked for audio:', item.audioUrl);
     setShowAudioPlayer(!showAudioPlayer);
-  };
-
-  const handleExternalLinkClick = (url: string, title: string) => {
-    console.log('🔗 Opening external link:', url);
-    try {
-      const validUrl = url.startsWith('http') ? url : `https://${url}`;
-      window.open(validUrl, '_blank', 'noopener,noreferrer');
-    } catch (error) {
-      console.error('❌ Error opening external link:', error);
-    }
   };
 
   // Debug logging for audio availability
@@ -164,7 +153,6 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
             {/* External Links Section */}
             <ExternalLinksSection
               links={item.externalLinks}
-              onLinkClick={handleExternalLinkClick}
             />
           </div>
         </CardContent>

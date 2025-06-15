@@ -2,24 +2,13 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { type PortfolioItem } from "@/types/portfolio";
-import { getLinkIcon, getLinkLabel } from "@/utils/linkUtils";
+import { getLinkIcon, getLinkLabel, validateAndFormatUrl } from "@/utils/linkUtils";
 
 interface ExternalLinksProps {
   links: PortfolioItem['externalLinks'];
 }
 
 const ExternalLinks: React.FC<ExternalLinksProps> = ({ links }) => {
-  const handleExternalLinkClick = (url: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log('🔗 Opening external link:', url);
-    try {
-      const validUrl = url.startsWith('http') ? url : `https://${url}`;
-      window.open(validUrl, '_blank', 'noopener,noreferrer');
-    } catch (error) {
-      console.error('❌ Error opening external link:', error);
-    }
-  };
-
   if (!links || links.length === 0) {
     return null;
   }
@@ -28,16 +17,23 @@ const ExternalLinks: React.FC<ExternalLinksProps> = ({ links }) => {
     <div className="mb-3">
       <div className="flex flex-wrap gap-1">
         {links.map((link, index) => (
-          <Button
+          <a
             key={index}
-            variant="outline"
-            size="sm"
-            onClick={(e) => handleExternalLinkClick(link.url, e)}
-            className="text-xs cursor-pointer border-2 hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-500 transition-all duration-200 transform hover:scale-105"
+            href={validateAndFormatUrl(link.url)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="group"
           >
-            <span className="h-4 w-4 mr-1 flex items-center justify-center">{getLinkIcon(link.type)}</span>
-            {getLinkLabel(link)}
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs cursor-pointer border-2 hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-500 transition-all duration-200 transform group-hover:scale-105"
+            >
+              <span className="h-4 w-4 mr-1 flex items-center justify-center">{getLinkIcon(link.type)}</span>
+              {getLinkLabel(link)}
+            </Button>
+          </a>
         ))}
       </div>
     </div>
