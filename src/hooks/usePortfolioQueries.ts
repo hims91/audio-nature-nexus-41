@@ -2,9 +2,32 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { usePortfolioRealtime } from './usePortfolioRealtime';
+import { type Tables } from '@/integrations/supabase/types';
+import { type PortfolioItem } from '@/types/portfolio';
+
+type PortfolioItemRow = Tables<'portfolio_items'>;
+
+const mapToPortfolioItem = (item: PortfolioItemRow): PortfolioItem => {
+  // Supabase returns snake_case, but our app's type `PortfolioItem` uses camelCase.
+  // This function maps the data to match the app's type definition.
+  return {
+    id: item.id,
+    title: item.title,
+    client: item.client,
+    category: item.category,
+    description: item.description,
+    coverImageUrl: item.cover_image_url ?? '',
+    audioUrl: item.audio_url ?? undefined,
+    videoUrl: item.video_url ?? undefined,
+    externalLinks: (item.external_links as any) || [],
+    featured: item.featured ?? false,
+    createdAt: item.created_at,
+    updatedAt: item.updated_at,
+  };
+};
 
 // Fetch all portfolio items
-const fetchPortfolioItems = async () => {
+const fetchPortfolioItems = async (): Promise<PortfolioItem[]> => {
   console.log('🔍 Fetching portfolio items from Supabase...');
   const { data, error } = await supabase
     .from('portfolio_items')
@@ -17,11 +40,11 @@ const fetchPortfolioItems = async () => {
   }
 
   console.log('✅ Successfully fetched', data?.length || 0, 'portfolio items');
-  return data || [];
+  return (data || []).map(mapToPortfolioItem);
 };
 
 // Fetch featured portfolio items
-const fetchFeaturedPortfolioItems = async (limit: number = 6) => {
+const fetchFeaturedPortfolioItems = async (limit: number = 6): Promise<PortfolioItem[]> => {
   const { data, error } = await supabase
     .from('portfolio_items')
     .select('*')
@@ -34,7 +57,7 @@ const fetchFeaturedPortfolioItems = async (limit: number = 6) => {
     throw error;
   }
 
-  return data || [];
+  return (data || []).map(mapToPortfolioItem);
 };
 
 // Hook to get all portfolio items with real-time updates
@@ -60,7 +83,7 @@ export const useFeaturedPortfolioItems = (limit: number = 6) => {
 export const usePortfolioItemsByCategory = (category?: string) => {
   return useQuery({
     queryKey: ['portfolio_items', 'category', category],
-    queryFn: async () => {
+    queryFn: async (): Promise<PortfolioItem[]> => {
       if (!category) return fetchPortfolioItems();
       
       const { data, error } = await supabase
@@ -74,7 +97,7 @@ export const usePortfolioItemsByCategory = (category?: string) => {
         throw error;
       }
 
-      return data || [];
+      return (data || []).map(mapToPortfolioItem);
     },
   });
 };
