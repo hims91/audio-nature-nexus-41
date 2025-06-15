@@ -54,7 +54,7 @@ const ProfilePage: React.FC = () => {
       <SEOManager
         title="My Profile"
         description="Manage your profile information and settings."
-        canonicalUrl={`${window.location.origin}/profile`}
+        url={`${window.location.origin}/profile`}
       />
       <UnifiedNavbar />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
