@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesUpdate } from '@/integrations/supabase/types';
@@ -19,12 +20,12 @@ const fetchSettings = async (): Promise<SiteSettings> => {
     throw new Error('Could not fetch site settings.');
   }
   
-  // This will act as a fallback, though it's unlikely to be needed with the current DB setup.
+  // Fallback default config — ensure includes all required fields
   return data || {
     id: 1,
     site_name: 'Terra Echo Studios',
     site_description: 'Professional Audio Engineering Services',
-    contact_email: 'contact@terraecho.com',
+    contact_email: 'terraechostudios@gmail.com',
     featured_items_limit: 6,
     allow_user_registration: true,
     email_notifications: true,
@@ -32,7 +33,9 @@ const fetchSettings = async (): Promise<SiteSettings> => {
     maintenance_mode: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    social_links: [],
+    brand_colors: null,            // <-- added
+    logo_url: null,                // <-- added
+    social_links: [],              // <-- added
   };
 };
 
