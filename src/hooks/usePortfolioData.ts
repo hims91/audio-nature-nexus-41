@@ -1,15 +1,13 @@
 
 import { usePortfolioItems, useFeaturedPortfolioItems, usePortfolioItemsByCategory } from "./usePortfolioQueries";
 import { usePortfolioMutations } from "./usePortfolioMutations";
-import { usePortfolioRealtime } from "./usePortfolioRealtime";
 
 export const usePortfolioData = () => {
   const portfolioItemsQuery = usePortfolioItems();
   const featuredItemsQuery = useFeaturedPortfolioItems();
   const mutations = usePortfolioMutations();
   
-  // Set up real-time subscription
-  usePortfolioRealtime();
+  // Real-time subscription is now handled within usePortfolioItems
 
   return {
     portfolioItems: portfolioItemsQuery.data || [],

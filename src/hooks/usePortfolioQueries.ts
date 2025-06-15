@@ -14,7 +14,7 @@ const mapToPortfolioItem = (item: PortfolioItemRow): PortfolioItem => {
     id: item.id,
     title: item.title,
     client: item.client,
-    category: item.category,
+    category: item.category as PortfolioItem['category'],
     description: item.description,
     coverImageUrl: item.cover_image_url ?? '',
     audioUrl: item.audio_url ?? undefined,
