@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesUpdate } from '@/integrations/supabase/types';
 
@@ -34,48 +33,11 @@ const fetchSettings = async (): Promise<SiteSettings> => {
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     social_links: [],
-    logo_url: null,
-    brand_colors: { primary: "#10b981", secondary: "#059669", accent: "#34d399" },
   };
 };
 
-// Custom hook to get settings with real-time updates
+// Custom hook to get settings
 export const useSettings = () => {
-  const queryClient = useQueryClient();
-
-  // Set up real-time subscription
-  useEffect(() => {
-    // Create new channel with a more unique name to avoid strict mode issues
-    const channelName = `site_settings_changes_${Math.random().toString(36).substring(2, 9)}`;
-
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'site_settings'
-        },
-        (payload) => {
-          console.log('🔄 Settings updated in real-time:', payload);
-          // Update the query cache with new data
-          if (payload.new && 'id' in payload.new) {
-            queryClient.setQueryData(SETTINGS_QUERY_KEY, payload.new as SiteSettings);
-          }
-        }
-      )
-      .subscribe((status, error) => {
-        if (error) {
-          console.error(`Subscription error on channel ${channelName}:`, error);
-        }
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-
   return useQuery({
     queryKey: SETTINGS_QUERY_KEY,
     queryFn: fetchSettings,

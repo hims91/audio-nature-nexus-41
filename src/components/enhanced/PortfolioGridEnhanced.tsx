@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { usePortfolioData } from "@/hooks/usePortfolioData";
 import { type PortfolioItem } from "@/types/portfolio";
@@ -24,7 +25,7 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
   const items = showFeaturedOnly ? featuredItems : portfolioItems;
   const displayItems = limit ? items.slice(0, limit) : items;
 
-  const categories: string[] = ["All", ...Array.from(new Set(portfolioItems.map(item => item.category)))];
+  const categories = ["All", ...Array.from(new Set(portfolioItems.map(item => item.category)))];
 
   const filteredItems = selectedCategory === "All" 
     ? displayItems 

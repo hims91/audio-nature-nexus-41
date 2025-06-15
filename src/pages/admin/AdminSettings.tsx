@@ -1,17 +1,34 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Save,
+  RefreshCw,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
 import { useAdminMonitoring } from '@/hooks/useAdminMonitoring';
+import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tables, TablesUpdate } from '@/integrations/supabase/types';
-import type { SocialLink } from '@/components/admin/SocialLinksManager';
-import AdminSettingsHeader from '@/components/admin/settings/AdminSettingsHeader';
-import SettingsTabs from '@/components/admin/settings/SettingsTabs';
-import { AdminSettingsData, BrandColors } from '@/types/settings';
+import { TablesUpdate, Tables } from '@/integrations/supabase/types';
+import SocialLinksManager, { SocialLink } from '@/components/admin/SocialLinksManager';
+import GeneralSettings from '@/components/admin/settings/GeneralSettings';
+import PortfolioSettings from '@/components/admin/settings/PortfolioSettings';
+import UserSettings from '@/components/admin/settings/UserSettings';
+import EmailSettings from '@/components/admin/settings/EmailSettings';
 
+interface AdminSettingsData {
+  siteName: string;
+  siteDescription: string;
+  contactEmail: string;
+  featuredItemsLimit: number;
+  allowUserRegistration: boolean;
+  emailNotifications: boolean;
+  portfolioAutoApprove: boolean;
+  maintenanceMode: boolean;
+  socialLinks: SocialLink[];
+}
 
 const AdminSettings: React.FC = () => {
   const { data: initialSettings, isLoading: isLoadingSettings, isError } = useSettings();
@@ -29,23 +46,6 @@ const AdminSettings: React.FC = () => {
       id: crypto.randomUUID(),
     }));
 
-    let brandColors: BrandColors = { 
-      primary: "#10b981", 
-      secondary: "#059669", 
-      accent: "#34d399" 
-    };
-    
-    if (s.brand_colors && typeof s.brand_colors === 'object' && !Array.isArray(s.brand_colors)) {
-      const colors = s.brand_colors as Record<string, any>;
-      if (colors.primary && colors.secondary && colors.accent) {
-        brandColors = {
-          primary: String(colors.primary),
-          secondary: String(colors.secondary),
-          accent: String(colors.accent)
-        };
-      }
-    }
-
     return {
       siteName: s.site_name,
       siteDescription: s.site_description,
@@ -56,8 +56,6 @@ const AdminSettings: React.FC = () => {
       portfolioAutoApprove: s.portfolio_auto_approve,
       maintenanceMode: s.maintenance_mode,
       socialLinks: socialLinksWithId,
-      logoUrl: s.logo_url,
-      brandColors,
     };
   };
 
@@ -92,8 +90,6 @@ const AdminSettings: React.FC = () => {
         portfolio_auto_approve: settings.portfolioAutoApprove,
         maintenance_mode: settings.maintenanceMode,
         social_links: socialLinksToSave,
-        logo_url: settings.logoUrl,
-        brand_colors: settings.brandColors as any,
     };
 
     updateSettings(settingsToUpdate, {
@@ -105,7 +101,7 @@ const AdminSettings: React.FC = () => {
         setHasChanges(false);
         toast({
           title: "Settings Saved",
-          description: "Your settings have been saved successfully and will be reflected across the site.",
+          description: "Your settings have been saved successfully.",
         });
       },
       onError: (error: any) => {
@@ -158,16 +154,66 @@ const AdminSettings: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <AdminSettingsHeader
-        isSaving={isSaving}
-        hasChanges={hasChanges}
-        onSave={saveSettings}
-        onReset={resetChanges}
-      />
-      <SettingsTabs
-        settings={settings}
-        handleSettingChange={handleSettingChange}
-      />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-nature-forest dark:text-white">
+            Settings
+          </h1>
+          <p className="text-nature-bark dark:text-gray-300 mt-2">
+            Configure application settings and preferences
+          </p>
+        </div>
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={resetChanges}
+            disabled={!hasChanges || isSaving}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reset
+          </Button>
+          <Button 
+            onClick={saveSettings}
+            disabled={!hasChanges || isSaving}
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
+      </div>
+
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="social">Social</TabsTrigger>
+          <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="email">Email</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general">
+          <GeneralSettings settings={settings} handleSettingChange={handleSettingChange} />
+        </TabsContent>
+
+        <TabsContent value="social">
+          <SocialLinksManager
+            links={settings.socialLinks}
+            onUpdate={(newLinks) => handleSettingChange('socialLinks', newLinks)}
+          />
+        </TabsContent>
+
+        <TabsContent value="portfolio">
+          <PortfolioSettings settings={settings} handleSettingChange={handleSettingChange} />
+        </TabsContent>
+
+        <TabsContent value="users">
+          <UserSettings settings={settings} handleSettingChange={handleSettingChange} />
+        </TabsContent>
+
+        <TabsContent value="email">
+          <EmailSettings settings={settings} handleSettingChange={handleSettingChange} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
