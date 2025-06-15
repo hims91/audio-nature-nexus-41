@@ -3,20 +3,22 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, ExternalLink, Calendar, User, Star } from "lucide-react";
+import { Play, Pause, ExternalLink, Calendar, User, Star, Headphones, Video, AudioWaveform } from "lucide-react";
 import { type PortfolioItem } from "@/types/portfolio";
 import AudioPlayer from "@/components/AudioPlayer";
 import VideoPlayer from "@/components/VideoPlayer";
 import HoverSoundPreview from "../interactive/HoverSoundPreview";
 import Card3D from "../effects/Card3D";
 import MagneticButton from "../animations/MagneticButton";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PortfolioCardProps {
   item: PortfolioItem;
 }
 
 const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
-  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const [showAudioPlayer, setShowAudioPlayer] = useState<boolean>(false);
+  const isMobile = useIsMobile();
 
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -36,12 +38,51 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
     });
   };
 
+  const hasValidMedia = (url?: string) => url && url.trim() !== '';
+
+  const getMediaTypeBadges = () => {
+    const badges = [];
+    
+    if (hasValidMedia(item.audioUrl)) {
+      badges.push(
+        <Badge key="audio" className="bg-blue-500 text-white hover:bg-blue-600 text-xs">
+          <Headphones className="w-3 h-3 mr-1" />
+          Audio
+        </Badge>
+      );
+    }
+    
+    if (hasValidMedia(item.videoUrl)) {
+      badges.push(
+        <Badge key="video" className="bg-purple-500 text-white hover:bg-purple-600 text-xs">
+          <Video className="w-3 h-3 mr-1" />
+          Video
+        </Badge>
+      );
+    }
+    
+    if (item.externalLinks && item.externalLinks.length > 0) {
+      badges.push(
+        <Badge key="links" className="bg-orange-500 text-white hover:bg-orange-600 text-xs">
+          <ExternalLink className="w-3 h-3 mr-1" />
+          {item.externalLinks.length} Link{item.externalLinks.length > 1 ? 's' : ''}
+        </Badge>
+      );
+    }
+    
+    return badges;
+  };
+
+  const handleListenNow = () => {
+    setShowAudioPlayer(!showAudioPlayer);
+  };
+
   return (
     <Card3D intensity="medium" glowEffect={true} className="group">
       <Card className="overflow-hidden transition-all duration-500 border-0 bg-white dark:bg-gray-800 transform h-full">
         {/* Cover Image with Hover Sound Preview */}
         <div className="relative h-48 overflow-hidden">
-          {item.audioUrl ? (
+          {item.audioUrl && !isMobile ? (
             <HoverSoundPreview
               audioUrl={item.audioUrl}
               title={item.title}
@@ -95,10 +136,15 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               {item.category}
             </Badge>
           </div>
+
+          {/* Media Type Indicators */}
+          <div className="absolute bottom-3 left-3 flex flex-wrap gap-1">
+            {getMediaTypeBadges()}
+          </div>
         </div>
 
         <CardContent className="p-6">
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
               <h3 className="font-bold text-lg text-nature-forest dark:text-white group-hover:text-nature-leaf dark:group-hover:text-blue-400 transition-colors duration-300">
                 {item.title}
@@ -115,15 +161,52 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               {item.description}
             </p>
 
-            {/* Media Players */}
-            {playingAudio === item.id && item.audioUrl && (
-              <div className="mt-4 animate-fade-in">
+            {/* Listen Now Button - Prominent for Audio Content */}
+            {hasValidMedia(item.audioUrl) && (
+              <div className="flex justify-center">
+                <MagneticButton>
+                  <Button
+                    onClick={handleListenNow}
+                    className={`${
+                      showAudioPlayer 
+                        ? 'bg-nature-leaf hover:bg-nature-forest' 
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
+                    } text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg`}
+                  >
+                    {showAudioPlayer ? (
+                      <>
+                        <Pause className="w-4 h-4 mr-2" />
+                        Hide Player
+                      </>
+                    ) : (
+                      <>
+                        <AudioWaveform className="w-4 h-4 mr-2" />
+                        Listen Now
+                      </>
+                    )}
+                  </Button>
+                </MagneticButton>
+              </div>
+            )}
+
+            {/* Audio Player - Prominently displayed when toggled */}
+            {showAudioPlayer && hasValidMedia(item.audioUrl) && (
+              <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-lg border-2 border-blue-200 dark:border-gray-500 animate-fade-in">
+                <div className="flex items-center mb-2">
+                  <AudioWaveform className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Audio Preview</span>
+                </div>
                 <AudioPlayer audioUrl={item.audioUrl} />
               </div>
             )}
 
-            {item.videoUrl && (
-              <div className="mt-4 animate-fade-in">
+            {/* Video Player */}
+            {hasValidMedia(item.videoUrl) && (
+              <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 rounded-lg border-2 border-purple-200 dark:border-gray-500">
+                <div className="flex items-center mb-2">
+                  <Video className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" />
+                  <span className="text-sm font-medium text-purple-800 dark:text-purple-200">Video Preview</span>
+                </div>
                 <VideoPlayer videoUrl={item.videoUrl} />
               </div>
             )}
@@ -137,7 +220,9 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(link.url, '_blank', 'noopener,noreferrer')}
-                      className="text-xs transform hover:scale-105 transition-all duration-200 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                      className={`text-xs transform hover:scale-105 transition-all duration-200 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 ${
+                        isMobile ? 'px-4 py-3 text-sm' : ''
+                      }`}
                     >
                       <ExternalLink className="w-3 h-3 mr-1" />
                       {link.title || link.type}
