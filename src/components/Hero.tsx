@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
@@ -37,11 +36,20 @@ const Hero: React.FC = () => {
           </div>
           
           {isLoading ? (
-            <Skeleton className="h-16 w-3/4 mx-auto mb-6 bg-white/20" />
+            <Skeleton className="h-16 w-3/4 mx-auto mb-4 bg-white/20" />
           ) : (
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-md">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-3 drop-shadow-md">
               {settings?.site_name}
             </h1>
+          )}
+          
+          {/* --- SLOGAN UNDER SITE NAME --- */}
+          {isLoading ? (
+            <Skeleton className="h-6 w-2/3 mx-auto mb-5 bg-white/20" />
+          ) : (
+            <div className="italic text-nature-cream/90 text-xl md:text-2xl md:mb-2 mb-5 drop-shadow-md font-medium">
+              Authentic Audio, Naturally Engineered
+            </div>
           )}
           
           {isLoading ? (

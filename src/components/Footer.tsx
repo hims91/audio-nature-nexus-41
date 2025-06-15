@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useSettings } from "@/hooks/useSettings";
 import { Facebook, Instagram, Twitter, Linkedin, Youtube } from 'lucide-react';
@@ -75,11 +74,21 @@ Studios </span>
             </ul>
           </div>
           
-          {/* Hours */}
+          {/* --- CONTACT US (REPLACES HOURS) --- */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Studio Hours</h4>
+            <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
             <ul className="space-y-2 text-nature-cream/80">
-              <li>Monday - Sunday: 9:00 AM - 6:00 PM</li>
+              <li>
+                <a 
+                  href="mailto:terraechostudios@gmail.com"
+                  className="hover:text-white transition-colors underline"
+                >
+                  terraechostudios@gmail.com
+                </a>
+              </li>
+              <li className="text-xs text-nature-cream/60 mt-2 pt-2 border-t border-white/10">
+                Studio Hours: Monday - Sunday: 9:00 AM - 6:00 PM
+              </li>
             </ul>
           </div>
         </div>
@@ -87,7 +96,7 @@ Studios </span>
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-nature-cream/70 mb-4 md:mb-0">
-            &copy; {currentYear} Will Hall Sound Studios. All rights reserved.
+            © 2025 Terra Echo Studios. All rights reserved.
           </p>
           
           <div className="flex items-center space-x-6">
