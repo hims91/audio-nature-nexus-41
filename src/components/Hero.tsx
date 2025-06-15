@@ -45,19 +45,11 @@ const Hero: React.FC = () => {
           
           {/* --- SLOGAN UNDER SITE NAME --- */}
           {isLoading ? (
-            <Skeleton className="h-6 w-2/3 mx-auto mb-5 bg-white/20" />
+            <Skeleton className="h-6 w-2/3 mx-auto mb-10 bg-white/20" />
           ) : (
-            <div className="italic text-nature-cream/90 text-xl md:text-2xl md:mb-2 mb-5 drop-shadow-md font-medium">
+            <div className="italic text-nature-cream/90 text-xl md:text-2xl mb-10 drop-shadow-md font-medium">
               Authentic Audio, Naturally Engineered
             </div>
-          )}
-          
-          {isLoading ? (
-            <Skeleton className="h-8 w-1/2 mx-auto mb-10 bg-white/20" />
-          ) : (
-            <p className="text-xl md:text-2xl text-nature-cream mb-10 drop-shadow-md">
-              {settings?.site_description}
-            </p>
           )}
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
