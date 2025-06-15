@@ -1,7 +1,6 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, AlertTriangle } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -24,8 +23,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
   
   // Generate simple waveform visualization data
   useEffect(() => {
-    // Create fake waveform data for visual appeal
-    const data = Array.from({ length: 50 }, () => Math.random() * 100);
+    // Create more dynamic-looking waveform data
+    const data = Array.from({ length: 60 }, () => 5 + Math.random() * 95);
     setWaveformData(data);
   }, [audioUrl]);
   
@@ -138,7 +137,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
     : encodeURI(audioUrl);
   
   return (
-    <div className="bg-gradient-to-r from-white via-blue-50 to-white dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 rounded-xl p-4 shadow-lg border border-blue-200 dark:border-gray-600">
+    <div className="bg-slate-800/30 dark:bg-slate-900/50 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-lg border border-slate-700/30">
       <audio
         ref={audioRef}
         src={safeAudioUrl}
@@ -151,33 +150,30 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
       />
       
       {isLoading && !audioError && (
-        <div className="text-sm text-blue-600 dark:text-blue-400 mb-2 text-center animate-pulse">
+        <div className="text-sm text-slate-400 dark:text-slate-300 mb-2 text-center animate-pulse">
           Loading audio...
         </div>
       )}
       
       {audioError ? (
-        <div className="text-sm text-red-500 mb-2 text-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+        <div className="text-sm text-amber-500 mb-2 text-center p-3 bg-amber-500/10 dark:bg-amber-900/20 rounded-lg flex items-center justify-center gap-2">
+          <AlertTriangle className="h-5 w-5" />
           <p className="font-medium">Audio could not be loaded</p>
-          <p className="text-xs mt-1 opacity-70">The file may be missing or in an unsupported format.</p>
-          {!isMobile && (
-            <p className="text-xs mt-1 text-gray-600 dark:text-gray-400 break-all">Path: {audioUrl}</p>
-          )}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Waveform Visualization */}
-          <div className="relative h-16 bg-blue-100 dark:bg-gray-600 rounded-lg overflow-hidden">
-            <div className="flex items-end justify-center h-full gap-1 p-2">
+          <div className="relative h-14 sm:h-16 bg-black/20 rounded-lg overflow-hidden">
+            <div className="flex items-end justify-center h-full gap-0.5 sm:gap-1 p-1">
               {waveformData.map((height, index) => (
                 <div
                   key={index}
-                  className={`w-1 rounded-t transition-all duration-300 ${
+                  className={`w-1 rounded-full transition-all duration-300 ${
                     (index / waveformData.length) * 100 <= getProgress()
-                      ? 'bg-blue-500 dark:bg-blue-400'
-                      : 'bg-blue-300 dark:bg-gray-500'
+                      ? 'bg-cyan-400'
+                      : 'bg-slate-600'
                   }`}
-                  style={{ height: `${Math.max(height * 0.4, 8)}%` }}
+                  style={{ height: `${height}%` }}
                 />
               ))}
             </div>
@@ -189,7 +185,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
               onClick={togglePlayPause}
               variant="outline"
               size={isMobile ? "default" : "icon"}
-              className={`${isMobile ? 'w-full py-3' : 'h-12 w-12'} rounded-full border-blue-300 text-blue-600 hover:bg-blue-600 hover:text-white dark:border-blue-400 dark:text-blue-400 shadow-lg transition-all duration-200 transform hover:scale-105`}
+              className={`${isMobile ? 'w-full py-3' : 'h-11 w-11'} rounded-full border-slate-600 text-slate-300 hover:bg-cyan-500 hover:text-white hover:border-cyan-500 dark:border-slate-500 dark:text-slate-300 shadow-lg transition-all duration-200 transform hover:scale-105`}
             >
               {isPlaying ? (
                 <>
@@ -204,15 +200,15 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
               )}
             </Button>
             
-            <div className={`${isMobile ? 'w-full' : 'flex-1'} space-y-2`}>
+            <div className={`${isMobile ? 'w-full' : 'flex-1'} space-y-1.5`}>
               <Slider
                 value={[currentTime]}
                 max={duration || 100}
                 step={0.1}
                 onValueChange={handleSeek}
-                className="my-1"
+                className="my-1 [&>span:first-child]:bg-cyan-400"
               />
-              <div className="flex justify-between text-xs text-blue-700 dark:text-blue-300">
+              <div className="flex justify-between text-xs text-slate-400 dark:text-slate-400">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration || 0)}</span>
               </div>
@@ -224,7 +220,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
                   onClick={toggleMute}
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                  className="h-8 w-8 text-slate-400 hover:text-white"
                 >
                   {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                 </Button>
@@ -233,7 +229,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
                   max={1}
                   step={0.01}
                   onValueChange={handleVolumeChange}
-                  className="flex-1"
+                  className="flex-1 [&>span:first-child]:bg-slate-400"
                 />
               </div>
             )}

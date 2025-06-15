@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { type PortfolioItem } from "@/types/portfolio";
 import { Card, CardContent } from "@/components/ui/card";
@@ -198,15 +197,6 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               </Badge>
             )}
           </div>
-
-          {/* Debug info for development */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
-              <p>Audio URL: {item.audioUrl || 'None'}</p>
-              <p>Video URL: {item.videoUrl || 'None'}</p>
-              <p>Cover Image: {item.coverImageUrl || 'None'}</p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </>

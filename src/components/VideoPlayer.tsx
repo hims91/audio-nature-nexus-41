@@ -1,15 +1,44 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { Play } from "lucide-react";
 
 interface VideoPlayerProps {
   videoUrl?: string;
   poster?: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = "/placeholder.svg" }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [videoError, setVideoError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isIntersecting, setIsIntersecting] = useState(false);
+  const [showPlayButton, setShowPlayButton] = useState(true);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsIntersecting(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "100px" } // Load when it's 100px away from viewport
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, []);
   
   // Return null if no videoUrl is provided
   if (!videoUrl) {
@@ -30,46 +59,67 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = "/placehol
     console.error("Video error loading:", videoUrl, e);
     setVideoError(true);
     setIsLoading(false);
-    
-    // Try to determine a more specific error message
-    const video = e.currentTarget;
-    
-    if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
-      setErrorMessage("Video file not found or format not supported by your browser.");
-    } else if (video.networkState === HTMLMediaElement.NETWORK_EMPTY) {
-      setErrorMessage("Video resource could not be loaded.");
-    } else {
-      setErrorMessage("Unable to load video. The file may be missing or in an unsupported format.");
+    setErrorMessage("Unable to load video. The file may be missing or unsupported.");
+  };
+
+  const handlePlayClick = () => {
+    if (videoRef.current) {
+      videoRef.current.play();
+      setShowPlayButton(false);
     }
   };
   
   return (
-    <div className="bg-white/80 rounded-md overflow-hidden shadow-sm">
-      {isLoading && !videoError && (
-        <div className="bg-gray-100 h-40 flex items-center justify-center">
-          <div className="animate-pulse text-nature-forest">Loading video...</div>
-        </div>
-      )}
-      
-      {videoError ? (
-        <div className="bg-red-50 text-red-500 p-4 text-sm">
-          {errorMessage}
-          <p className="text-xs mt-2 text-nature-bark">Path: {videoUrl}</p>
-        </div>
+    <div ref={containerRef} className="relative bg-black rounded-lg overflow-hidden shadow-lg group">
+      {isIntersecting ? (
+        <>
+          {videoError ? (
+            <div className="bg-red-50 text-red-500 p-4 text-sm aspect-video flex flex-col items-center justify-center">
+              <p>{errorMessage}</p>
+              <p className="text-xs mt-2 text-nature-bark break-all">Path: {videoUrl}</p>
+            </div>
+          ) : (
+            <>
+              {showPlayButton && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-10 backdrop-blur-sm transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+                  <button
+                    onClick={handlePlayClick}
+                    className="bg-white/20 hover:bg-white/30 rounded-full p-4 transition-all duration-200 transform hover:scale-110"
+                    aria-label="Play video"
+                  >
+                    <Play className="w-8 h-8 text-white ml-1" />
+                  </button>
+                </div>
+              )}
+
+              <video 
+                ref={videoRef}
+                controls={!showPlayButton}
+                className="w-full h-auto aspect-video" 
+                src={safeVideoUrl}
+                preload="metadata"
+                onLoadedData={handleVideoLoad}
+                onError={handleVideoError}
+                poster={poster || "/placeholder.svg"}
+                playsInline
+                onPlay={() => setShowPlayButton(false)}
+                onPause={() => setShowPlayButton(true)}
+              >
+                <source src={safeVideoUrl} type="video/mp4" />
+                <source src={safeVideoUrl} type="video/webm" />
+                Your browser does not support the video tag.
+              </video>
+            </>
+          )}
+        </>
       ) : (
-        <video 
-          controls 
-          className="w-full h-auto" 
-          src={safeVideoUrl}
-          preload="metadata"
-          onLoadedData={handleVideoLoad}
-          onError={handleVideoError}
-          poster={poster}
-        >
-          <source src={safeVideoUrl} type="video/mp4" />
-          <source src={safeVideoUrl} type="video/webm" />
-          Your browser does not support the video tag.
-        </video>
+         <div className="aspect-video bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+           {poster ? (
+             <img src={poster} alt="Video poster" className="w-full h-full object-cover" />
+           ) : (
+             <div className="animate-pulse text-nature-forest">Loading video...</div>
+           )}
+         </div>
       )}
     </div>
   );
