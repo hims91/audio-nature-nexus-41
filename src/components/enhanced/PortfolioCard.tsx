@@ -77,6 +77,17 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
     setShowAudioPlayer(!showAudioPlayer);
   };
 
+  const handleExternalLinkClick = (url: string, title: string) => {
+    console.log('🔗 Opening external link:', url);
+    try {
+      // Ensure the URL is properly formatted
+      const validUrl = url.startsWith('http') ? url : `https://${url}`;
+      window.open(validUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('❌ Error opening external link:', error);
+    }
+  };
+
   return (
     <Card3D intensity="medium" glowEffect={true} className="group">
       <Card className="overflow-hidden transition-all duration-500 border-0 bg-white dark:bg-gray-800 transform h-full">
@@ -200,7 +211,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               </div>
             )}
 
-            {/* Video Player */}
+            {/* Video Player - Always visible when video exists */}
             {hasValidMedia(item.videoUrl) && (
               <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 rounded-lg border-2 border-purple-200 dark:border-gray-500">
                 <div className="flex items-center mb-2">
@@ -211,7 +222,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               </div>
             )}
 
-            {/* External Links */}
+            {/* External Links - Fixed to be properly clickable */}
             {item.externalLinks && item.externalLinks.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
                 {item.externalLinks.map((link, index) => (
@@ -219,8 +230,8 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open(link.url, '_blank', 'noopener,noreferrer')}
-                      className={`text-xs transform hover:scale-105 transition-all duration-200 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 ${
+                      onClick={() => handleExternalLinkClick(link.url, link.title || link.type)}
+                      className={`text-xs transform hover:scale-105 transition-all duration-200 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer ${
                         isMobile ? 'px-4 py-3 text-sm' : ''
                       }`}
                     >

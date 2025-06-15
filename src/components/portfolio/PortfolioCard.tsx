@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import AudioPlayer from "@/components/AudioPlayer";
 import VideoPlayer from "@/components/VideoPlayer";
 import PortfolioItemDetail from "./PortfolioItemDetail";
-import { Music, FileVideo, ExternalLink, Star } from "lucide-react";
+import { Music, FileVideo, ExternalLink, Star, Play } from "lucide-react";
 
 interface PortfolioCardProps {
   item: PortfolioItem;
@@ -16,6 +16,7 @@ interface PortfolioCardProps {
 
 const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
   const [detailOpen, setDetailOpen] = useState(false);
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
   
   // Function to check if a URL actually exists and is not an empty string
   const hasMedia = (url?: string) => {
@@ -26,6 +27,17 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
   const getEncodedUrl = (url?: string) => {
     if (!url) return "";
     return url.startsWith("http") ? url : encodeURI(url);
+  };
+
+  const handleExternalLinkClick = (url: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('🔗 Opening external link:', url);
+    try {
+      const validUrl = url.startsWith('http') ? url : `https://${url}`;
+      window.open(validUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('❌ Error opening external link:', error);
+    }
   };
 
   return (
@@ -85,6 +97,55 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
           <p className="text-sm text-nature-bark line-clamp-2 mb-3">
             {item.description}
           </p>
+
+          {/* Quick Audio Preview */}
+          {hasMedia(item.audioUrl) && (
+            <div className="mb-3">
+              <Button
+                onClick={() => setShowAudioPlayer(!showAudioPlayer)}
+                variant="outline"
+                size="sm"
+                className="w-full mb-2"
+              >
+                <Play className="h-3 w-3 mr-1" />
+                {showAudioPlayer ? 'Hide Audio' : 'Play Audio'}
+              </Button>
+              {showAudioPlayer && (
+                <div className="bg-blue-50 dark:bg-gray-700 p-2 rounded">
+                  <AudioPlayer audioUrl={item.audioUrl} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Quick Video Preview */}
+          {hasMedia(item.videoUrl) && (
+            <div className="mb-3">
+              <div className="bg-purple-50 dark:bg-gray-700 p-2 rounded">
+                <VideoPlayer videoUrl={item.videoUrl} />
+              </div>
+            </div>
+          )}
+
+          {/* External Links - Clickable */}
+          {item.externalLinks && item.externalLinks.length > 0 && (
+            <div className="mb-3">
+              <div className="flex flex-wrap gap-1">
+                {item.externalLinks.map((link, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => handleExternalLinkClick(link.url, e)}
+                    className="text-xs cursor-pointer"
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    {link.title || link.type}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
           
           {/* Media Type Indicators */}
           <div className="mt-auto flex items-center gap-2">

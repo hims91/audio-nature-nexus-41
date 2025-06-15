@@ -87,15 +87,25 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
       return;
     }
     
+    console.log('💾 Saving portfolio item with data:', formData);
+    
+    // Ensure all media URLs are properly included
+    const saveData = {
+      ...formData,
+      audioUrl: formData.audioUrl || '',
+      videoUrl: formData.videoUrl || '',
+      coverImageUrl: formData.coverImageUrl || ''
+    };
+    
     // In edit mode, preserve the original ID and creation date
     if (mode === "edit" && item) {
       onSave({
-        ...formData,
+        ...saveData,
         id: item.id,
         createdAt: item.createdAt
       });
     } else {
-      onSave(formData);
+      onSave(saveData);
     }
   };
 

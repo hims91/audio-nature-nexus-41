@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -152,6 +153,8 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
     setUploadProgress(0);
     
     try {
+      console.log(`🚀 Starting ${type} upload:`, file.name);
+      
       const result: FileUploadResult = await FileUploadService.uploadFile(
         file,
         type,
@@ -164,20 +167,22 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
         setUploadedUrl(result.url);
         setUploadedPath(result.path);
         
-        // Notify parent component
+        console.log(`✅ ${type} upload successful:`, result.url);
+        
+        // Notify parent component immediately
         if (onFileUploaded) {
           onFileUploaded(result.url, result.path);
         }
         
         toast({
           title: "File Uploaded Successfully",
-          description: `${fileName} has been uploaded to Supabase Storage.`,
+          description: `${fileName} has been uploaded and is ready to use.`,
         });
       } else {
         throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error(`❌ ${type} upload error:`, error);
       toast({
         title: "Upload Failed",
         description: error instanceof Error ? error.message : "Failed to upload file",
@@ -220,7 +225,7 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
             <div className="flex items-center mt-2">
               <span className="text-sm text-nature-forest flex-grow">
                 {fileName} 
-                {isUploaded && <span className="text-green-500 ml-2">(Uploaded)</span>}
+                {isUploaded && <span className="text-green-500 ml-2">(✓ Uploaded & Ready)</span>}
               </span>
               <div className="flex space-x-2">
                 {!isUploaded && !isUploading && (
@@ -270,8 +275,8 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
               <>
                 <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium">File uploaded successfully</p>
-                  <p>The file has been saved to Supabase Storage and is ready to use.</p>
+                  <p className="font-medium">File uploaded and ready</p>
+                  <p>The file has been saved and will be included when you save the portfolio item.</p>
                   {uploadedUrl && (
                     <p className="text-xs text-green-800 mt-1 break-all">URL: {uploadedUrl}</p>
                   )}

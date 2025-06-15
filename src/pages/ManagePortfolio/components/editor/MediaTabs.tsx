@@ -28,18 +28,30 @@ const MediaTabs: React.FC<MediaTabsProps> = ({
   toast
 }) => {
   const handleImageUploaded = (url: string, path: string) => {
+    console.log('🖼️ Image uploaded successfully:', url);
     setFormData(prev => ({ ...prev, coverImageUrl: url }));
-    console.log('Image uploaded:', url);
+    toast({
+      title: "Image Uploaded",
+      description: "Cover image has been uploaded successfully."
+    });
   };
 
   const handleAudioUploaded = (url: string, path: string) => {
+    console.log('🎵 Audio uploaded successfully:', url);
     setFormData(prev => ({ ...prev, audioUrl: url }));
-    console.log('Audio uploaded:', url);
+    toast({
+      title: "Audio Uploaded",
+      description: "Audio file has been uploaded successfully."
+    });
   };
 
   const handleVideoUploaded = (url: string, path: string) => {
+    console.log('🎬 Video uploaded successfully:', url);
     setFormData(prev => ({ ...prev, videoUrl: url }));
-    console.log('Video uploaded:', url);
+    toast({
+      title: "Video Uploaded", 
+      description: "Video file has been uploaded successfully."
+    });
   };
 
   return (
