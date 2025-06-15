@@ -80,11 +80,6 @@ const AboutEnhanced: React.FC = () => {
                   </Badge>
                 </div>
               </div>
-              
-              {/* Floating Stats with 3D effect */}
-              <Card3D intensity="low" className="absolute -bottom-6 -right-6">
-                
-              </Card3D>
             </Card3D>
           </FadeInView>
 

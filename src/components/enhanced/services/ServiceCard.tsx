@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -15,7 +14,6 @@ interface ServiceCardProps {
     description: string;
     icon: string;
     features: string[];
-    price: string;
     category: string;
   };
   isHovered: boolean;
@@ -78,26 +76,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between pt-4 border-t border-nature-moss/20 dark:border-gray-700">
-              <div className="text-lg font-semibold text-nature-forest dark:text-white">
-                {service.price}
-              </div>
-              <MagneticButton>
-                <Button
-                  size="sm"
-                  className={`rounded-full transition-all duration-300 ${
-                    isHovered
-                      ? 'bg-nature-forest hover:bg-nature-leaf text-white transform scale-105'
-                      : 'bg-nature-moss/20 hover:bg-nature-moss/30 dark:bg-gray-700 dark:hover:bg-gray-600 text-nature-forest dark:text-white'
-                  }`}
-                >
-                  Learn More
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </MagneticButton>
             </div>
 
             {/* Audio Preview Button */}

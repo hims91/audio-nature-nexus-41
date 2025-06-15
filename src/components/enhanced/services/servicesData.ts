@@ -6,7 +6,6 @@ export const servicesData = [
     description: "Professional mixing and mastering services that bring clarity, depth, and commercial polish to your tracks.",
     icon: "audio-waveform",
     features: ["Analog-style processing", "Streaming optimization", "Multiple format delivery"],
-    price: "From $150",
     category: "Production"
   },
   {
@@ -15,7 +14,6 @@ export const servicesData = [
     description: "Custom sound creation for films, games, and multimedia projects with cinematic depth and emotional impact.",
     icon: "wand-2",
     features: ["Foley recording", "Ambient soundscapes", "Interactive audio"],
-    price: "From $200",
     category: "Creative"
   },
   {
@@ -24,7 +22,6 @@ export const servicesData = [
     description: "Complete podcast production from recording to final delivery, ensuring broadcast-quality audio.",
     icon: "mic",
     features: ["Multi-track editing", "Noise reduction", "Format optimization"],
-    price: "From $100",
     category: "Content"
   },
   {
@@ -33,7 +30,6 @@ export const servicesData = [
     description: "Immersive 3D audio mixing for the ultimate listening experience across all playback systems.",
     icon: "volume-2",
     features: ["Object-based mixing", "Binaural rendering", "Platform optimization"],
-    price: "From $300",
     category: "Premium"
   },
   {
@@ -42,7 +38,6 @@ export const servicesData = [
     description: "Multi-track live recording services for concerts, events, and performances.",
     icon: "music",
     features: ["Up to 64 channels", "Redundant systems", "Post-production available"],
-    price: "Custom Quote",
     category: "Live"
   },
   {
@@ -51,7 +46,6 @@ export const servicesData = [
     description: "Breathe new life into old recordings with advanced restoration and enhancement techniques.",
     icon: "star",
     features: ["Noise removal", "Quality enhancement", "Format conversion"],
-    price: "From $75",
     category: "Restoration"
   }
 ];
