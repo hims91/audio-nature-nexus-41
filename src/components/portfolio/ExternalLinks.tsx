@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
 import { type PortfolioItem } from "@/types/portfolio";
+import { getLinkIcon, getLinkLabel } from "@/utils/linkUtils";
 
 interface ExternalLinksProps {
   links: PortfolioItem['externalLinks'];
@@ -35,8 +35,8 @@ const ExternalLinks: React.FC<ExternalLinksProps> = ({ links }) => {
             onClick={(e) => handleExternalLinkClick(link.url, e)}
             className="text-xs cursor-pointer border-2 hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-500 transition-all duration-200 transform hover:scale-105"
           >
-            <ExternalLink className="h-3 w-3 mr-1" />
-            {link.title || link.type}
+            <span className="h-4 w-4 mr-1 flex items-center justify-center">{getLinkIcon(link.type)}</span>
+            {getLinkLabel(link)}
           </Button>
         ))}
       </div>

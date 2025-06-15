@@ -7,33 +7,13 @@ import AudioPlayer from "./AudioPlayer";
 import VideoPlayer from "./VideoPlayer";
 import LazyImage from "./performance/LazyImage";
 import { FileVideo, Music, Link as LinkIcon } from "lucide-react";
-import { Youtube, Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
 import { trackPortfolioView } from "@/utils/analytics";
+import EmbedPreview from "./portfolio/EmbedPreview";
+import { getLinkIcon, getLinkLabel } from "@/utils/linkUtils";
 
 interface PortfolioItemProps {
   item: PortfolioItemType;
 }
-
-// Helper function to get the appropriate icon component
-const getIconComponent = (iconName: string) => {
-  switch (iconName.toLowerCase()) {
-    case "youtube":
-      return <Youtube className="h-4 w-4" />;
-    case "instagram":
-      return <Instagram className="h-4 w-4" />;
-    case "facebook":
-      return <Facebook className="h-4 w-4" />;
-    case "twitter":
-      return <Twitter className="h-4 w-4" />;
-    case "linkedin":
-      return <Linkedin className="h-4 w-4" />;
-    case "spotify":
-      return <Music className="h-4 w-4" />; // Using Music icon for Spotify as a fallback
-    case "link":
-    default:
-      return <LinkIcon className="h-4 w-4" />;
-  }
-};
 
 const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
   // Function to check if a URL actually exists and is not an empty string
@@ -93,20 +73,7 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
               <span className="text-sm font-medium">Links</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {item.externalLinks.filter(link => link.type === "spotify").map((link, index) => (
-                <a 
-                  key={index}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#1DB954] text-white hover:bg-opacity-90 transition-colors"
-                >
-                  <Music className="h-3.5 w-3.5 mr-1" />
-                  Spotify
-                </a>
-              ))}
-              
-              {item.externalLinks.filter(link => link.type === "other").map((link, index) => (
+              {item.externalLinks.filter(link => link.type !== 'youtube').map((link, index) => (
                 <a 
                   key={index}
                   href={link.url}
@@ -114,11 +81,15 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ item }) => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-nature-stone text-white hover:bg-nature-bark transition-colors"
                 >
-                  {getIconComponent(link.title || "link")}
-                  <span className="ml-1">{link.title || "Link"}</span>
+                  <span className="mr-1.5 flex items-center justify-center">{getLinkIcon(link.type)}</span>
+                  <span className="ml-1">{getLinkLabel(link)}</span>
                 </a>
               ))}
             </div>
+
+            {item.externalLinks.filter(link => link.type === 'youtube').map((link, index) => (
+              <EmbedPreview key={`yt-${index}`} link={link} />
+            ))}
           </div>
         )}
         

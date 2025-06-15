@@ -1,4 +1,3 @@
-
 import type { Database } from "@/integrations/supabase/types";
 
 // Database type from Supabase
@@ -8,7 +7,7 @@ export type PortfolioItemUpdate = Database['public']['Tables']['portfolio_items'
 
 // External link type for the application - compatible with both old and new systems
 export interface ExternalLink {
-  type: 'spotify' | 'apple' | 'appleMusic' | 'youtube' | 'soundcloud' | 'bandcamp' | 'website' | 'vimeo' | 'other';
+  type: 'spotify' | 'appleMusic' | 'youtube' | 'vimeo' | 'soundcloud' | 'bandcamp' | 'facebook' | 'twitter' | 'instagram' | 'other';
   url: string;
   title?: string;
 }

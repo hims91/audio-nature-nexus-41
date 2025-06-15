@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { ExternalLink } from "@/types/portfolio";
-import { getLinkIcon, getLinkLabel } from "./linkUtils";
+import { getLinkIcon, getLinkLabel } from "@/utils/linkUtils";
 
 interface LinksListProps {
   links: ExternalLink[];
