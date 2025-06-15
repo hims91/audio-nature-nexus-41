@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { useSettings } from "@/hooks/useSettings";
 
 interface SocialMetaProps {
   title: string;
@@ -19,8 +20,11 @@ const SocialMeta: React.FC<SocialMetaProps> = ({
   type = "website",
   twitterCard = "summary_large_image"
 }) => {
+  const { data: settings } = useSettings();
   const currentUrl = url || window.location.href;
   const fullImageUrl = image.startsWith('http') ? image : `${window.location.origin}${image}`;
+
+  const siteName = settings?.site_name || "Terra Echo Studios";
 
   return (
     <Helmet>
@@ -31,7 +35,7 @@ const SocialMeta: React.FC<SocialMetaProps> = ({
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullImageUrl} />
       <meta property="og:image:alt" content={title} />
-      <meta property="og:site_name" content="Will Hall Sound Studios" />
+      <meta property="og:site_name" content={siteName} />
       <meta property="og:locale" content="en_US" />
 
       {/* Twitter */}

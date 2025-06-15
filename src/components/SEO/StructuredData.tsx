@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { useSettings } from "@/hooks/useSettings";
 
 interface StructuredDataProps {
   type: "website" | "organization" | "service" | "portfolio";
@@ -8,7 +9,13 @@ interface StructuredDataProps {
 }
 
 const StructuredData: React.FC<StructuredDataProps> = ({ type, data = {} }) => {
+  const { data: settings } = useSettings();
+
   const generateStructuredData = () => {
+    const siteName = settings?.site_name || 'Terra Echo Studios';
+    const siteDescription = settings?.site_description || 'Professional Audio Engineering Services';
+    const contactEmail = settings?.contact_email || 'contact@terraecho.com';
+
     const baseData = {
       "@context": "https://schema.org",
     };
@@ -18,8 +25,8 @@ const StructuredData: React.FC<StructuredDataProps> = ({ type, data = {} }) => {
         return {
           ...baseData,
           "@type": "WebSite",
-          "name": "Will Hall Sound Studios",
-          "description": "Professional audio engineering services including mixing, mastering, sound design, and Dolby Atmos production",
+          "name": siteName,
+          "description": siteDescription,
           "url": window.location.origin,
           "potentialAction": {
             "@type": "SearchAction",
@@ -33,13 +40,13 @@ const StructuredData: React.FC<StructuredDataProps> = ({ type, data = {} }) => {
         return {
           ...baseData,
           "@type": "ProfessionalService",
-          "name": "Will Hall Sound Studios",
-          "description": "Professional audio engineering services including mixing, mastering, sound design, and Dolby Atmos production",
+          "name": siteName,
+          "description": siteDescription,
           "url": window.location.origin,
           "logo": `${window.location.origin}/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png`,
           "contactPoint": {
             "@type": "ContactPoint",
-            "email": "TerraEchoStudios@gmail.com",
+            "email": contactEmail,
             "contactType": "customer service",
             "areaServed": "Worldwide"
           },
@@ -67,9 +74,9 @@ const StructuredData: React.FC<StructuredDataProps> = ({ type, data = {} }) => {
           "serviceType": "Audio Engineering",
           "provider": {
             "@type": "Organization",
-            "name": "Will Hall Sound Studios"
+            "name": siteName
           },
-          "description": "Professional audio engineering services",
+          "description": siteDescription,
           "areaServed": "Worldwide",
           ...data
         };
