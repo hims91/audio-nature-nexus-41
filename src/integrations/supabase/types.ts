@@ -257,13 +257,11 @@ export type Database = {
       site_settings: {
         Row: {
           allow_user_registration: boolean
-          brand_colors: Json | null
           contact_email: string
           created_at: string
           email_notifications: boolean
           featured_items_limit: number
           id: number
-          logo_url: string | null
           maintenance_mode: boolean
           portfolio_auto_approve: boolean
           site_description: string
@@ -273,13 +271,11 @@ export type Database = {
         }
         Insert: {
           allow_user_registration?: boolean
-          brand_colors?: Json | null
           contact_email?: string
           created_at?: string
           email_notifications?: boolean
           featured_items_limit?: number
           id: number
-          logo_url?: string | null
           maintenance_mode?: boolean
           portfolio_auto_approve?: boolean
           site_description?: string
@@ -289,13 +285,11 @@ export type Database = {
         }
         Update: {
           allow_user_registration?: boolean
-          brand_colors?: Json | null
           contact_email?: string
           created_at?: string
           email_notifications?: boolean
           featured_items_limit?: number
           id?: number
-          logo_url?: string | null
           maintenance_mode?: boolean
           portfolio_auto_approve?: boolean
           site_description?: string

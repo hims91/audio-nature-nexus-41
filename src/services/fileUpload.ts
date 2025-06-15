@@ -32,78 +32,12 @@ export class FileUploadService {
     return `${userFolder}/${timestamp}_${randomId}_${sanitizedName}`;
   }
 
-  private static isValidAudioFile(file: File): boolean {
-    // Check file extension and MIME type for audio files
-    const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.flac'];
-    const audioMimeTypes = [
-      'audio/mpeg', 
-      'audio/wav', 
-      'audio/wave', 
-      'audio/x-wav',
-      'audio/ogg', 
-      'audio/mp4', 
-      'audio/aac', 
-      'audio/flac',
-      'audio/x-m4a'
-    ];
-    
-    const fileName = file.name.toLowerCase();
-    const hasValidExtension = audioExtensions.some(ext => fileName.endsWith(ext));
-    const hasValidMimeType = audioMimeTypes.includes(file.type);
-    
-    return hasValidExtension || hasValidMimeType;
-  }
-
-  private static isValidVideoFile(file: File): boolean {
-    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
-    const videoMimeTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'];
-    
-    const fileName = file.name.toLowerCase();
-    const hasValidExtension = videoExtensions.some(ext => fileName.endsWith(ext));
-    const hasValidMimeType = videoMimeTypes.includes(file.type);
-    
-    return hasValidExtension || hasValidMimeType;
-  }
-
-  private static isValidImageFile(file: File): boolean {
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
-    const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
-    
-    const fileName = file.name.toLowerCase();
-    const hasValidExtension = imageExtensions.some(ext => fileName.endsWith(ext));
-    const hasValidMimeType = imageMimeTypes.includes(file.type);
-    
-    return hasValidExtension || hasValidMimeType;
-  }
-
   static async uploadFile(
     file: File, 
     type: "image" | "audio" | "video" | "avatar",
     onProgress?: (progress: UploadProgress) => void
   ): Promise<FileUploadResult> {
     try {
-      // Validate file type
-      let isValidFile = false;
-      switch (type) {
-        case "audio":
-          isValidFile = this.isValidAudioFile(file);
-          break;
-        case "video":
-          isValidFile = this.isValidVideoFile(file);
-          break;
-        case "image":
-        case "avatar":
-          isValidFile = this.isValidImageFile(file);
-          break;
-      }
-
-      if (!isValidFile) {
-        return {
-          success: false,
-          error: `Invalid ${type} file format. Please check the file extension and try again.`
-        };
-      }
-
       const bucketName = this.getBucketName(type);
       
       // Get current user

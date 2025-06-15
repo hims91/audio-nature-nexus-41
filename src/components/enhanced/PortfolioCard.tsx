@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, ExternalLink, Calendar, User, Star, Music, FileVideo } from "lucide-react";
+import { Play, Pause, ExternalLink, Calendar, User, Star } from "lucide-react";
 import { type PortfolioItem } from "@/types/portfolio";
 import AudioPlayer from "@/components/AudioPlayer";
 import VideoPlayer from "@/components/VideoPlayer";
@@ -16,7 +16,7 @@ interface PortfolioCardProps {
 }
 
 const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
-  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -34,10 +34,6 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
       year: 'numeric',
       month: 'short'
     });
-  };
-
-  const hasMedia = (url?: string | null) => {
-    return url && url.trim() !== '';
   };
 
   return (
@@ -99,22 +95,6 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               {item.category}
             </Badge>
           </div>
-
-          {/* Media Type Indicators */}
-          <div className="absolute bottom-3 right-3 flex gap-1">
-            {hasMedia(item.audioUrl) && (
-              <Badge variant="secondary" className="text-xs bg-black/60 text-white border-0">
-                <Music className="w-3 h-3 mr-1" />
-                Audio
-              </Badge>
-            )}
-            {hasMedia(item.videoUrl) && (
-              <Badge variant="secondary" className="text-xs bg-black/60 text-white border-0">
-                <FileVideo className="w-3 h-3 mr-1" />
-                Video
-              </Badge>
-            )}
-          </div>
         </div>
 
         <CardContent className="p-6">
@@ -135,29 +115,14 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               {item.description}
             </p>
 
-            {/* Audio Player Toggle */}
-            {hasMedia(item.audioUrl) && (
-              <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAudioPlayer(!showAudioPlayer)}
-                  className="w-full"
-                >
-                  <Music className="w-4 h-4 mr-2" />
-                  {showAudioPlayer ? 'Hide' : 'Play'} Audio Preview
-                </Button>
-                
-                {showAudioPlayer && (
-                  <div className="animate-fade-in">
-                    <AudioPlayer audioUrl={item.audioUrl} />
-                  </div>
-                )}
+            {/* Media Players */}
+            {playingAudio === item.id && item.audioUrl && (
+              <div className="mt-4 animate-fade-in">
+                <AudioPlayer audioUrl={item.audioUrl} />
               </div>
             )}
 
-            {/* Video Player */}
-            {hasMedia(item.videoUrl) && (
+            {item.videoUrl && (
               <div className="mt-4 animate-fade-in">
                 <VideoPlayer videoUrl={item.videoUrl} />
               </div>
@@ -171,7 +136,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open(link.url, '_blank', 'noopener,noreferrer')}
+                      onClick={() => window.open(link.url, '_blank')}
                       className="text-xs transform hover:scale-105 transition-all duration-200 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                     >
                       <ExternalLink className="w-3 h-3 mr-1" />

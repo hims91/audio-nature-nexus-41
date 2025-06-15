@@ -1,147 +1,200 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Award, Users, Clock, Star } from "lucide-react";
+import { GlassCard } from "@/components/ui/glass-card";
 import FadeInView from "../animations/FadeInView";
-import CountUp from "../animations/CountUp";
-import ParallaxSection from "../animations/ParallaxSection";
+import FloatingElement from "../animations/FloatingElement";
+import Card3D from "../effects/Card3D";
+import MagneticButton from "../animations/MagneticButton";
+import { Badge } from "@/components/ui/badge";
+import { User, Award, Clock, Target } from "lucide-react";
+const AboutEnhanced: React.FC = () => {
+  const [activeTab, setActiveTab] = useState("story");
+  const tabs = [{
+    id: "story",
+    label: "My Story",
+    icon: User
+  }, {
+    id: "education",
+    label: "Education",
+    icon: Award
+  }, {
+    id: "experience",
+    label: "Experience",
+    icon: Clock
+  }, {
+    id: "approach",
+    label: "Approach",
+    icon: Target
+  }];
+  const skills = [{
+    name: "Audio Engineering",
+    level: 95
+  }, {
+    name: "Sound Design",
+    level: 90
+  }, {
+    name: "Mixing & Mastering",
+    level: 98
+  }, {
+    name: "Podcast Production",
+    level: 92
+  }, {
+    name: "Dolby Atmos",
+    level: 85
+  }, {
+    name: "Live Recording",
+    level: 88
+  }];
+  return <section id="about" className="py-20 bg-gradient-to-br from-nature-cream/30 via-white to-nature-mist/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+      {/* Background Elements */}
+      <FloatingElement intensity="light" delay={0} className="absolute top-10 right-10">
+        <div className="w-8 h-8 bg-nature-forest/20 dark:bg-white/20 rounded-full animate-pulse-slow" />
+      </FloatingElement>
+      <FloatingElement intensity="medium" delay={2} className="absolute bottom-20 left-10">
+        <div className="w-6 h-6 bg-nature-leaf/30 dark:bg-blue-400/30 rounded-full" />
+      </FloatingElement>
 
-const AboutEnhanced = () => {
-  const skills = [
-    "Audio Mixing & Mastering",
-    "Sound Design for Film & TV",
-    "Dolby Atmos Production",
-    "Podcast Production & Editing",
-    "Music Production",
-    "Live Sound Engineering",
-    "Studio Recording",
-    "Audio Restoration"
-  ];
-
-  const stats = [
-    { icon: Users, value: 500, label: "Projects Completed", suffix: "+" },
-    { icon: Award, value: 15, label: "Years Experience", suffix: "" },
-    { icon: Clock, value: 10000, label: "Studio Hours", suffix: "+" },
-    { icon: Star, value: 50, label: "Happy Clients", suffix: "+" }
-  ];
-
-  return (
-    <section id="about" className="py-20 bg-gradient-to-br from-nature-sage to-nature-mist">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+      <div className="container mx-auto px-4">
         <FadeInView direction="up" delay={0.2}>
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-nature-forest mb-4">
-              About Terra Echo Studios
+            <h2 className="text-4xl md:text-5xl font-bold text-nature-forest dark:text-white mb-4 font-playfair">
+              About <span className="text-gradient">Will Hall</span>
             </h2>
-            <p className="text-xl text-nature-bark max-w-3xl mx-auto">
-              Bringing your audio vision to life with professional expertise and natural creativity.
+            <p className="text-lg text-nature-bark dark:text-gray-300 max-w-2xl mx-auto">
+              Crafting sonic landscapes that resonate with authenticity and technical excellence
             </p>
+            <div className="w-24 h-1 bg-gradient-to-r from-nature-forest to-nature-leaf mx-auto mt-6 rounded-full" />
           </div>
         </FadeInView>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-          {stats.map((stat, index) => (
-            <FadeInView key={index} direction="up" delay={0.1 * index}>
-              <Card className="text-center bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <stat.icon className="h-8 w-8 text-nature-forest mx-auto mb-2" />
-                  <div className="text-3xl font-bold text-nature-forest mb-1">
-                    <CountUp end={stat.value} duration={2000} />
-                    {stat.suffix}
-                  </div>
-                  <p className="text-sm text-nature-bark">{stat.label}</p>
-                </CardContent>
-              </Card>
-            </FadeInView>
-          ))}
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Content */}
-          <FadeInView direction="left" delay={0.3}>
-            <div className="space-y-6">
-              <h3 className="text-3xl font-bold text-nature-forest">
-                Professional Audio Engineering
-              </h3>
-              
-              <div className="space-y-4 text-nature-bark">
-                <p>
-                  With over 15 years of experience in professional audio engineering, 
-                  Terra Echo Studios combines technical expertise with artistic vision 
-                  to deliver exceptional results for every project.
-                </p>
-                
-                <p>
-                  From intimate acoustic recordings to cinematic soundscapes, we specialize 
-                  in capturing the authentic essence of your audio while applying the latest 
-                  in digital audio technology.
-                </p>
-                
-                <p>
-                  Our state-of-the-art studio environment and meticulous attention to detail 
-                  ensure that every project meets the highest industry standards while 
-                  maintaining the natural character that makes your audio unique.
-                </p>
-              </div>
-
-              {/* Skills without percentage bars */}
-              <div>
-                <h4 className="text-xl font-semibold text-nature-forest mb-4">
-                  Areas of Expertise
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {skills.map((skill, index) => (
-                    <div key={index} className="flex items-center">
-                      <Badge 
-                        variant="outline" 
-                        className="bg-white/60 border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white transition-colors"
-                      >
-                        {skill}
-                      </Badge>
-                    </div>
-                  ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          {/* Image Side with Enhanced 3D Design */}
+          <FadeInView direction="left" delay={0.4}>
+            <Card3D intensity="medium" glowEffect={true} className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-nature-forest/20 to-nature-leaf/20 rounded-2xl transform rotate-3 group-hover:rotate-6 transition-transform duration-500" />
+              <div className="relative bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-2xl">
+                <img src="/lovable-uploads/40101aee-c085-43b1-a83a-03ed8d362687.png" alt="Will Hall holding a speaker in nature" className="rounded-xl w-full h-auto object-cover" />
+                <div className="absolute top-4 right-4">
+                  <Badge className="bg-nature-forest text-white shadow-lg">
+                    Audio Engineer
+                  </Badge>
                 </div>
               </div>
-            </div>
+            </Card3D>
           </FadeInView>
 
-          {/* Image */}
-          <FadeInView direction="right" delay={0.4}>
-            <ParallaxSection offset={30}>
-              <div className="relative">
-                <img 
-                  src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxzZWFyY2h8M3x8YXVkaW8lMjBlbmdpbmVlcmluZ3x8MHx8fHwxNjIxOTM4NDM2fDA&ixlib=rb-4.0.3&q=80&w=1080"
-                  alt="Professional Audio Engineering Setup"
-                  className="rounded-lg shadow-2xl w-full h-96 object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-nature-forest/20 to-transparent rounded-lg"></div>
+          {/* Content Side */}
+          <FadeInView direction="right" delay={0.6}>
+            <div className="space-y-8">
+              {/* Tab Navigation with 3D effects */}
+              <div className="flex flex-wrap gap-2">
+                {tabs.map(tab => {
+                const IconComponent = tab.icon;
+                return <MagneticButton key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center px-4 py-2 rounded-full transition-all duration-300 ${activeTab === tab.id ? 'bg-nature-forest text-white shadow-lg transform scale-105' : 'bg-white/50 dark:bg-gray-800/50 text-nature-bark dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:scale-102'}`}>
+                      <IconComponent className="w-4 h-4 mr-2" />
+                      {tab.label}
+                    </MagneticButton>;
+              })}
               </div>
-            </ParallaxSection>
+
+              {/* Tab Content with 3D cards */}
+              <div className="min-h-[300px]">
+                {activeTab === "story" && <FadeInView direction="up" delay={0.2}>
+                    <Card3D intensity="low">
+                      <GlassCard className="p-6 bg-white/70 dark:bg-gray-800/70">
+                        <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-4">Hi, I'm Will</h3>
+                        <p className="text-nature-bark dark:text-gray-300 leading-relaxed mb-4">
+                          I'm an audio engineer and sound designer obsessed with the power of sonic storytelling. 
+                          With a passion for blending natural soundscapes with modern production techniques, I 
+                          specialize in crafting immersive audio experiences.
+                        </p>
+                        <p className="text-nature-bark dark:text-gray-300 leading-relaxed">
+                          I bring a deep love for sound and a detail-driven approach to every project, ensuring 
+                          that each piece resonates with both technical excellence and emotional depth.
+                        </p>
+                      </GlassCard>
+                    </Card3D>
+                  </FadeInView>}
+
+                {activeTab === "education" && <FadeInView direction="up" delay={0.2}>
+                    <Card3D intensity="low">
+                      <GlassCard className="p-6 bg-white/70 dark:bg-gray-800/70">
+                        <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-4">Education & Certifications</h3>
+                        <div className="space-y-4">
+                          <div className="border-l-4 border-nature-forest pl-4">
+                            <h4 className="font-semibold text-nature-forest dark:text-white">Bachelor of Science in Audio Engineering</h4>
+                            <p className="text-nature-bark dark:text-gray-300">Belmont University</p>
+                            <p className="text-sm text-nature-stone dark:text-gray-400">Minor in Music Business</p>
+                          </div>
+                          <div className="border-l-4 border-nature-leaf pl-4">
+                            <h4 className="font-semibold text-nature-forest dark:text-white">Dante Level 3 Certification</h4>
+                            <p className="text-nature-bark dark:text-gray-300">Advanced Audio Networking</p>
+                            <p className="text-sm text-nature-stone dark:text-gray-400">Expert in digital audio signal flow</p>
+                          </div>
+                        </div>
+                      </GlassCard>
+                    </Card3D>
+                  </FadeInView>}
+
+                {activeTab === "experience" && <FadeInView direction="up" delay={0.2}>
+                    <Card3D intensity="low">
+                      <GlassCard className="p-6 bg-white/70 dark:bg-gray-800/70">
+                        <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-4">Professional Experience</h3>
+                        <p className="text-nature-bark dark:text-gray-300 leading-relaxed mb-4">
+                          With over seven years of freelance experience, I've worked on short films, commercials, 
+                          150+ podcast episodes, and countless band projects—from tracking and mixing to mastering 
+                          and post-production.
+                        </p>
+                        <p className="text-nature-bark dark:text-gray-300 leading-relaxed">
+                          I've had the privilege of collaborating with talented artists like Spookie, Nashville Tour Stop, 
+                          and Grace Pelle, helping shape their sonic identity through expert audio engineering.
+                        </p>
+                      </GlassCard>
+                    </Card3D>
+                  </FadeInView>}
+
+                {activeTab === "approach" && <FadeInView direction="up" delay={0.2}>
+                    <Card3D intensity="low">
+                      <GlassCard className="p-6 bg-white/70 dark:bg-gray-800/70">
+                        <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-4">My Philosophy on Sound</h3>
+                        <p className="text-nature-bark dark:text-gray-300 leading-relaxed mb-4">
+                          Sound is more than just vibration—it's emotion, movement, and memory. A single note can 
+                          transport you, a well-placed sound can shift a mood, and a carefully crafted mix can make 
+                          the intangible feel real.
+                        </p>
+                        <p className="text-nature-bark dark:text-gray-300 leading-relaxed">
+                          I strive to create sonic landscapes that don't just sound good but feel alive, blending 
+                          natural and live-recorded elements with the warmth of electronic production.
+                        </p>
+                      </GlassCard>
+                    </Card3D>
+                  </FadeInView>}
+              </div>
+
+              {/* Skills Section with 3D effect */}
+              <Card3D intensity="low">
+                <GlassCard className="p-6 bg-white/70 dark:bg-gray-800/70">
+                  <h4 className="text-xl font-semibold text-nature-forest dark:text-white mb-4">Expertise</h4>
+                  <div className="space-y-3">
+                    {skills.map((skill, index) => <div key={skill.name}>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sm font-medium text-nature-bark dark:text-gray-300">{skill.name}</span>
+                          <span className="text-sm text-nature-stone dark:text-gray-400">{skill.level}%</span>
+                        </div>
+                        <div className="w-full bg-nature-cream/50 dark:bg-gray-700 rounded-full h-2">
+                          <div className="bg-gradient-to-r from-nature-forest to-nature-leaf h-2 rounded-full transition-all duration-1000 ease-out" style={{
+                        width: `${skill.level}%`,
+                        animationDelay: `${index * 200}ms`
+                      }} />
+                        </div>
+                      </div>)}
+                  </div>
+                </GlassCard>
+              </Card3D>
+            </div>
           </FadeInView>
         </div>
-
-        {/* Testimonials Section Placeholder */}
-        <FadeInView direction="up" delay={0.5}>
-          <div className="mt-20 text-center">
-            <h3 className="text-3xl font-bold text-nature-forest mb-8">
-              What Our Clients Say
-            </h3>
-            <div className="bg-white/60 backdrop-blur-sm rounded-lg p-8 border border-nature-forest/20">
-              <p className="text-nature-bark text-lg italic mb-4">
-                "Client testimonials will be featured here. This space is ready for new testimonials to be added."
-              </p>
-              <p className="text-sm text-nature-bark/70">
-                More testimonials coming soon...
-              </p>
-            </div>
-          </div>
-        </FadeInView>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default AboutEnhanced;
