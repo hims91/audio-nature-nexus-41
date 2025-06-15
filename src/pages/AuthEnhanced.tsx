@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -63,15 +62,6 @@ const AuthEnhanced: React.FC = () => {
       return false;
     }
 
-    if (password.length < 6) {
-      toast({
-        title: "Validation Error",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
-      return false;
-    }
-
     return true;
   };
 
@@ -116,11 +106,11 @@ const AuthEnhanced: React.FC = () => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Unexpected auth error:', error);
       toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
+        title: "Authentication Error",
+        description: error.message || "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {
@@ -210,7 +200,6 @@ const AuthEnhanced: React.FC = () => {
                     required
                     placeholder="Enter your password"
                     className="pr-10 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:border-nature-forest dark:focus:border-nature-leaf"
-                    minLength={6}
                   />
                   <button
                     type="button"
@@ -236,7 +225,6 @@ const AuthEnhanced: React.FC = () => {
                       required
                       placeholder="Confirm your password"
                       className="pr-10 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:border-nature-forest dark:focus:border-nature-leaf"
-                      minLength={6}
                     />
                     <button
                       type="button"

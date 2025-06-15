@@ -73,8 +73,8 @@ export const useEnhancedAuth = () => {
       return { error: null };
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred during Google sign in.",
+        title: "Google Sign In Error",
+        description: error.message || "An unexpected error occurred during Google sign in.",
         variant: "destructive",
       });
       return { error };
@@ -116,8 +116,8 @@ export const useEnhancedAuth = () => {
       return { error: null };
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred during X sign in.",
+        title: "X Sign In Error",
+        description: error.message || "An unexpected error occurred during X sign in.",
         variant: "destructive",
       });
       return { error };
@@ -240,8 +240,8 @@ export const useEnhancedAuth = () => {
 
       if (error) {
         toast({
-          title: "Error",
-          description: "Failed to terminate session.",
+          title: "Error Terminating Session",
+          description: error.message || "Failed to terminate session.",
           variant: "destructive",
         });
         return { error };
@@ -258,8 +258,8 @@ export const useEnhancedAuth = () => {
       return { error: null };
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
+        title: "Error Terminating Session",
+        description: error.message || "An unexpected error occurred.",
         variant: "destructive",
       });
       return { error };
