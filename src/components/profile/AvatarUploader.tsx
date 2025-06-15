@@ -10,7 +10,7 @@ import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
 
 const AvatarUploader: React.FC = () => {
   const { profile, updateProfile } = useUserProfile();
-  const { userProfile } = useEnhancedAuth();
+  const { user, userProfile } = useEnhancedAuth();
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -73,7 +73,7 @@ const AvatarUploader: React.FC = () => {
     if (userProfile?.first_name) {
       return userProfile.first_name[0];
     }
-    return userProfile?.email?.[0]?.toUpperCase() || 'U';
+    return user?.email?.[0]?.toUpperCase() || 'U';
   };
 
   return (

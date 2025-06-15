@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import UnifiedNavbar from '@/components/UnifiedNavbar';
 import Footer from '@/components/Footer';
-import { SEOManager } from '@/components/SEO/SEOManager';
+import SEOManager from '@/components/SEO/SEOManager';
 
 const ProfilePage: React.FC = () => {
   const { isLoading, isError, profile } = useUserProfile();
