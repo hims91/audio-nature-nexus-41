@@ -15,11 +15,12 @@ export interface UploadProgress {
 }
 
 export class FileUploadService {
-  private static getBucketName(type: "image" | "audio" | "video"): string {
+  private static getBucketName(type: "image" | "audio" | "video" | "avatar"): string {
     switch (type) {
       case "image": return "portfolio-images";
       case "audio": return "portfolio-audio";
       case "video": return "portfolio-videos";
+      case "avatar": return "avatars";
     }
   }
 
@@ -33,7 +34,7 @@ export class FileUploadService {
 
   static async uploadFile(
     file: File, 
-    type: "image" | "audio" | "video",
+    type: "image" | "audio" | "video" | "avatar",
     onProgress?: (progress: UploadProgress) => void
   ): Promise<FileUploadResult> {
     try {
@@ -92,7 +93,7 @@ export class FileUploadService {
 
   static async deleteFile(
     path: string, 
-    type: "image" | "audio" | "video"
+    type: "image" | "audio" | "video" | "avatar"
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const bucketName = this.getBucketName(type);
@@ -124,7 +125,7 @@ export class FileUploadService {
   static async replaceFile(
     oldPath: string,
     newFile: File,
-    type: "image" | "audio" | "video",
+    type: "image" | "audio" | "video" | "avatar",
     onProgress?: (progress: UploadProgress) => void
   ): Promise<FileUploadResult> {
     try {

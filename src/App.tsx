@@ -18,6 +18,7 @@ import ContactPage from './pages/ContactPage';
 import AuthEnhanced from './pages/AuthEnhanced';
 import NotFound from './pages/NotFound';
 import MaintenancePage from './pages/MaintenancePage';
+import ProfilePage from './pages/ProfilePage';
 
 // Admin Pages
 import AdminLayout from './components/admin/AdminLayout';
@@ -66,6 +67,15 @@ const AppRoutes: React.FC = () => {
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/contact" element={<ContactPage />} />
             
+            <Route 
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+
             <Route 
               path="/admin/*" 
               element={

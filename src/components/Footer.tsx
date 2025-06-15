@@ -2,6 +2,8 @@
 import React from "react";
 import { useSettings } from "@/hooks/useSettings";
 import { Facebook, Instagram, Twitter, Linkedin, Youtube } from 'lucide-react';
+import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
+import { Link } from "react-router-dom";
 
 const iconMap: { [key: string]: React.ElementType } = {
   facebook: Facebook,
@@ -14,6 +16,7 @@ const iconMap: { [key: string]: React.ElementType } = {
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const { data: settings } = useSettings();
+  const { user } = useEnhancedAuth();
   const socialLinks = (settings?.social_links as { platform: string; url: string }[]) || [];
 
   const scrollToTop = () => {
@@ -52,6 +55,13 @@ Studios </span>
                     {item}
                   </button>
                 </li>)}
+              {user && (
+                <li>
+                  <Link to="/profile" className="text-nature-cream/80 hover:text-white transition-colors">
+                    Profile
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
           
