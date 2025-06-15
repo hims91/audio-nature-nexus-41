@@ -38,7 +38,11 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
     });
   };
 
-  const hasValidMedia = (url?: string) => url && url.trim() !== '';
+  const hasValidMedia = (url?: string) => {
+    const isValid = url && url.trim() !== '' && url !== 'undefined' && url !== 'null';
+    console.log(`🔍 Media validation for "${url}":`, isValid);
+    return isValid;
+  };
 
   const getMediaTypeBadges = () => {
     const badges = [];
@@ -74,6 +78,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
   };
 
   const handleListenNow = () => {
+    console.log('🎵 Listen Now clicked for audio:', item.audioUrl);
     setShowAudioPlayer(!showAudioPlayer);
   };
 
@@ -87,6 +92,12 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
       console.error('❌ Error opening external link:', error);
     }
   };
+
+  // Debug logging for audio availability
+  React.useEffect(() => {
+    console.log(`🎵 Portfolio item "${item.title}" audio URL:`, item.audioUrl);
+    console.log(`🎵 Has valid audio:`, hasValidMedia(item.audioUrl));
+  }, [item.audioUrl, item.title]);
 
   return (
     <Card3D intensity="medium" glowEffect={true} className="group">
@@ -172,7 +183,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               {item.description}
             </p>
 
-            {/* Listen Now Button - Prominent for Audio Content */}
+            {/* Listen Now Button - Always visible when audio exists */}
             {hasValidMedia(item.audioUrl) && (
               <div className="flex justify-center">
                 <MagneticButton>
@@ -222,7 +233,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               </div>
             )}
 
-            {/* External Links - Fixed to be properly clickable */}
+            {/* External Links - Enhanced clickability */}
             {item.externalLinks && item.externalLinks.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
                 {item.externalLinks.map((link, index) => (
@@ -231,7 +242,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleExternalLinkClick(link.url, link.title || link.type)}
-                      className={`text-xs transform hover:scale-105 transition-all duration-200 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer ${
+                      className={`text-xs transform hover:scale-105 transition-all duration-200 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer border-2 hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-500 ${
                         isMobile ? 'px-4 py-3 text-sm' : ''
                       }`}
                     >
@@ -240,6 +251,15 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
                     </Button>
                   </MagneticButton>
                 ))}
+              </div>
+            )}
+
+            {/* Debug info for development */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
+                <p>Audio URL: {item.audioUrl || 'None'}</p>
+                <p>Video URL: {item.videoUrl || 'None'}</p>
+                <p>Cover Image: {item.coverImageUrl || 'None'}</p>
               </div>
             )}
           </div>

@@ -19,6 +19,7 @@ export interface BaseMediaUploaderProps {
 
 export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   type,
+  currentUrl,
   file,
   setFile,
   toast,
@@ -28,8 +29,16 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   const [fileName, setFileName] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [uploadedUrl, setUploadedUrl] = useState<string>("");
+  const [uploadedUrl, setUploadedUrl] = useState<string>(currentUrl || "");
   const [uploadedPath, setUploadedPath] = useState<string>("");
+  
+  // Initialize uploadedUrl when currentUrl changes
+  React.useEffect(() => {
+    if (currentUrl && currentUrl !== uploadedUrl) {
+      setUploadedUrl(currentUrl);
+      console.log(`📂 ${type} uploader initialized with existing URL:`, currentUrl);
+    }
+  }, [currentUrl, type]);
   
   const getAcceptTypes = () => {
     switch (type) {
@@ -128,6 +137,7 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
     const sanitizedFileName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     setFileName(sanitizedFileName);
     setFile(selectedFile);
+    // Clear previous upload state when new file is selected
     setUploadedUrl("");
     setUploadedPath("");
     
@@ -203,12 +213,26 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   };
   
   const isUploaded = uploadedUrl !== "";
+  const hasCurrentMedia = currentUrl && currentUrl.trim() !== '';
   
   return (
     <div className="space-y-4">
       <div>
         <h3 className="text-lg font-medium text-nature-forest mb-2">{getTitle()}</h3>
         <p className="text-sm text-nature-bark mb-4">{getDescription()}</p>
+        
+        {/* Show current media info if it exists */}
+        {hasCurrentMedia && !file && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-green-600" />
+              <div className="text-sm">
+                <p className="font-medium text-green-800">Current {type} file is available</p>
+                <p className="text-green-700 break-all">{currentUrl}</p>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="flex flex-col space-y-2">
           <Label htmlFor={`${type}-upload`}>Select {getTitle()}</Label>

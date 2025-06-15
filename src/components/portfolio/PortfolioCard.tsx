@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import AudioPlayer from "@/components/AudioPlayer";
 import VideoPlayer from "@/components/VideoPlayer";
 import PortfolioItemDetail from "./PortfolioItemDetail";
-import { Music, FileVideo, ExternalLink, Star, Play } from "lucide-react";
+import { Music, FileVideo, ExternalLink, Star, Play, AudioWaveform } from "lucide-react";
 
 interface PortfolioCardProps {
   item: PortfolioItem;
@@ -20,7 +20,9 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
   
   // Function to check if a URL actually exists and is not an empty string
   const hasMedia = (url?: string) => {
-    return url && url.trim() !== '';
+    const isValid = url && url.trim() !== '' && url !== 'undefined' && url !== 'null';
+    console.log(`🔍 Media validation for "${url}":`, isValid);
+    return isValid;
   };
 
   // Properly encode the URL to handle spaces and special characters
@@ -39,6 +41,12 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
       console.error('❌ Error opening external link:', error);
     }
   };
+
+  // Debug logging for audio availability
+  React.useEffect(() => {
+    console.log(`🎵 Portfolio item "${item.title}" audio URL:`, item.audioUrl);
+    console.log(`🎵 Has valid audio:`, hasMedia(item.audioUrl));
+  }, [item.audioUrl, item.title]);
 
   return (
     <>
@@ -98,36 +106,56 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
             {item.description}
           </p>
 
-          {/* Quick Audio Preview */}
+          {/* Enhanced Audio Preview with better visibility */}
           {hasMedia(item.audioUrl) && (
             <div className="mb-3">
               <Button
                 onClick={() => setShowAudioPlayer(!showAudioPlayer)}
-                variant="outline"
+                className={`w-full mb-2 ${
+                  showAudioPlayer 
+                    ? 'bg-nature-leaf hover:bg-nature-forest' 
+                    : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
+                } text-white transition-all duration-300`}
                 size="sm"
-                className="w-full mb-2"
               >
-                <Play className="h-3 w-3 mr-1" />
-                {showAudioPlayer ? 'Hide Audio' : 'Play Audio'}
+                {showAudioPlayer ? (
+                  <>
+                    <Play className="h-3 w-3 mr-1" />
+                    Hide Audio Player
+                  </>
+                ) : (
+                  <>
+                    <AudioWaveform className="h-3 w-3 mr-1" />
+                    Listen Now
+                  </>
+                )}
               </Button>
               {showAudioPlayer && (
-                <div className="bg-blue-50 dark:bg-gray-700 p-2 rounded">
+                <div className="bg-blue-50 dark:bg-gray-700 p-3 rounded-lg border-2 border-blue-200">
+                  <div className="flex items-center mb-2">
+                    <Music className="h-4 w-4 mr-1 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Audio Preview</span>
+                  </div>
                   <AudioPlayer audioUrl={item.audioUrl} />
                 </div>
               )}
             </div>
           )}
 
-          {/* Quick Video Preview */}
+          {/* Enhanced Video Preview */}
           {hasMedia(item.videoUrl) && (
             <div className="mb-3">
-              <div className="bg-purple-50 dark:bg-gray-700 p-2 rounded">
+              <div className="bg-purple-50 dark:bg-gray-700 p-3 rounded-lg border-2 border-purple-200">
+                <div className="flex items-center mb-2">
+                  <FileVideo className="h-4 w-4 mr-1 text-purple-600" />
+                  <span className="text-sm font-medium text-purple-800 dark:text-purple-200">Video Preview</span>
+                </div>
                 <VideoPlayer videoUrl={item.videoUrl} />
               </div>
             </div>
           )}
 
-          {/* External Links - Clickable */}
+          {/* Enhanced External Links - More prominent and clickable */}
           {item.externalLinks && item.externalLinks.length > 0 && (
             <div className="mb-3">
               <div className="flex flex-wrap gap-1">
@@ -137,7 +165,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
                     variant="outline"
                     size="sm"
                     onClick={(e) => handleExternalLinkClick(link.url, e)}
-                    className="text-xs cursor-pointer"
+                    className="text-xs cursor-pointer border-2 hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-500 transition-all duration-200 transform hover:scale-105"
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
                     {link.title || link.type}
@@ -150,26 +178,35 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
           {/* Media Type Indicators */}
           <div className="mt-auto flex items-center gap-2">
             {hasMedia(item.audioUrl) && (
-              <Badge variant="outline" className="text-xs bg-white">
+              <Badge variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
                 <Music className="h-3 w-3 mr-1" />
                 Audio
               </Badge>
             )}
             
             {hasMedia(item.videoUrl) && (
-              <Badge variant="outline" className="text-xs bg-white">
+              <Badge variant="outline" className="text-xs bg-purple-50 border-purple-200 text-purple-700">
                 <FileVideo className="h-3 w-3 mr-1" />
                 Video
               </Badge>
             )}
             
             {item.externalLinks && item.externalLinks.length > 0 && (
-              <Badge variant="outline" className="text-xs bg-white">
+              <Badge variant="outline" className="text-xs bg-orange-50 border-orange-200 text-orange-700">
                 <ExternalLink className="h-3 w-3 mr-1" />
                 {item.externalLinks.length} Links
               </Badge>
             )}
           </div>
+
+          {/* Debug info for development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
+              <p>Audio URL: {item.audioUrl || 'None'}</p>
+              <p>Video URL: {item.videoUrl || 'None'}</p>
+              <p>Cover Image: {item.coverImageUrl || 'None'}</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </>

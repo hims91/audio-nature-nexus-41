@@ -87,15 +87,23 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
       return;
     }
     
-    console.log('💾 Saving portfolio item with data:', formData);
+    console.log('💾 Saving portfolio item with form data:', formData);
     
-    // Ensure all media URLs are properly included
+    // Ensure all media URLs are properly included in the save data
     const saveData = {
-      ...formData,
+      title: formData.title,
+      client: formData.client,
+      category: formData.category,
+      description: formData.description,
+      featured: formData.featured,
+      externalLinks: formData.externalLinks,
+      // Explicitly include all media URLs with fallbacks
+      coverImageUrl: formData.coverImageUrl || '',
       audioUrl: formData.audioUrl || '',
-      videoUrl: formData.videoUrl || '',
-      coverImageUrl: formData.coverImageUrl || ''
+      videoUrl: formData.videoUrl || ''
     };
+    
+    console.log('💾 Final save data being sent:', saveData);
     
     // In edit mode, preserve the original ID and creation date
     if (mode === "edit" && item) {
