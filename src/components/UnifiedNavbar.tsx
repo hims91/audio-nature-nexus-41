@@ -4,10 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import UserProfileDropdown from "./auth/UserProfileDropdown";
+import { useSettings } from "@/hooks/useSettings";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const UnifiedNavbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut, isAdmin } = useEnhancedAuth();
+  const { data: settings, isLoading } = useSettings();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -59,7 +62,11 @@ const UnifiedNavbar: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
             <img alt="Terra Echo Studios Logo" className="h-16 w-16 object-contain" src="/lovable-uploads/d1a61084-5eaf-41e1-a5f6-704cbf8197fe.png" />
-            <span className="text-xl font-bold text-nature-forest my-0">Terra Echo Studios</span>
+            {isLoading ? (
+              <Skeleton className="h-6 w-48" />
+            ) : (
+              <span className="text-xl font-bold text-nature-forest my-0">{settings?.site_name}</span>
+            )}
           </div>
           
           <div className="hidden md:flex items-center space-x-8">

@@ -1,7 +1,13 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
+import { useSettings } from "@/hooks/useSettings";
+import { Skeleton } from "@/components/ui/skeleton";
+
 const Hero: React.FC = () => {
+  const { data: settings, isLoading } = useSettings();
+
   const scrollToAbout = () => {
     const element = document.getElementById("about");
     if (element) {
@@ -30,13 +36,21 @@ const Hero: React.FC = () => {
           }}></div>)}
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-md">
-            Terra Echo Studios
-          </h1>
+          {isLoading ? (
+            <Skeleton className="h-16 w-3/4 mx-auto mb-6 bg-white/20" />
+          ) : (
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-md">
+              {settings?.site_name}
+            </h1>
+          )}
           
-          <p className="text-xl md:text-2xl text-nature-cream mb-10 drop-shadow-md">
-            Authentic Audio, Naturally Engineered.
-          </p>
+          {isLoading ? (
+            <Skeleton className="h-8 w-1/2 mx-auto mb-10 bg-white/20" />
+          ) : (
+            <p className="text-xl md:text-2xl text-nature-cream mb-10 drop-shadow-md">
+              {settings?.site_description}
+            </p>
+          )}
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button onClick={() => {

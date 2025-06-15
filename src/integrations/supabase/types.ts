@@ -254,6 +254,48 @@ export type Database = {
           },
         ]
       }
+      site_settings: {
+        Row: {
+          allow_user_registration: boolean
+          contact_email: string
+          created_at: string
+          email_notifications: boolean
+          featured_items_limit: number
+          id: number
+          maintenance_mode: boolean
+          portfolio_auto_approve: boolean
+          site_description: string
+          site_name: string
+          updated_at: string
+        }
+        Insert: {
+          allow_user_registration?: boolean
+          contact_email?: string
+          created_at?: string
+          email_notifications?: boolean
+          featured_items_limit?: number
+          id: number
+          maintenance_mode?: boolean
+          portfolio_auto_approve?: boolean
+          site_description?: string
+          site_name?: string
+          updated_at?: string
+        }
+        Update: {
+          allow_user_registration?: boolean
+          contact_email?: string
+          created_at?: string
+          email_notifications?: boolean
+          featured_items_limit?: number
+          id?: number
+          maintenance_mode?: boolean
+          portfolio_auto_approve?: boolean
+          site_description?: string
+          site_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null

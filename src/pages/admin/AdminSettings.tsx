@@ -20,6 +20,9 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
 import { useAdminMonitoring } from '@/hooks/useAdminMonitoring';
+import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TablesUpdate } from '@/integrations/supabase/types';
 
 interface AdminSettingsData {
   siteName: string;
@@ -33,17 +36,10 @@ interface AdminSettingsData {
 }
 
 const AdminSettings: React.FC = () => {
-  const [settings, setSettings] = useState<AdminSettingsData>({
-    siteName: 'Terra Echo Studios',
-    siteDescription: 'Professional Audio Engineering Services',
-    contactEmail: 'TerraEchoStudios@gmail.com',
-    featuredItemsLimit: 6,
-    allowUserRegistration: true,
-    emailNotifications: true,
-    portfolioAutoApprove: false,
-    maintenanceMode: false,
-  });
-  const [loading, setLoading] = useState(false);
+  const { data: initialSettings, isLoading: isLoadingSettings, isError } = useSettings();
+  const { mutate: updateSettings, isPending: isSaving } = useUpdateSettings();
+
+  const [settings, setSettings] = useState<AdminSettingsData | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const { isAdmin } = useEnhancedAuth();
   const { toast } = useToast();
@@ -53,59 +49,108 @@ const AdminSettings: React.FC = () => {
     trackPageView('admin_settings');
   }, [trackPageView]);
 
+  useEffect(() => {
+    if (initialSettings) {
+      setSettings({
+        siteName: initialSettings.site_name,
+        siteDescription: initialSettings.site_description,
+        contactEmail: initialSettings.contact_email,
+        featuredItemsLimit: initialSettings.featured_items_limit,
+        allowUserRegistration: initialSettings.allow_user_registration,
+        emailNotifications: initialSettings.email_notifications,
+        portfolioAutoApprove: initialSettings.portfolio_auto_approve,
+        maintenanceMode: initialSettings.maintenance_mode,
+      });
+      setHasChanges(false);
+    }
+  }, [initialSettings]);
+
   const handleSettingChange = (key: keyof AdminSettingsData, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings(prev => (prev ? { ...prev, [key]: value } : null));
     setHasChanges(true);
   };
 
   const saveSettings = async () => {
-    setLoading(true);
-    try {
-      console.log('💾 Saving admin settings...');
-      
-      // Here you would save to your settings table
-      // For now, we'll just simulate saving to localStorage
-      localStorage.setItem('adminSettings', JSON.stringify(settings));
-      
-      logAdminAction('settings_update', 'admin_settings', undefined, {
-        settings: settings,
-        timestamp: new Date().toISOString()
-      });
+    if (!settings) return;
 
-      setHasChanges(false);
-      toast({
-        title: "Settings Saved",
-        description: "Your settings have been saved successfully.",
-      });
-    } catch (error: any) {
-      console.error('❌ Error saving settings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save settings.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    const settingsToUpdate: TablesUpdate<'site_settings'> = {
+        site_name: settings.siteName,
+        site_description: settings.siteDescription,
+        contact_email: settings.contactEmail,
+        featured_items_limit: settings.featuredItemsLimit,
+        allow_user_registration: settings.allowUserRegistration,
+        email_notifications: settings.emailNotifications,
+        portfolio_auto_approve: settings.portfolioAutoApprove,
+        maintenance_mode: settings.maintenanceMode,
+    };
 
-  const loadSettings = () => {
-    try {
-      const saved = localStorage.getItem('adminSettings');
-      if (saved) {
-        setSettings(JSON.parse(saved));
+    updateSettings(settingsToUpdate, {
+      onSuccess: () => {
+        logAdminAction('settings_update', 'site_settings', '1', {
+          settings: settingsToUpdate,
+          timestamp: new Date().toISOString()
+        });
+        setHasChanges(false);
+        toast({
+          title: "Settings Saved",
+          description: "Your settings have been saved successfully.",
+        });
+      },
+      onError: (error: any) => {
+        console.error('❌ Error saving settings:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save settings.",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
-      console.error('Error loading settings:', error);
-    }
+    });
   };
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
+  const resetChanges = () => {
+    if (initialSettings) {
+      setSettings({
+        siteName: initialSettings.site_name,
+        siteDescription: initialSettings.site_description,
+        contactEmail: initialSettings.contact_email,
+        featuredItemsLimit: initialSettings.featured_items_limit,
+        allowUserRegistration: initialSettings.allow_user_registration,
+        emailNotifications: initialSettings.email_notifications,
+        portfolioAutoApprove: initialSettings.portfolio_auto_approve,
+        maintenanceMode: initialSettings.maintenance_mode,
+      });
+      setHasChanges(false);
+    }
+  };
 
   if (!isAdmin) {
     return null;
+  }
+
+  if (isLoadingSettings) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+            <div className='space-y-2'>
+              <Skeleton className="h-9 w-48" />
+              <Skeleton className="h-5 w-80" />
+            </div>
+            <div className="flex space-x-2">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-32" />
+            </div>
+        </div>
+        <Skeleton className="h-10 w-full" />
+        <Card>
+            <CardHeader><Skeleton className="h-6 w-1/4" /><Skeleton className="h-4 w-1/2 mt-2" /></CardHeader>
+            <CardContent className="space-y-6"><Skeleton className="h-24 w-full" /><Skeleton className="h-12 w-full" /></CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isError || !settings) {
+    return <div className="text-destructive font-semibold">Could not load site settings. Please try refreshing the page.</div>;
   }
 
   return (
@@ -122,17 +167,18 @@ const AdminSettings: React.FC = () => {
         <div className="flex space-x-2">
           <Button 
             variant="outline" 
-            onClick={loadSettings}
+            onClick={resetChanges}
+            disabled={!hasChanges || isSaving}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Reset
           </Button>
           <Button 
             onClick={saveSettings}
-            disabled={!hasChanges || loading}
+            disabled={!hasChanges || isSaving}
           >
             <Save className="h-4 w-4 mr-2" />
-            Save Changes
+            {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </div>
