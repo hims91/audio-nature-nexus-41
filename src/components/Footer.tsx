@@ -1,6 +1,21 @@
+
 import React from "react";
+import { useSettings } from "@/hooks/useSettings";
+import { Facebook, Instagram, Twitter, Linkedin, Youtube } from 'lucide-react';
+
+const iconMap: { [key: string]: React.ElementType } = {
+  facebook: Facebook,
+  instagram: Instagram,
+  twitter: Twitter,
+  linkedin: Linkedin,
+  youtube: Youtube,
+};
+
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const { data: settings } = useSettings();
+  const socialLinks = (settings?.social_links as { platform: string; url: string }[]) || [];
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -65,7 +80,26 @@ Studios </span>
             &copy; {currentYear} Will Hall Sound Studios. All rights reserved.
           </p>
           
-          <div className="flex space-x-4">
+          <div className="flex items-center space-x-6">
+            {socialLinks.length > 0 && (
+              <div className="flex space-x-4">
+                {socialLinks.map((link) => {
+                  const IconComponent = iconMap[link.platform.toLowerCase()];
+                  return IconComponent ? (
+                    <a
+                      key={link.platform}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-nature-cream/70 hover:text-white transition-colors"
+                      aria-label={link.platform}
+                    >
+                      <IconComponent className="h-5 w-5" />
+                    </a>
+                  ) : null;
+                })}
+              </div>
+            )}
             <button onClick={scrollToTop} className="text-sm text-nature-cream/70 hover:text-white transition-colors">
               Back to Top
             </button>
