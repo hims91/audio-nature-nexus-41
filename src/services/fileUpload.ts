@@ -32,6 +32,41 @@ export class FileUploadService {
     return `${userFolder}/${timestamp}_${randomId}_${sanitizedName}`;
   }
 
+  private static validateAudioFile(file: File): boolean {
+    // Accept common audio MIME types and file extensions
+    const validMimeTypes = [
+      'audio/mpeg',      // .mp3
+      'audio/wav',       // .wav
+      'audio/wave',      // .wav (alternative)
+      'audio/x-wav',     // .wav (alternative)
+      'audio/ogg',       // .ogg
+      'audio/vorbis',    // .ogg (alternative)
+      'audio/mp4',       // .m4a
+      'audio/aac',       // .aac
+      'audio/flac',      // .flac
+      'audio/webm'       // .webm audio
+    ];
+
+    const validExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.flac', '.webm'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    
+    console.log(`🎵 Validating audio file: ${file.name}`);
+    console.log(`📋 MIME type: ${file.type}`);
+    console.log(`📁 Extension: ${fileExtension}`);
+    
+    // Check both MIME type and file extension for better compatibility
+    const isValidMime = validMimeTypes.includes(file.type);
+    const isValidExtension = validExtensions.includes(fileExtension);
+    
+    if (isValidMime || isValidExtension) {
+      console.log(`✅ Audio file validation passed`);
+      return true;
+    }
+    
+    console.log(`❌ Audio file validation failed`);
+    return false;
+  }
+
   static async uploadFile(
     file: File, 
     type: "image" | "audio" | "video" | "avatar",
@@ -50,8 +85,18 @@ export class FileUploadService {
         };
       }
 
+      // Special validation for audio files
+      if (type === 'audio' && !this.validateAudioFile(file)) {
+        return {
+          success: false,
+          error: "Invalid audio file format. Supported formats: MP3, WAV, OGG, M4A, AAC, FLAC, WebM"
+        };
+      }
+
       // Generate unique file name
       const fileName = this.generateFileName(file.name, user.id);
+
+      console.log(`📤 Uploading ${type} file: ${file.name} (${file.type}) to ${bucketName}/${fileName}`);
 
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage

@@ -136,7 +136,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open(link.url, '_blank')}
+                      onClick={() => window.open(link.url, '_blank', 'noopener,noreferrer')}
                       className="text-xs transform hover:scale-105 transition-all duration-200 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                     >
                       <ExternalLink className="w-3 h-3 mr-1" />

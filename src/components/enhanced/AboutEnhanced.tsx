@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -7,45 +8,62 @@ import Card3D from "../effects/Card3D";
 import MagneticButton from "../animations/MagneticButton";
 import { Badge } from "@/components/ui/badge";
 import { User, Award, Clock, Target } from "lucide-react";
+
 const AboutEnhanced: React.FC = () => {
   const [activeTab, setActiveTab] = useState("story");
-  const tabs = [{
-    id: "story",
-    label: "My Story",
-    icon: User
-  }, {
-    id: "education",
-    label: "Education",
-    icon: Award
-  }, {
-    id: "experience",
-    label: "Experience",
-    icon: Clock
-  }, {
-    id: "approach",
-    label: "Approach",
-    icon: Target
-  }];
-  const skills = [{
-    name: "Audio Engineering",
-    level: 95
-  }, {
-    name: "Sound Design",
-    level: 90
-  }, {
-    name: "Mixing & Mastering",
-    level: 98
-  }, {
-    name: "Podcast Production",
-    level: 92
-  }, {
-    name: "Dolby Atmos",
-    level: 85
-  }, {
-    name: "Live Recording",
-    level: 88
-  }];
-  return <section id="about" className="py-20 bg-gradient-to-br from-nature-cream/30 via-white to-nature-mist/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+  
+  const tabs = [
+    {
+      id: "story",
+      label: "My Story",
+      icon: User
+    },
+    {
+      id: "education",
+      label: "Education",
+      icon: Award
+    },
+    {
+      id: "experience",
+      label: "Experience",
+      icon: Clock
+    },
+    {
+      id: "approach",
+      label: "Approach",
+      icon: Target
+    }
+  ];
+
+  const skills = [
+    {
+      name: "Audio Engineering",
+      description: "Professional recording, mixing, and mastering with industry-standard equipment"
+    },
+    {
+      name: "Sound Design",
+      description: "Creative audio production for films, games, and multimedia projects"
+    },
+    {
+      name: "Mixing & Mastering",
+      description: "Expert level mixing and mastering for music and audio content"
+    },
+    {
+      name: "Podcast Production",
+      description: "Complete podcast production workflow from recording to final delivery"
+    },
+    {
+      name: "Dolby Atmos",
+      description: "Immersive audio production and spatial sound design capabilities"
+    },
+    {
+      name: "Live Recording",
+      description: "On-location recording and live sound engineering for events"
+    }
+  ];
+
+  return (
+    <section id="about" className="py-20 bg-gradient-to-br from-nature-cream/30 via-white to-nature-mist/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
       {/* Background Elements */}
       <FloatingElement intensity="light" delay={0} className="absolute top-10 right-10">
         <div className="w-8 h-8 bg-nature-forest/20 dark:bg-white/20 rounded-full animate-pulse-slow" />
@@ -73,7 +91,11 @@ const AboutEnhanced: React.FC = () => {
             <Card3D intensity="medium" glowEffect={true} className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-nature-forest/20 to-nature-leaf/20 rounded-2xl transform rotate-3 group-hover:rotate-6 transition-transform duration-500" />
               <div className="relative bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-2xl">
-                <img src="/lovable-uploads/40101aee-c085-43b1-a83a-03ed8d362687.png" alt="Will Hall holding a speaker in nature" className="rounded-xl w-full h-auto object-cover" />
+                <img
+                  src="/lovable-uploads/40101aee-c085-43b1-a83a-03ed8d362687.png"
+                  alt="Will Hall holding a speaker in nature"
+                  className="rounded-xl w-full h-auto object-cover"
+                />
                 <div className="absolute top-4 right-4">
                   <Badge className="bg-nature-forest text-white shadow-lg">
                     Audio Engineer
@@ -88,18 +110,30 @@ const AboutEnhanced: React.FC = () => {
             <div className="space-y-8">
               {/* Tab Navigation with 3D effects */}
               <div className="flex flex-wrap gap-2">
-                {tabs.map(tab => {
-                const IconComponent = tab.icon;
-                return <MagneticButton key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center px-4 py-2 rounded-full transition-all duration-300 ${activeTab === tab.id ? 'bg-nature-forest text-white shadow-lg transform scale-105' : 'bg-white/50 dark:bg-gray-800/50 text-nature-bark dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:scale-102'}`}>
-                      <IconComponent className="w-4 h-4 mr-2" />
-                      {tab.label}
-                    </MagneticButton>;
-              })}
+                {tabs.map((tab) => {
+                  const IconComponent = tab.icon;
+                  return (
+                    <MagneticButton key={tab.id}>
+                      <button
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex items-center px-4 py-2 rounded-full transition-all duration-300 ${
+                          activeTab === tab.id
+                            ? 'bg-nature-forest text-white shadow-lg transform scale-105'
+                            : 'bg-white/50 dark:bg-gray-800/50 text-nature-bark dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:scale-102'
+                        }`}
+                      >
+                        <IconComponent className="w-4 h-4 mr-2" />
+                        {tab.label}
+                      </button>
+                    </MagneticButton>
+                  );
+                })}
               </div>
 
               {/* Tab Content with 3D cards */}
               <div className="min-h-[300px]">
-                {activeTab === "story" && <FadeInView direction="up" delay={0.2}>
+                {activeTab === "story" && (
+                  <FadeInView direction="up" delay={0.2}>
                     <Card3D intensity="low">
                       <GlassCard className="p-6 bg-white/70 dark:bg-gray-800/70">
                         <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-4">Hi, I'm Will</h3>
@@ -114,9 +148,11 @@ const AboutEnhanced: React.FC = () => {
                         </p>
                       </GlassCard>
                     </Card3D>
-                  </FadeInView>}
+                  </FadeInView>
+                )}
 
-                {activeTab === "education" && <FadeInView direction="up" delay={0.2}>
+                {activeTab === "education" && (
+                  <FadeInView direction="up" delay={0.2}>
                     <Card3D intensity="low">
                       <GlassCard className="p-6 bg-white/70 dark:bg-gray-800/70">
                         <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-4">Education & Certifications</h3>
@@ -134,9 +170,11 @@ const AboutEnhanced: React.FC = () => {
                         </div>
                       </GlassCard>
                     </Card3D>
-                  </FadeInView>}
+                  </FadeInView>
+                )}
 
-                {activeTab === "experience" && <FadeInView direction="up" delay={0.2}>
+                {activeTab === "experience" && (
+                  <FadeInView direction="up" delay={0.2}>
                     <Card3D intensity="low">
                       <GlassCard className="p-6 bg-white/70 dark:bg-gray-800/70">
                         <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-4">Professional Experience</h3>
@@ -151,9 +189,11 @@ const AboutEnhanced: React.FC = () => {
                         </p>
                       </GlassCard>
                     </Card3D>
-                  </FadeInView>}
+                  </FadeInView>
+                )}
 
-                {activeTab === "approach" && <FadeInView direction="up" delay={0.2}>
+                {activeTab === "approach" && (
+                  <FadeInView direction="up" delay={0.2}>
                     <Card3D intensity="low">
                       <GlassCard className="p-6 bg-white/70 dark:bg-gray-800/70">
                         <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-4">My Philosophy on Sound</h3>
@@ -168,26 +208,21 @@ const AboutEnhanced: React.FC = () => {
                         </p>
                       </GlassCard>
                     </Card3D>
-                  </FadeInView>}
+                  </FadeInView>
+                )}
               </div>
 
-              {/* Skills Section with 3D effect */}
+              {/* Skills Section with clean text design */}
               <Card3D intensity="low">
                 <GlassCard className="p-6 bg-white/70 dark:bg-gray-800/70">
                   <h4 className="text-xl font-semibold text-nature-forest dark:text-white mb-4">Expertise</h4>
-                  <div className="space-y-3">
-                    {skills.map((skill, index) => <div key={skill.name}>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium text-nature-bark dark:text-gray-300">{skill.name}</span>
-                          <span className="text-sm text-nature-stone dark:text-gray-400">{skill.level}%</span>
-                        </div>
-                        <div className="w-full bg-nature-cream/50 dark:bg-gray-700 rounded-full h-2">
-                          <div className="bg-gradient-to-r from-nature-forest to-nature-leaf h-2 rounded-full transition-all duration-1000 ease-out" style={{
-                        width: `${skill.level}%`,
-                        animationDelay: `${index * 200}ms`
-                      }} />
-                        </div>
-                      </div>)}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {skills.map((skill) => (
+                      <div key={skill.name} className="p-3 rounded-lg bg-white/50 dark:bg-gray-700/50 border border-nature-cream/50 dark:border-gray-600/50">
+                        <h5 className="font-medium text-nature-forest dark:text-white mb-1">{skill.name}</h5>
+                        <p className="text-sm text-nature-bark dark:text-gray-300">{skill.description}</p>
+                      </div>
+                    ))}
                   </div>
                 </GlassCard>
               </Card3D>
@@ -195,6 +230,8 @@ const AboutEnhanced: React.FC = () => {
           </FadeInView>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default AboutEnhanced;

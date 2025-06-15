@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +33,7 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   const getAcceptTypes = () => {
     switch (type) {
       case "image": return "image/*";
-      case "audio": return "audio/*";
+      case "audio": return "audio/*,.wav,.mp3,.ogg,.m4a,.aac,.flac,.webm";
       case "video": return "video/*";
       default: return "";
     }
@@ -61,10 +60,41 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
   const getDescription = () => {
     switch (type) {
       case "image": return "Upload a cover image for your portfolio item (JPG, PNG, WebP, GIF)";
-      case "audio": return "Upload an audio preview (MP3, WAV, OGG)";
+      case "audio": return "Upload an audio preview (MP3, WAV, OGG, M4A, AAC, FLAC, WebM)";
       case "video": return "Upload a video preview (MP4, WebM, MOV)";
       default: return "";
     }
+  };
+  
+  const validateFileType = (selectedFile: File): boolean => {
+    const fileType = selectedFile.type;
+    const fileName = selectedFile.name.toLowerCase();
+    
+    if (type === "image" && !fileType.startsWith("image/")) {
+      return false;
+    }
+    
+    if (type === "audio") {
+      // Accept both MIME type and file extension for audio files
+      const audioMimeTypes = [
+        'audio/mpeg', 'audio/wav', 'audio/wave', 'audio/x-wav',
+        'audio/ogg', 'audio/vorbis', 'audio/mp4', 'audio/aac',
+        'audio/flac', 'audio/webm'
+      ];
+      const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.flac', '.webm'];
+      const hasValidMime = audioMimeTypes.includes(fileType);
+      const hasValidExtension = audioExtensions.some(ext => fileName.endsWith(ext));
+      
+      if (!hasValidMime && !hasValidExtension) {
+        return false;
+      }
+    }
+    
+    if (type === "video" && !fileType.startsWith("video/")) {
+      return false;
+    }
+    
+    return true;
   };
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,16 +102,11 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
     if (!files || files.length === 0) return;
     
     const selectedFile = files[0];
-    const fileType = selectedFile.type;
     
-    if (
-      (type === "image" && !fileType.startsWith("image/")) ||
-      (type === "audio" && !fileType.startsWith("audio/")) ||
-      (type === "video" && !fileType.startsWith("video/"))
-    ) {
+    if (!validateFileType(selectedFile)) {
       toast({
         title: "Invalid File Type",
-        description: `Please select a ${type} file.`,
+        description: `Please select a valid ${type} file. ${type === 'audio' ? 'Supported formats: MP3, WAV, OGG, M4A, AAC, FLAC, WebM' : ''}`,
         variant: "destructive"
       });
       return;
@@ -104,6 +129,8 @@ export const BaseMediaUploader: React.FC<BaseMediaUploaderProps> = ({
     setFile(selectedFile);
     setUploadedUrl("");
     setUploadedPath("");
+    
+    console.log(`📎 File selected: ${sanitizedFileName} (${selectedFile.type})`);
     
     toast({
       title: `${type.charAt(0).toUpperCase() + type.slice(1)} Selected`,
