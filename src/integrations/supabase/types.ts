@@ -266,6 +266,7 @@ export type Database = {
           portfolio_auto_approve: boolean
           site_description: string
           site_name: string
+          social_links: Json
           updated_at: string
         }
         Insert: {
@@ -279,6 +280,7 @@ export type Database = {
           portfolio_auto_approve?: boolean
           site_description?: string
           site_name?: string
+          social_links?: Json
           updated_at?: string
         }
         Update: {
@@ -292,6 +294,7 @@ export type Database = {
           portfolio_auto_approve?: boolean
           site_description?: string
           site_name?: string
+          social_links?: Json
           updated_at?: string
         }
         Relationships: []

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,14 +14,16 @@ import {
   Save,
   RefreshCw,
   Globe,
-  Shield
+  Shield,
+  Share2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
 import { useAdminMonitoring } from '@/hooks/useAdminMonitoring';
 import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TablesUpdate } from '@/integrations/supabase/types';
+import { TablesUpdate, Tables } from '@/integrations/supabase/types';
+import SocialLinksManager, { SocialLink } from '@/components/admin/SocialLinksManager';
 
 interface AdminSettingsData {
   siteName: string;
@@ -33,6 +34,7 @@ interface AdminSettingsData {
   emailNotifications: boolean;
   portfolioAutoApprove: boolean;
   maintenanceMode: boolean;
+  socialLinks: SocialLink[];
 }
 
 const AdminSettings: React.FC = () => {
@@ -45,22 +47,32 @@ const AdminSettings: React.FC = () => {
   const { toast } = useToast();
   const { trackPageView, logAdminAction } = useAdminMonitoring();
 
+  const mapSettingsForState = (s: Tables<'site_settings'>): AdminSettingsData => {
+    const socialLinksWithId = ((s.social_links as any[]) || []).map(link => ({
+      ...link,
+      id: crypto.randomUUID(),
+    }));
+
+    return {
+      siteName: s.site_name,
+      siteDescription: s.site_description,
+      contactEmail: s.contact_email,
+      featuredItemsLimit: s.featured_items_limit,
+      allowUserRegistration: s.allow_user_registration,
+      emailNotifications: s.email_notifications,
+      portfolioAutoApprove: s.portfolio_auto_approve,
+      maintenanceMode: s.maintenance_mode,
+      socialLinks: socialLinksWithId,
+    };
+  };
+
   useEffect(() => {
     trackPageView('admin_settings');
   }, [trackPageView]);
 
   useEffect(() => {
     if (initialSettings) {
-      setSettings({
-        siteName: initialSettings.site_name,
-        siteDescription: initialSettings.site_description,
-        contactEmail: initialSettings.contact_email,
-        featuredItemsLimit: initialSettings.featured_items_limit,
-        allowUserRegistration: initialSettings.allow_user_registration,
-        emailNotifications: initialSettings.email_notifications,
-        portfolioAutoApprove: initialSettings.portfolio_auto_approve,
-        maintenanceMode: initialSettings.maintenance_mode,
-      });
+      setSettings(mapSettingsForState(initialSettings));
       setHasChanges(false);
     }
   }, [initialSettings]);
@@ -73,6 +85,8 @@ const AdminSettings: React.FC = () => {
   const saveSettings = async () => {
     if (!settings) return;
 
+    const socialLinksToSave = settings.socialLinks.map(({ platform, url }) => ({ platform, url }));
+
     const settingsToUpdate: TablesUpdate<'site_settings'> = {
         site_name: settings.siteName,
         site_description: settings.siteDescription,
@@ -82,6 +96,7 @@ const AdminSettings: React.FC = () => {
         email_notifications: settings.emailNotifications,
         portfolio_auto_approve: settings.portfolioAutoApprove,
         maintenance_mode: settings.maintenanceMode,
+        social_links: socialLinksToSave,
     };
 
     updateSettings(settingsToUpdate, {
@@ -109,16 +124,7 @@ const AdminSettings: React.FC = () => {
 
   const resetChanges = () => {
     if (initialSettings) {
-      setSettings({
-        siteName: initialSettings.site_name,
-        siteDescription: initialSettings.site_description,
-        contactEmail: initialSettings.contact_email,
-        featuredItemsLimit: initialSettings.featured_items_limit,
-        allowUserRegistration: initialSettings.allow_user_registration,
-        emailNotifications: initialSettings.email_notifications,
-        portfolioAutoApprove: initialSettings.portfolio_auto_approve,
-        maintenanceMode: initialSettings.maintenance_mode,
-      });
+      setSettings(mapSettingsForState(initialSettings));
       setHasChanges(false);
     }
   };
@@ -184,8 +190,9 @@ const AdminSettings: React.FC = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="social">Social</TabsTrigger>
           <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
@@ -250,6 +257,13 @@ const AdminSettings: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="social">
+          <SocialLinksManager
+            links={settings.socialLinks}
+            onUpdate={(newLinks) => handleSettingChange('socialLinks', newLinks)}
+          />
         </TabsContent>
 
         <TabsContent value="portfolio">
