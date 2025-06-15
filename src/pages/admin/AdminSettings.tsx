@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,14 @@ import GeneralSettings from '@/components/admin/settings/GeneralSettings';
 import PortfolioSettings from '@/components/admin/settings/PortfolioSettings';
 import UserSettings from '@/components/admin/settings/UserSettings';
 import EmailSettings from '@/components/admin/settings/EmailSettings';
+import LogoManager from '@/components/admin/settings/LogoManager';
+import ColorThemeManager from '@/components/admin/settings/ColorThemeManager';
+
+interface BrandColors {
+  primary: string;
+  secondary: string;
+  accent: string;
+}
 
 interface AdminSettingsData {
   siteName: string;
@@ -28,6 +37,8 @@ interface AdminSettingsData {
   portfolioAutoApprove: boolean;
   maintenanceMode: boolean;
   socialLinks: SocialLink[];
+  logoUrl: string | null;
+  brandColors: BrandColors;
 }
 
 const AdminSettings: React.FC = () => {
@@ -46,6 +57,12 @@ const AdminSettings: React.FC = () => {
       id: crypto.randomUUID(),
     }));
 
+    const brandColors = (s.brand_colors as BrandColors) || { 
+      primary: "#10b981", 
+      secondary: "#059669", 
+      accent: "#34d399" 
+    };
+
     return {
       siteName: s.site_name,
       siteDescription: s.site_description,
@@ -56,6 +73,8 @@ const AdminSettings: React.FC = () => {
       portfolioAutoApprove: s.portfolio_auto_approve,
       maintenanceMode: s.maintenance_mode,
       socialLinks: socialLinksWithId,
+      logoUrl: s.logo_url,
+      brandColors,
     };
   };
 
@@ -90,6 +109,8 @@ const AdminSettings: React.FC = () => {
         portfolio_auto_approve: settings.portfolioAutoApprove,
         maintenance_mode: settings.maintenanceMode,
         social_links: socialLinksToSave,
+        logo_url: settings.logoUrl,
+        brand_colors: settings.brandColors,
     };
 
     updateSettings(settingsToUpdate, {
@@ -101,7 +122,7 @@ const AdminSettings: React.FC = () => {
         setHasChanges(false);
         toast({
           title: "Settings Saved",
-          description: "Your settings have been saved successfully.",
+          description: "Your settings have been saved successfully and will be reflected across the site.",
         });
       },
       onError: (error: any) => {
@@ -183,8 +204,10 @@ const AdminSettings: React.FC = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="branding">Branding</TabsTrigger>
+          <TabsTrigger value="colors">Colors</TabsTrigger>
           <TabsTrigger value="social">Social</TabsTrigger>
           <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
@@ -193,6 +216,20 @@ const AdminSettings: React.FC = () => {
 
         <TabsContent value="general">
           <GeneralSettings settings={settings} handleSettingChange={handleSettingChange} />
+        </TabsContent>
+
+        <TabsContent value="branding">
+          <LogoManager
+            logoUrl={settings.logoUrl}
+            onLogoUpdate={(url) => handleSettingChange('logoUrl', url)}
+          />
+        </TabsContent>
+
+        <TabsContent value="colors">
+          <ColorThemeManager
+            brandColors={settings.brandColors}
+            onColorsUpdate={(colors) => handleSettingChange('brandColors', colors)}
+          />
         </TabsContent>
 
         <TabsContent value="social">
