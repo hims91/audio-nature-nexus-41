@@ -1,41 +1,62 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { GlassCard } from "@/components/ui/glass-card";
-import FadeInView from "../../animations/FadeInView";
-import Card3D from "../../effects/Card3D";
-import MagneticButton from "../../animations/MagneticButton";
-import { ArrowRight } from "lucide-react";
+import { Music } from "lucide-react";
 
 const ServicesCallToAction: React.FC = () => {
   return (
-    <FadeInView direction="up" delay={0.8}>
-      <div className="text-center mt-16">
-        <Card3D intensity="medium">
-          <GlassCard className="max-w-2xl mx-auto p-8 bg-gradient-to-r from-nature-forest/10 to-nature-leaf/10 dark:from-blue-900/20 dark:to-purple-900/20">
-            <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-4">
-              Ready to elevate your audio?
-            </h3>
-            <p className="text-nature-bark dark:text-gray-300 mb-6">
-              Let's discuss your project and create something extraordinary together.
-            </p>
-            <MagneticButton>
-              <Button 
-                size="lg"
-                className="bg-nature-forest hover:bg-nature-leaf text-white px-8 py-3 rounded-full transform hover:scale-105 transition-all duration-300"
-                onClick={() => {
-                  const element = document.getElementById("contact");
-                  if (element) element.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                Start Your Project
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </MagneticButton>
-          </GlassCard>
-        </Card3D>
+    <section id="live-events" className="py-20 bg-gradient-to-br from-nature-forest/10 to-nature-moss/20">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-nature-forest mb-4">Live Event Work</h2>
+          <p className="text-lg text-nature-bark max-w-3xl mx-auto">Professional Recording for any size event&nbsp;</p>
+          <div className="w-20 h-1 bg-nature-forest mx-auto mt-4"></div>
+        </div>
+        
+        <div className="max-w-3xl mx-auto">
+          {/* Live Recording - Now as a single, centered card */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden dark:bg-gray-800">
+            <div className="relative h-64">
+              <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d" alt="Live Recording" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 flex items-center justify-center bg-[#183b29]/40">
+                <Music className="w-16 h-16 text-white" />
+              </div>
+            </div>
+            <div className="p-6">
+              <h3 className="text-2xl font-semibold text-nature-forest dark:text-white mb-3">Live Recording</h3>
+              <p className="text-nature-bark dark:text-gray-300 mb-4">
+                Capture the energy and essence of your live performances with multi-track recording services. Perfect for creating live albums, video content, or archival purposes.
+              </p>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-start">
+                  <span className="text-nature-forest dark:text-nature-leaf mr-2">•</span>
+                  <span className="text-nature-bark dark:text-gray-300">Multi-track recording up to 64 channels</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-nature-forest dark:text-nature-leaf mr-2">•</span>
+                  <span className="text-nature-bark dark:text-gray-300">Redundant recording systems for backup</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-nature-forest dark:text-nature-leaf mr-2">•</span>
+                  <span className="text-nature-bark dark:text-gray-300">Post-production mixing and mastering available</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div className="text-center mt-12">
+          <Button onClick={() => {
+          const element = document.getElementById("contact");
+          if (element) element.scrollIntoView({
+            behavior: "smooth"
+          });
+        }} className="bg-nature-forest hover:bg-nature-leaf text-white">
+            Book Your Live Event
+          </Button>
+        </div>
       </div>
-    </FadeInView>
+    </section>
   );
 };
 
