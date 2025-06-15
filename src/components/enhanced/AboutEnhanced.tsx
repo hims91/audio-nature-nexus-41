@@ -1,11 +1,8 @@
-
 import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { GlassCard } from "@/components/ui/glass-card";
 import FadeInView from "../animations/FadeInView";
 import FloatingElement from "../animations/FloatingElement";
 import Card3D from "../effects/Card3D";
-import MagneticButton from "../animations/MagneticButton";
 import { Badge } from "@/components/ui/badge";
 import { User, Award, Clock, Target } from "lucide-react";
 
@@ -113,19 +110,18 @@ const AboutEnhanced: React.FC = () => {
                 {tabs.map((tab) => {
                   const IconComponent = tab.icon;
                   return (
-                    <MagneticButton key={tab.id}>
-                      <button
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center px-4 py-2 rounded-full transition-all duration-300 ${
-                          activeTab === tab.id
-                            ? 'bg-nature-forest text-white shadow-lg transform scale-105'
-                            : 'bg-white/50 dark:bg-gray-800/50 text-nature-bark dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:scale-102'
-                        }`}
-                      >
-                        <IconComponent className="w-4 h-4 mr-2" />
-                        {tab.label}
-                      </button>
-                    </MagneticButton>
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center px-4 py-2 rounded-full transition-all duration-300 ${
+                        activeTab === tab.id
+                          ? 'bg-nature-forest text-white shadow-lg transform scale-105'
+                          : 'bg-white/50 dark:bg-gray-800/50 text-nature-bark dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:scale-102'
+                      }`}
+                    >
+                      <IconComponent className="w-4 h-4 mr-2" />
+                      {tab.label}
+                    </button>
                   );
                 })}
               </div>
