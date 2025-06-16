@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,7 @@ import HoverSoundPreview from "../interactive/HoverSoundPreview";
 import Card3D from "../effects/Card3D";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MediaTypeBadges from "./MediaTypeBadges";
-import AudioPlayerSection from "./AudioPlayerSection";
+import AudioPlayerManager, { validateAudioUrl } from "../audio/AudioPlayerManager";
 import VideoPlayerSection from "./VideoPlayerSection";
 import ExternalLinksSection from "./ExternalLinksSection";
 
@@ -16,7 +17,6 @@ interface PortfolioCardProps {
 }
 
 const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
-  const [showAudioPlayer, setShowAudioPlayer] = useState<boolean>(false);
   const isMobile = useIsMobile();
 
   const getCategoryColor = (category: string) => {
@@ -43,15 +43,10 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
     return isValid;
   };
 
-  const handleListenNow = () => {
-    console.log('🎵 Listen Now clicked for audio:', item.audioUrl);
-    setShowAudioPlayer(!showAudioPlayer);
-  };
-
   // Debug logging for audio availability
   React.useEffect(() => {
     console.log(`🎵 Portfolio item "${item.title}" audio URL:`, item.audioUrl);
-    console.log(`🎵 Has valid audio:`, hasValidMedia(item.audioUrl));
+    console.log(`🎵 Has valid audio:`, validateAudioUrl(item.audioUrl));
   }, [item.audioUrl, item.title]);
 
   return (
@@ -137,11 +132,11 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
             </p>
 
             {/* Audio Player Section */}
-            {hasValidMedia(item.audioUrl) && (
-              <AudioPlayerSection
+            {validateAudioUrl(item.audioUrl) && (
+              <AudioPlayerManager
                 audioUrl={item.audioUrl}
-                showAudioPlayer={showAudioPlayer}
-                onTogglePlayer={handleListenNow}
+                title={item.title}
+                variant="default"
               />
             )}
 

@@ -3,7 +3,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Pause, AudioWaveform } from "lucide-react";
 import AudioPlayer from "@/components/AudioPlayer";
-import MagneticButton from "../animations/MagneticButton";
 
 interface AudioPlayerSectionProps {
   audioUrl: string;
@@ -16,32 +15,37 @@ const AudioPlayerSection: React.FC<AudioPlayerSectionProps> = ({
   showAudioPlayer,
   onTogglePlayer,
 }) => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('🎵 AudioPlayerSection button clicked');
+    onTogglePlayer();
+  };
+
   return (
     <>
       {/* Listen Now Button */}
       <div className="flex justify-center">
-        <MagneticButton>
-          <Button
-            onClick={onTogglePlayer}
-            className={`${
-              showAudioPlayer 
-                ? 'bg-nature-leaf hover:bg-nature-forest' 
-                : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
-            } text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg`}
-          >
-            {showAudioPlayer ? (
-              <>
-                <Pause className="w-4 h-4 mr-2" />
-                Hide Player
-              </>
-            ) : (
-              <>
-                <AudioWaveform className="w-4 h-4 mr-2" />
-                Listen Now
-              </>
-            )}
-          </Button>
-        </MagneticButton>
+        <Button
+          onClick={handleClick}
+          className={`${
+            showAudioPlayer 
+              ? 'bg-nature-leaf hover:bg-nature-forest' 
+              : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
+          } text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg cursor-pointer`}
+        >
+          {showAudioPlayer ? (
+            <>
+              <Pause className="w-4 h-4 mr-2" />
+              Hide Player
+            </>
+          ) : (
+            <>
+              <AudioWaveform className="w-4 h-4 mr-2" />
+              Listen Now
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Audio Player */}

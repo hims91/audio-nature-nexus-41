@@ -19,6 +19,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
   const [audioError, setAudioError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [waveformData, setWaveformData] = useState<number[]>([]);
+  const [loadProgress, setLoadProgress] = useState(0);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
@@ -30,10 +31,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
   
   // Reset state when audio URL changes
   useEffect(() => {
+    console.log('🎵 AudioPlayer received URL:', audioUrl);
     setIsPlaying(false);
     setCurrentTime(0);
     setAudioError(false);
     setIsLoading(true);
+    setLoadProgress(0);
     
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
@@ -45,16 +48,19 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
+        console.log('🎵 Audio paused');
       } else {
+        console.log('🎵 Attempting to play audio');
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
               setIsPlaying(true);
               setAudioError(false);
+              console.log('🎵 Audio playing successfully');
             })
             .catch(error => {
-              console.error("Audio playback error:", error);
+              console.error("🚫 Audio playback error:", error);
               setAudioError(true);
               setIsPlaying(false);
             });
@@ -76,13 +82,32 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
       setCurrentTime(audioRef.current.currentTime);
     }
   };
+
+  const handleProgress = () => {
+    if (audioRef.current) {
+      const buffered = audioRef.current.buffered;
+      if (buffered.length > 0) {
+        const loadedEnd = buffered.end(buffered.length - 1);
+        const duration = audioRef.current.duration;
+        if (duration > 0) {
+          setLoadProgress((loadedEnd / duration) * 100);
+        }
+      }
+    }
+  };
   
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
       audioRef.current.volume = isMuted ? 0 : volume;
       setIsLoading(false);
+      console.log('🎵 Audio metadata loaded, duration:', audioRef.current.duration);
     }
+  };
+
+  const handleCanPlay = () => {
+    setIsLoading(false);
+    console.log('🎵 Audio can play');
   };
   
   const handleEnded = () => {
@@ -91,12 +116,19 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
     }
+    console.log('🎵 Audio playback ended');
   };
   
   const handleAudioError = (e: React.SyntheticEvent<HTMLAudioElement>) => {
-    console.error("Audio error loading:", audioUrl, e);
+    console.error("🚫 Audio error loading:", audioUrl, e);
     setAudioError(true);
     setIsLoading(false);
+  };
+
+  const handleLoadStart = () => {
+    console.log('🎵 Audio load started');
+    setIsLoading(true);
+    setAudioError(false);
   };
   
   const handleSeek = (value: number[]) => {
@@ -120,6 +152,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
   };
   
   if (!audioUrl) {
+    console.warn('🚫 AudioPlayer: No audio URL provided');
     return null;
   }
   
@@ -133,14 +166,19 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
         ref={audioRef}
         src={safeAudioUrl}
         onTimeUpdate={handleTimeUpdate}
+        onProgress={handleProgress}
         onLoadedMetadata={handleLoadedMetadata}
+        onCanPlay={handleCanPlay}
+        onLoadStart={handleLoadStart}
         onEnded={handleEnded}
         onError={handleAudioError}
         preload="metadata"
         style={{ display: 'none' }}
       />
       
-      {isLoading && !audioError && <AudioLoadingDisplay />}
+      {isLoading && !audioError && (
+        <AudioLoadingDisplay progress={loadProgress} />
+      )}
       
       {audioError ? (
         <AudioErrorDisplay />
