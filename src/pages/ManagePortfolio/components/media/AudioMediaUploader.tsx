@@ -1,6 +1,6 @@
 
 import React from "react";
-import { AudioUploadManager } from "@/components/audio/AudioUploadManager";
+import { AudioUploadEnhanced } from "@/components/audio/AudioUploadEnhanced";
 
 interface AudioMediaUploaderProps {
   currentUrl?: string;
@@ -8,6 +8,7 @@ interface AudioMediaUploaderProps {
   setFile: React.Dispatch<React.SetStateAction<File | null>>;
   toast: any;
   onFileUploaded?: (url: string, path: string) => void;
+  onUploadStatusChange?: (isUploading: boolean, hasUploaded: boolean) => void;
 }
 
 export const AudioMediaUploader: React.FC<AudioMediaUploaderProps> = ({
@@ -15,15 +16,17 @@ export const AudioMediaUploader: React.FC<AudioMediaUploaderProps> = ({
   file,
   setFile,
   toast,
-  onFileUploaded
+  onFileUploaded,
+  onUploadStatusChange
 }) => {
   return (
-    <AudioUploadManager
+    <AudioUploadEnhanced
       currentUrl={currentUrl}
       file={file}
       setFile={setFile}
       toast={toast}
       onUploadComplete={onFileUploaded}
+      onUploadStatusChange={onUploadStatusChange}
     />
   );
 };

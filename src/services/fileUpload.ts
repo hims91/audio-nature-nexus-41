@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface FileUploadResult {
@@ -32,16 +31,37 @@ export class FileUploadService {
     return `${userFolder}/${timestamp}_${randomId}_${sanitizedName}`;
   }
 
+  private static normalizeMimeType(file: File): string {
+    const fileName = file.name.toLowerCase();
+    const originalType = file.type;
+    
+    // Normalize problematic MIME types
+    if (originalType === 'audio/x-wav' || fileName.endsWith('.wav')) {
+      return 'audio/wav';
+    }
+    
+    if (originalType === 'audio/x-m4a' || fileName.endsWith('.m4a')) {
+      return 'audio/mp4';
+    }
+    
+    if (originalType === 'audio/x-flac' || fileName.endsWith('.flac')) {
+      return 'audio/flac';
+    }
+    
+    return originalType;
+  }
+
   private static validateAudioFile(file: File): boolean {
-    // Accept common audio MIME types and file extensions
+    const normalizedMimeType = this.normalizeMimeType(file);
+    
+    // Accept common audio MIME types
     const validMimeTypes = [
       'audio/mpeg',      // .mp3
-      'audio/wav',       // .wav
+      'audio/wav',       // .wav (normalized)
       'audio/wave',      // .wav (alternative)
-      'audio/x-wav',     // .wav (alternative)
       'audio/ogg',       // .ogg
       'audio/vorbis',    // .ogg (alternative)
-      'audio/mp4',       // .m4a
+      'audio/mp4',       // .m4a (normalized)
       'audio/aac',       // .aac
       'audio/flac',      // .flac
       'audio/webm'       // .webm audio
@@ -51,11 +71,12 @@ export class FileUploadService {
     const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
     
     console.log(`🎵 Validating audio file: ${file.name}`);
-    console.log(`📋 MIME type: ${file.type}`);
+    console.log(`📋 Original MIME type: ${file.type}`);
+    console.log(`📋 Normalized MIME type: ${normalizedMimeType}`);
     console.log(`📁 Extension: ${fileExtension}`);
     
-    // Check both MIME type and file extension for better compatibility
-    const isValidMime = validMimeTypes.includes(file.type);
+    // Check both normalized MIME type and file extension
+    const isValidMime = validMimeTypes.includes(normalizedMimeType);
     const isValidExtension = validExtensions.includes(fileExtension);
     
     if (isValidMime || isValidExtension) {
@@ -64,7 +85,22 @@ export class FileUploadService {
     }
     
     console.log(`❌ Audio file validation failed`);
+    console.log(`❌ Valid MIME types:`, validMimeTypes);
+    console.log(`❌ Valid extensions:`, validExtensions);
     return false;
+  }
+
+  private static async compressAudioIfNeeded(file: File): Promise<File> {
+    // For files larger than 25MB, we should consider compression
+    const maxSizeBeforeCompression = 25 * 1024 * 1024; // 25MB
+    
+    if (file.size > maxSizeBeforeCompression) {
+      console.log(`🗜️ File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds threshold, considering compression`);
+      // For now, just return the original file
+      // In the future, we could implement audio compression here
+    }
+    
+    return file;
   }
 
   static async uploadFile(
@@ -85,12 +121,17 @@ export class FileUploadService {
         };
       }
 
-      // Special validation for audio files
-      if (type === 'audio' && !this.validateAudioFile(file)) {
-        return {
-          success: false,
-          error: "Invalid audio file format. Supported formats: MP3, WAV, OGG, M4A, AAC, FLAC, WebM"
-        };
+      // Special validation and processing for audio files
+      if (type === 'audio') {
+        if (!this.validateAudioFile(file)) {
+          return {
+            success: false,
+            error: "Invalid audio file format. Supported formats: MP3, WAV, OGG, M4A, AAC, FLAC, WebM"
+          };
+        }
+        
+        // Compress if needed
+        file = await this.compressAudioIfNeeded(file);
       }
 
       // Generate unique file name
@@ -98,19 +139,30 @@ export class FileUploadService {
 
       console.log(`📤 Uploading ${type} file: ${file.name} (${file.type}) to ${bucketName}/${fileName}`);
 
+      // Create a new File object with normalized MIME type for audio
+      let uploadFile = file;
+      if (type === 'audio') {
+        const normalizedType = this.normalizeMimeType(file);
+        if (normalizedType !== file.type) {
+          console.log(`🔄 Normalizing MIME type from ${file.type} to ${normalizedType}`);
+          uploadFile = new File([file], file.name, { type: normalizedType });
+        }
+      }
+
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage
         .from(bucketName)
-        .upload(fileName, file, {
+        .upload(fileName, uploadFile, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: uploadFile.type
         });
 
       if (error) {
         console.error('Upload error:', error);
         return {
           success: false,
-          error: error.message
+          error: `Upload failed: ${error.message}`
         };
       }
 
