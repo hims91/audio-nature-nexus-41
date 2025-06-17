@@ -1,33 +1,32 @@
 
 import React from "react";
-import { BaseMediaUploader, BaseMediaUploaderProps } from "./BaseMediaUploader";
-import VideoPlayer from "@/components/VideoPlayer";
+import { VideoUploadEnhanced } from "@/components/video/VideoUploadEnhanced";
 
-type VideoMediaUploaderProps = Omit<BaseMediaUploaderProps, 'type' | 'children'>;
+interface VideoMediaUploaderProps {
+  currentUrl?: string;
+  file: File | null;
+  setFile: React.Dispatch<React.SetStateAction<File | null>>;
+  toast: any;
+  onFileUploaded?: (url: string, path: string) => void;
+  onUploadStatusChange?: (isUploading: boolean, hasUploaded: boolean) => void;
+}
 
 export const VideoMediaUploader: React.FC<VideoMediaUploaderProps> = ({
   currentUrl,
   file,
   setFile,
-  toast
+  toast,
+  onFileUploaded,
+  onUploadStatusChange
 }) => {
-  const hasCurrentMedia = (url?: string) => url && url.trim() !== '';
-  
   return (
-    <BaseMediaUploader
-      type="video"
+    <VideoUploadEnhanced
       currentUrl={currentUrl}
       file={file}
       setFile={setFile}
       toast={toast}
-    >
-      {hasCurrentMedia(currentUrl) && (
-        <div className="mt-4">
-          <h4 className="text-sm font-medium text-nature-forest mb-2">Current Video:</h4>
-          <VideoPlayer videoUrl={currentUrl} />
-          <p className="text-xs text-nature-bark mt-1">{currentUrl}</p>
-        </div>
-      )}
-    </BaseMediaUploader>
+      onUploadComplete={onFileUploaded}
+      onUploadStatusChange={onUploadStatusChange}
+    />
   );
 };

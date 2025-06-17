@@ -35,7 +35,7 @@ export class FileUploadService {
     const fileName = file.name.toLowerCase();
     const originalType = file.type;
     
-    // Normalize problematic MIME types
+    // Normalize problematic MIME types for audio
     if (originalType === 'audio/x-wav' || fileName.endsWith('.wav')) {
       return 'audio/wav';
     }
@@ -46,6 +46,15 @@ export class FileUploadService {
     
     if (originalType === 'audio/x-flac' || fileName.endsWith('.flac')) {
       return 'audio/flac';
+    }
+    
+    // Normalize problematic MIME types for video
+    if (originalType === 'video/x-msvideo' || fileName.endsWith('.avi')) {
+      return 'video/avi';
+    }
+    
+    if (originalType === 'video/quicktime' || fileName.endsWith('.mov')) {
+      return 'video/mov';
     }
     
     return originalType;
@@ -90,6 +99,42 @@ export class FileUploadService {
     return false;
   }
 
+  private static validateVideoFile(file: File): boolean {
+    const normalizedMimeType = this.normalizeMimeType(file);
+    
+    // Accept common video MIME types
+    const validMimeTypes = [
+      'video/mp4',       // .mp4
+      'video/webm',      // .webm
+      'video/mov',       // .mov
+      'video/quicktime', // .mov (alternative)
+      'video/avi',       // .avi
+      'video/ogg'        // .ogv
+    ];
+
+    const validExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogv'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    
+    console.log(`🎬 Validating video file: ${file.name}`);
+    console.log(`📋 Original MIME type: ${file.type}`);
+    console.log(`📋 Normalized MIME type: ${normalizedMimeType}`);
+    console.log(`📁 Extension: ${fileExtension}`);
+    
+    // Check both normalized MIME type and file extension
+    const isValidMime = validMimeTypes.includes(normalizedMimeType);
+    const isValidExtension = validExtensions.includes(fileExtension);
+    
+    if (isValidMime || isValidExtension) {
+      console.log(`✅ Video file validation passed`);
+      return true;
+    }
+    
+    console.log(`❌ Video file validation failed`);
+    console.log(`❌ Valid MIME types:`, validMimeTypes);
+    console.log(`❌ Valid extensions:`, validExtensions);
+    return false;
+  }
+
   private static async compressAudioIfNeeded(file: File): Promise<File> {
     // For files larger than 25MB, we should consider compression
     const maxSizeBeforeCompression = 25 * 1024 * 1024; // 25MB
@@ -98,6 +143,19 @@ export class FileUploadService {
       console.log(`🗜️ File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds threshold, considering compression`);
       // For now, just return the original file
       // In the future, we could implement audio compression here
+    }
+    
+    return file;
+  }
+
+  private static async compressVideoIfNeeded(file: File): Promise<File> {
+    // For files larger than 50MB, we should consider compression
+    const maxSizeBeforeCompression = 50 * 1024 * 1024; // 50MB
+    
+    if (file.size > maxSizeBeforeCompression) {
+      console.log(`🗜️ Video file size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds threshold, considering compression`);
+      // For now, just return the original file
+      // In the future, we could implement video compression here
     }
     
     return file;
@@ -134,14 +192,27 @@ export class FileUploadService {
         file = await this.compressAudioIfNeeded(file);
       }
 
+      // Special validation and processing for video files
+      if (type === 'video') {
+        if (!this.validateVideoFile(file)) {
+          return {
+            success: false,
+            error: "Invalid video file format. Supported formats: MP4, WebM, MOV, AVI, OGV"
+          };
+        }
+        
+        // Compress if needed
+        file = await this.compressVideoIfNeeded(file);
+      }
+
       // Generate unique file name
       const fileName = this.generateFileName(file.name, user.id);
 
       console.log(`📤 Uploading ${type} file: ${file.name} (${file.type}) to ${bucketName}/${fileName}`);
 
-      // Create a new File object with normalized MIME type for audio
+      // Create a new File object with normalized MIME type for audio/video
       let uploadFile = file;
-      if (type === 'audio') {
+      if (type === 'audio' || type === 'video') {
         const normalizedType = this.normalizeMimeType(file);
         if (normalizedType !== file.type) {
           console.log(`🔄 Normalizing MIME type from ${file.type} to ${normalizedType}`);

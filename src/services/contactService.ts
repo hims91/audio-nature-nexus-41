@@ -1,109 +1,107 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-interface ContactFormData {
+export interface ContactFormData {
   name: string;
   email: string;
   subject: string;
   message: string;
-  files?: File[];
+  fileAttachments?: File[];
 }
 
-export class ContactService {
-  static async submitContactForm(formData: ContactFormData): Promise<{ success: boolean; error?: string }> {
-    try {
-      const fileAttachments: any[] = [];
+export interface ContactSubmissionResult {
+  success: boolean;
+  error?: string;
+  submissionId?: string;
+}
 
-      // Upload files if provided
-      if (formData.files && formData.files.length > 0) {
-        for (const file of formData.files) {
-          const result = await this.uploadContactFile(file);
-          if (result.success && result.url) {
-            fileAttachments.push({
-              filename: file.name,
-              url: result.url,
-              size: file.size,
-              type: file.type
-            });
-          }
+export const submitContactForm = async (formData: ContactFormData): Promise<ContactSubmissionResult> => {
+  try {
+    console.log('📧 Submitting contact form:', formData.subject);
+    
+    // Handle file uploads if any
+    let fileAttachments: Array<{filename: string; url: string; type: string}> = [];
+    
+    if (formData.fileAttachments && formData.fileAttachments.length > 0) {
+      console.log('📎 Processing file attachments:', formData.fileAttachments.length);
+      
+      for (const file of formData.fileAttachments) {
+        const fileName = `${Date.now()}_${file.name}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('contact-files')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+        
+        if (uploadError) {
+          console.error('❌ File upload error:', uploadError);
+          throw new Error(`Failed to upload file ${file.name}: ${uploadError.message}`);
         }
-      }
-
-      // Submit contact form to database
-      const { data: submission, error: dbError } = await supabase
-        .from('contact_submissions')
-        .insert({
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
-          file_attachments: fileAttachments
-        })
-        .select()
-        .single();
-
-      if (dbError) {
-        console.error('Contact form submission error:', dbError);
-        return { success: false, error: dbError.message };
-      }
-
-      // Send emails via Edge Function
-      const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-contact-email', {
-        body: {
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
-          submissionId: submission.id
-        }
-      });
-
-      if (emailError) {
-        console.error('Email sending error:', emailError);
-        // Don't fail the whole submission if email fails
-        console.warn('Contact form submitted successfully but email notification failed');
-      } else {
-        console.log('Emails sent successfully:', emailResult);
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.error('Contact service error:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
-      };
-    }
-  }
-
-  private static async uploadContactFile(file: File) {
-    const bucketName = 'contact-files';
-    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}_${file.name}`;
-
-    try {
-      const { data, error } = await supabase.storage
-        .from(bucketName)
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('contact-files')
+          .getPublicUrl(fileName);
+        
+        fileAttachments.push({
+          filename: file.name,
+          url: publicUrl,
+          type: file.type
         });
-
-      if (error) {
-        console.error('File upload error:', error);
-        return { success: false, error: error.message };
       }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(fileName);
-
-      return { success: true, url: publicUrl, path: fileName };
-    } catch (error) {
-      console.error('Upload service error:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Upload failed' 
-      };
     }
+    
+    // Store the contact submission in the database
+    const { data: submission, error: dbError } = await supabase
+      .from('contact_submissions')
+      .insert({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        file_attachments: fileAttachments,
+        status: 'new'
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error('❌ Database error:', dbError);
+      throw new Error(`Failed to save contact submission: ${dbError.message}`);
+    }
+
+    console.log('✅ Contact submission saved:', submission.id);
+
+    // Send email notification using edge function
+    const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-contact-email', {
+      body: {
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        fileAttachments: fileAttachments
+      }
+    });
+
+    if (emailError) {
+      console.error('❌ Email sending error:', emailError);
+      // Don't fail the entire submission if email fails
+      console.warn('⚠️ Contact form saved but email notification failed');
+    } else {
+      console.log('✅ Contact emails sent successfully');
+    }
+
+    return {
+      success: true,
+      submissionId: submission.id
+    };
+
+  } catch (error) {
+    console.error('❌ Contact form submission error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred'
+    };
   }
-}
+};
