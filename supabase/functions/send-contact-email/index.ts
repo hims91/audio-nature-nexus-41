@@ -133,10 +133,6 @@ const handler = async (req: Request): Promise<Response> => {
                  style="background-color: #10b981; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s;">
                 📧 Reply to ${name}
               </a>
-              <a href="https://admin.terraechostudios.com" 
-                 style="background-color: #6366f1; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s;">
-                🎛️ Admin Dashboard
-              </a>
             </div>
           </div>
         </div>
@@ -148,16 +144,16 @@ const handler = async (req: Request): Promise<Response> => {
           </p>
           <p style="margin: 0;">
             🔗 Visit: <a href="https://terraechostudios.com" style="color: #10b981; text-decoration: none;">terraechostudios.com</a> | 
-            📧 Admin: <a href="mailto:TerraEchoStudios@gmail.com" style="color: #10b981; text-decoration: none;">TerraEchoStudios@gmail.com</a>
+            📧 Admin: <a href="mailto:terraechostudios@gmail.com" style="color: #10b981; text-decoration: none;">terraechostudios@gmail.com</a>
           </p>
         </div>
       </div>
     `;
 
-    // Send notification email to admin with enhanced template
+    // Send notification email to admin with corrected email address
     const adminEmailResponse = await resend.emails.send({
       from: "Terra Echo Studios Contact <noreply@terraechostudios.com>",
-      to: ["TerraEchoStudios@gmail.com"],
+      to: ["terraechostudios@gmail.com"], // Fixed: using lowercase as requested
       subject: `🎵 New Contact Form: ${subject} - from ${name}`,
       html: adminEmailHtml,
       replyTo: email,
@@ -168,7 +164,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     });
 
-    console.log("✅ Admin notification email sent:", adminEmailResponse.id);
+    console.log("✅ Admin notification email sent to terraechostudios@gmail.com:", adminEmailResponse.id);
 
     // Enhanced confirmation email for user
     const userConfirmationHtml = `
@@ -272,7 +268,7 @@ const handler = async (req: Request): Promise<Response> => {
             Professional Audio Engineering Services
           </p>
           <p style="margin: 0; font-size: 12px;">
-            📧 <a href="mailto:TerraEchoStudios@gmail.com" style="color: #10b981; text-decoration: none;">TerraEchoStudios@gmail.com</a>
+            📧 <a href="mailto:terraechostudios@gmail.com" style="color: #10b981; text-decoration: none;">terraechostudios@gmail.com</a>
           </p>
         </div>
       </div>
@@ -293,7 +289,8 @@ const handler = async (req: Request): Promise<Response> => {
         success: true, 
         adminEmailId: adminEmailResponse.id,
         userEmailId: userEmailResponse.id,
-        message: "Emails sent successfully to both admin and user"
+        message: "Emails sent successfully to both admin and user",
+        adminEmail: "terraechostudios@gmail.com" // Added for confirmation
       }), 
       {
         status: 200,

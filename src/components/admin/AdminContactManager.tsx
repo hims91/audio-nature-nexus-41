@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
@@ -13,11 +12,15 @@ import {
   User, 
   MessageSquare, 
   CheckCircle, 
-  Clock,
   RefreshCw,
   ExternalLink,
-  Timer,
-  Settings
+  X,
+  Download,
+  FileText,
+  Image,
+  Music,
+  Video,
+  FileIcon
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -41,43 +44,11 @@ const AdminContactManager: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [autoFade, setAutoFade] = useState(true);
-  const [fadeDelay, setFadeDelay] = useState(30); // seconds
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const { isAdmin } = useEnhancedAuth();
   const { toast } = useToast();
   const channelRef = useRef<any>(null);
   const isSubscribedRef = useRef(false);
-  const fadeTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
-
-  const fadeSubmission = (submissionId: string) => {
-    setSubmissions(prev => prev.filter(sub => sub.id !== submissionId));
-    fadeTimeoutsRef.current.delete(submissionId);
-  };
-
-  const startFadeTimer = (submissionId: string) => {
-    if (!autoFade) return;
-    
-    // Clear existing timeout if any
-    const existingTimeout = fadeTimeoutsRef.current.get(submissionId);
-    if (existingTimeout) {
-      clearTimeout(existingTimeout);
-    }
-    
-    // Set new timeout
-    const timeout = setTimeout(() => {
-      fadeSubmission(submissionId);
-    }, fadeDelay * 1000);
-    
-    fadeTimeoutsRef.current.set(submissionId, timeout);
-  };
-
-  const clearFadeTimer = (submissionId: string) => {
-    const timeout = fadeTimeoutsRef.current.get(submissionId);
-    if (timeout) {
-      clearTimeout(timeout);
-      fadeTimeoutsRef.current.delete(submissionId);
-    }
-  };
 
   const fetchSubmissions = async () => {
     if (!isAdmin) return;
@@ -106,16 +77,6 @@ const AdminContactManager: React.FC = () => {
       })) || [];
       
       setSubmissions(typedSubmissions);
-      
-      // Start fade timers for new submissions
-      if (autoFade) {
-        typedSubmissions.forEach(submission => {
-          if (submission.status === 'new') {
-            startFadeTimer(submission.id);
-          }
-        });
-      }
-      
       setError(null);
     } catch (error: any) {
       console.error('❌ Error fetching contact submissions:', error);
@@ -136,9 +97,6 @@ const AdminContactManager: React.FC = () => {
         .eq('id', id);
 
       if (error) throw error;
-
-      // Clear fade timer when marked as read
-      clearFadeTimer(id);
 
       setSubmissions(prev => 
         prev.map(sub => 
@@ -196,6 +154,39 @@ const AdminContactManager: React.FC = () => {
     }
   };
 
+  const deleteSubmission = async (id: string) => {
+    setDeletingIds(prev => new Set([...prev, id]));
+    
+    try {
+      const { error } = await supabase
+        .from('contact_submissions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setSubmissions(prev => prev.filter(sub => sub.id !== id));
+      
+      toast({
+        title: "Success",
+        description: "Contact submission deleted.",
+      });
+    } catch (error: any) {
+      console.error('Error deleting submission:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete submission.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
+  };
+
   // Set up real-time subscription
   useEffect(() => {
     if (!isAdmin || isSubscribedRef.current || channelRef.current) {
@@ -232,11 +223,6 @@ const AdminContactManager: React.FC = () => {
             
             setSubmissions(prev => [newSubmission, ...prev.slice(0, 14)]);
             
-            // Start fade timer for new submission
-            if (autoFade && newSubmission.status === 'new') {
-              startFadeTimer(newSubmission.id);
-            }
-            
             toast({
               title: "New Contact Submission",
               description: `From ${newSubmission.name}: ${newSubmission.subject}`,
@@ -259,7 +245,6 @@ const AdminContactManager: React.FC = () => {
           } else if (payload.eventType === 'DELETE') {
             const deletedId = payload.old.id;
             setSubmissions(prev => prev.filter(sub => sub.id !== deletedId));
-            clearFadeTimer(deletedId);
           }
         }
       )
@@ -281,28 +266,8 @@ const AdminContactManager: React.FC = () => {
         channelRef.current = null;
       }
       isSubscribedRef.current = false;
-      
-      // Clear all fade timers
-      fadeTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
-      fadeTimeoutsRef.current.clear();
     };
-  }, [isAdmin, toast, autoFade, fadeDelay]);
-
-  // Handle auto-fade setting changes
-  useEffect(() => {
-    if (autoFade) {
-      // Start timers for existing new submissions
-      submissions.forEach(submission => {
-        if (submission.status === 'new') {
-          startFadeTimer(submission.id);
-        }
-      });
-    } else {
-      // Clear all timers
-      fadeTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
-      fadeTimeoutsRef.current.clear();
-    }
-  }, [autoFade, fadeDelay]);
+  }, [isAdmin, toast]);
 
   if (!isAdmin) {
     return null;
@@ -323,6 +288,14 @@ const AdminContactManager: React.FC = () => {
     );
   };
 
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith('image/')) return <Image className="h-4 w-4" />;
+    if (fileType.startsWith('audio/')) return <Music className="h-4 w-4" />;
+    if (fileType.startsWith('video/')) return <Video className="h-4 w-4" />;
+    if (fileType === 'application/pdf') return <FileText className="h-4 w-4" />;
+    return <FileIcon className="h-4 w-4" />;
+  };
+
   return (
     <TooltipProvider>
       <Card>
@@ -337,30 +310,15 @@ const AdminContactManager: React.FC = () => {
                 Recent contact form submissions and inquiries
               </CardDescription>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Settings className="h-4 w-4 text-gray-500" />
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="auto-fade"
-                    checked={autoFade}
-                    onCheckedChange={setAutoFade}
-                  />
-                  <Label htmlFor="auto-fade" className="text-sm">
-                    Auto-fade ({fadeDelay}s)
-                  </Label>
-                </div>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={fetchSubmissions}
-                disabled={loading}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={fetchSubmissions}
+              disabled={loading}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -386,28 +344,28 @@ const AdminContactManager: React.FC = () => {
               {submissions.map((submission) => (
                 <div 
                   key={submission.id}
-                  className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-500 hover:shadow-md"
-                  style={{
-                    animation: autoFade && submission.status === 'new' 
-                      ? `fadeOut ${fadeDelay}s linear forwards` 
-                      : undefined
-                  }}
+                  className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 hover:shadow-md relative"
                 >
-                  <div className="flex items-start justify-between mb-3">
+                  {/* Delete Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteSubmission(submission.id)}
+                    disabled={deletingIds.has(submission.id)}
+                    className="absolute top-2 right-2 h-8 w-8 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                  >
+                    {deletingIds.has(submission.id) ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <X className="h-4 w-4" />
+                    )}
+                  </Button>
+
+                  <div className="flex items-start justify-between mb-3 pr-10">
                     <div className="flex items-center space-x-2">
                       <User className="h-4 w-4 text-gray-500" />
                       <span className="font-medium">{submission.name}</span>
                       <span className="text-gray-500 text-sm">({submission.email})</span>
-                      {autoFade && submission.status === 'new' && (
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Timer className="h-3 w-3 text-orange-500" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Auto-fading enabled</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
                     </div>
                     {getStatusBadge(submission.status)}
                   </div>
@@ -421,18 +379,48 @@ const AdminContactManager: React.FC = () => {
                     </p>
                   </div>
                   
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString()}
+                  {/* File Attachments Display */}
+                  {submission.file_attachments && submission.file_attachments.length > 0 && (
+                    <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                      <div className="flex items-center mb-2">
+                        <ExternalLink className="h-4 w-4 mr-2 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          File Attachments ({submission.file_attachments.length})
+                        </span>
                       </div>
-                      {submission.file_attachments && submission.file_attachments.length > 0 && (
-                        <div className="flex items-center">
-                          <ExternalLink className="h-3 w-3 mr-1" />
-                          {submission.file_attachments.length} file(s)
-                        </div>
-                      )}
+                      <div className="space-y-2">
+                        {submission.file_attachments.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-white dark:bg-gray-700 rounded border">
+                            <div className="flex items-center space-x-2">
+                              {getFileIcon(file.type || '')}
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                  {file.filename || `File ${index + 1}`}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {file.type || 'Unknown type'}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(file.url, '_blank')}
+                              className="text-xs"
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              View
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <div className="flex items-center">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString()}
                     </div>
                     
                     <div className="flex space-x-2">
@@ -474,14 +462,6 @@ const AdminContactManager: React.FC = () => {
             </div>
           )}
         </CardContent>
-        
-        <style>{`
-          @keyframes fadeOut {
-            0% { opacity: 1; transform: translateX(0); }
-            90% { opacity: 0.1; transform: translateX(-10px); }
-            100% { opacity: 0; transform: translateX(-20px); height: 0; margin: 0; padding: 0; }
-          }
-        `}</style>
       </Card>
     </TooltipProvider>
   );
