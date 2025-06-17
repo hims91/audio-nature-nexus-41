@@ -26,10 +26,8 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial }) => {
         </p>
         
         <div className="mt-auto">
-          <p className="font-semibold text-nature-forest">{testimonial.author}</p>
-          <p className="text-sm text-nature-stone">
-            {testimonial.role}, {testimonial.company}
-          </p>
+          <p className="font-semibold text-nature-forest">{testimonial.name}</p>
+          <p className="text-sm text-nature-stone">{testimonial.role}</p>
         </div>
       </CardContent>
     </Card>

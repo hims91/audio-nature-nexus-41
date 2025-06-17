@@ -56,10 +56,10 @@ const TestimonialCarousel: React.FC = () => {
               
               <div className="space-y-2">
                 <div className="font-bold text-nature-forest text-lg">
-                  {testimonial.author}
+                  {testimonial.name}
                 </div>
                 <div className="text-nature-stone text-sm">
-                  {testimonial.role} • {testimonial.company}
+                  {testimonial.role}
                 </div>
               </div>
             </div>

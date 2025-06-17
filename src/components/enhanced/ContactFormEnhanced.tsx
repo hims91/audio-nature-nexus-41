@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, X, FileText, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ContactService } from "@/services/contactService";
+import { submitContactForm } from "@/services/contactService";
 
 const ContactFormEnhanced: React.FC = () => {
   const { toast } = useToast();
@@ -63,9 +62,9 @@ const ContactFormEnhanced: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await ContactService.submitContactForm({
+      const result = await submitContactForm({
         ...formData,
-        files
+        fileAttachments: files
       });
 
       if (result.success) {
