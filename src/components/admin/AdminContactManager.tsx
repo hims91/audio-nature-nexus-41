@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Mail, 
   Calendar, 
@@ -323,157 +324,166 @@ const AdminContactManager: React.FC = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center">
-              <Mail className="h-5 w-5 mr-2 text-nature-forest" />
-              Contact Submissions
-            </CardTitle>
-            <CardDescription>
-              Recent contact form submissions and inquiries
-            </CardDescription>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Settings className="h-4 w-4 text-gray-500" />
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="auto-fade"
-                  checked={autoFade}
-                  onCheckedChange={setAutoFade}
-                />
-                <Label htmlFor="auto-fade" className="text-sm">
-                  Auto-fade ({fadeDelay}s)
-                </Label>
-              </div>
+    <TooltipProvider>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center">
+                <Mail className="h-5 w-5 mr-2 text-nature-forest" />
+                Contact Submissions
+              </CardTitle>
+              <CardDescription>
+                Recent contact form submissions and inquiries
+              </CardDescription>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={fetchSubmissions}
-              disabled={loading}
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <LoadingSpinner size="md" />
-          </div>
-        ) : error ? (
-          <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
-            <AlertDescription className="text-red-800 dark:text-red-200">
-              <strong>Error loading submissions:</strong> {error}
-            </AlertDescription>
-          </Alert>
-        ) : submissions.length === 0 ? (
-          <div className="text-center py-8">
-            <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">
-              No contact submissions yet. When users submit the contact form, they'll appear here.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {submissions.map((submission) => (
-              <div 
-                key={submission.id}
-                className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-500 hover:shadow-md"
-                style={{
-                  animation: autoFade && submission.status === 'new' 
-                    ? `fadeOut ${fadeDelay}s linear forwards` 
-                    : undefined
-                }}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Settings className="h-4 w-4 text-gray-500" />
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="auto-fade"
+                    checked={autoFade}
+                    onCheckedChange={setAutoFade}
+                  />
+                  <Label htmlFor="auto-fade" className="text-sm">
+                    Auto-fade ({fadeDelay}s)
+                  </Label>
+                </div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={fetchSubmissions}
+                disabled={loading}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <User className="h-4 w-4 text-gray-500" />
-                    <span className="font-medium">{submission.name}</span>
-                    <span className="text-gray-500 text-sm">({submission.email})</span>
-                    {autoFade && submission.status === 'new' && (
-                      <Timer className="h-3 w-3 text-orange-500" title="Auto-fading enabled" />
-                    )}
-                  </div>
-                  {getStatusBadge(submission.status)}
-                </div>
-                
-                <div className="mb-3">
-                  <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
-                    {submission.subject}
-                  </h4>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
-                    {submission.message}
-                  </p>
-                </div>
-                
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString()}
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <LoadingSpinner size="md" />
+            </div>
+          ) : error ? (
+            <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+              <AlertDescription className="text-red-800 dark:text-red-200">
+                <strong>Error loading submissions:</strong> {error}
+              </AlertDescription>
+            </Alert>
+          ) : submissions.length === 0 ? (
+            <div className="text-center py-8">
+              <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-gray-400">
+                No contact submissions yet. When users submit the contact form, they'll appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {submissions.map((submission) => (
+                <div 
+                  key={submission.id}
+                  className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-500 hover:shadow-md"
+                  style={{
+                    animation: autoFade && submission.status === 'new' 
+                      ? `fadeOut ${fadeDelay}s linear forwards` 
+                      : undefined
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4 text-gray-500" />
+                      <span className="font-medium">{submission.name}</span>
+                      <span className="text-gray-500 text-sm">({submission.email})</span>
+                      {autoFade && submission.status === 'new' && (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Timer className="h-3 w-3 text-orange-500" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Auto-fading enabled</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
-                    {submission.file_attachments && submission.file_attachments.length > 0 && (
-                      <div className="flex items-center">
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        {submission.file_attachments.length} file(s)
-                      </div>
-                    )}
+                    {getStatusBadge(submission.status)}
                   </div>
                   
-                  <div className="flex space-x-2">
-                    {submission.status === 'new' && (
+                  <div className="mb-3">
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                      {submission.subject}
+                    </h4>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
+                      {submission.message}
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString()}
+                      </div>
+                      {submission.file_attachments && submission.file_attachments.length > 0 && (
+                        <div className="flex items-center">
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          {submission.file_attachments.length} file(s)
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex space-x-2">
+                      {submission.status === 'new' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => markAsRead(submission.id)}
+                          className="text-xs h-6"
+                        >
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Mark Read
+                        </Button>
+                      )}
+                      {submission.status === 'read' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => markAsReplied(submission.id)}
+                          className="text-xs h-6"
+                        >
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          Mark Replied
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => markAsRead(submission.id)}
+                        onClick={() => window.open(`mailto:${submission.email}?subject=Re: ${submission.subject}&body=Hello ${submission.name},%0A%0AThank you for contacting Terra Echo Studios. I received your message about "${submission.subject}".%0A%0A---Original Message---%0A${encodeURIComponent(submission.message)}`, '_blank')}
                         className="text-xs h-6"
                       >
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Mark Read
+                        <Mail className="h-3 w-3 mr-1" />
+                        Reply
                       </Button>
-                    )}
-                    {submission.status === 'read' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => markAsReplied(submission.id)}
-                        className="text-xs h-6"
-                      >
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        Mark Replied
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(`mailto:${submission.email}?subject=Re: ${submission.subject}&body=Hello ${submission.name},%0A%0AThank you for contacting Terra Echo Studios. I received your message about "${submission.subject}".%0A%0A---Original Message---%0A${encodeURIComponent(submission.message)}`, '_blank')}
-                      className="text-xs h-6"
-                    >
-                      <Mail className="h-3 w-3 mr-1" />
-                      Reply
-                    </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-      
-      <style jsx>{`
-        @keyframes fadeOut {
-          0% { opacity: 1; transform: translateX(0); }
-          90% { opacity: 0.1; transform: translateX(-10px); }
-          100% { opacity: 0; transform: translateX(-20px); height: 0; margin: 0; padding: 0; }
-        }
-      `}</style>
-    </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+        
+        <style>{`
+          @keyframes fadeOut {
+            0% { opacity: 1; transform: translateX(0); }
+            90% { opacity: 0.1; transform: translateX(-10px); }
+            100% { opacity: 0; transform: translateX(-20px); height: 0; margin: 0; padding: 0; }
+          }
+        `}</style>
+      </Card>
+    </TooltipProvider>
   );
 };
 
