@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { 
   Mail, 
   Calendar, 
@@ -12,7 +14,9 @@ import {
   CheckCircle, 
   Clock,
   RefreshCw,
-  ExternalLink
+  ExternalLink,
+  Timer,
+  Settings
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -36,10 +40,43 @@ const AdminContactManager: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [autoFade, setAutoFade] = useState(true);
+  const [fadeDelay, setFadeDelay] = useState(30); // seconds
   const { isAdmin } = useEnhancedAuth();
   const { toast } = useToast();
   const channelRef = useRef<any>(null);
   const isSubscribedRef = useRef(false);
+  const fadeTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
+  const fadeSubmission = (submissionId: string) => {
+    setSubmissions(prev => prev.filter(sub => sub.id !== submissionId));
+    fadeTimeoutsRef.current.delete(submissionId);
+  };
+
+  const startFadeTimer = (submissionId: string) => {
+    if (!autoFade) return;
+    
+    // Clear existing timeout if any
+    const existingTimeout = fadeTimeoutsRef.current.get(submissionId);
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+    }
+    
+    // Set new timeout
+    const timeout = setTimeout(() => {
+      fadeSubmission(submissionId);
+    }, fadeDelay * 1000);
+    
+    fadeTimeoutsRef.current.set(submissionId, timeout);
+  };
+
+  const clearFadeTimer = (submissionId: string) => {
+    const timeout = fadeTimeoutsRef.current.get(submissionId);
+    if (timeout) {
+      clearTimeout(timeout);
+      fadeTimeoutsRef.current.delete(submissionId);
+    }
+  };
 
   const fetchSubmissions = async () => {
     if (!isAdmin) return;
@@ -50,14 +87,13 @@ const AdminContactManager: React.FC = () => {
         .from('contact_submissions')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(15);
 
       if (error) {
         throw error;
       }
 
       console.log('✅ Contact submissions fetched:', data?.length || 0);
-      // Type cast the fields to ensure TypeScript compatibility
       const typedSubmissions = data?.map(submission => ({
         ...submission,
         status: submission.status as 'new' | 'read' | 'replied' | 'closed',
@@ -69,6 +105,16 @@ const AdminContactManager: React.FC = () => {
       })) || [];
       
       setSubmissions(typedSubmissions);
+      
+      // Start fade timers for new submissions
+      if (autoFade) {
+        typedSubmissions.forEach(submission => {
+          if (submission.status === 'new') {
+            startFadeTimer(submission.id);
+          }
+        });
+      }
+      
       setError(null);
     } catch (error: any) {
       console.error('❌ Error fetching contact submissions:', error);
@@ -90,7 +136,9 @@ const AdminContactManager: React.FC = () => {
 
       if (error) throw error;
 
-      // Update local state
+      // Clear fade timer when marked as read
+      clearFadeTimer(id);
+
       setSubmissions(prev => 
         prev.map(sub => 
           sub.id === id 
@@ -125,7 +173,6 @@ const AdminContactManager: React.FC = () => {
 
       if (error) throw error;
 
-      // Update local state
       setSubmissions(prev => 
         prev.map(sub => 
           sub.id === id 
@@ -157,7 +204,6 @@ const AdminContactManager: React.FC = () => {
 
     fetchSubmissions();
 
-    // Subscribe to real-time changes
     console.log('🔄 Setting up real-time subscription for contact submissions...');
     const channelName = `contact_submissions_${Math.random().toString(36).substr(2, 9)}`;
     const channel = supabase
@@ -182,7 +228,13 @@ const AdminContactManager: React.FC = () => {
                   ? [payload.new.file_attachments] 
                   : []
             } as ContactSubmission;
-            setSubmissions(prev => [newSubmission, ...prev.slice(0, 9)]); // Keep latest 10
+            
+            setSubmissions(prev => [newSubmission, ...prev.slice(0, 14)]);
+            
+            // Start fade timer for new submission
+            if (autoFade && newSubmission.status === 'new') {
+              startFadeTimer(newSubmission.id);
+            }
             
             toast({
               title: "New Contact Submission",
@@ -206,6 +258,7 @@ const AdminContactManager: React.FC = () => {
           } else if (payload.eventType === 'DELETE') {
             const deletedId = payload.old.id;
             setSubmissions(prev => prev.filter(sub => sub.id !== deletedId));
+            clearFadeTimer(deletedId);
           }
         }
       )
@@ -227,8 +280,28 @@ const AdminContactManager: React.FC = () => {
         channelRef.current = null;
       }
       isSubscribedRef.current = false;
+      
+      // Clear all fade timers
+      fadeTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      fadeTimeoutsRef.current.clear();
     };
-  }, [isAdmin, toast]);
+  }, [isAdmin, toast, autoFade, fadeDelay]);
+
+  // Handle auto-fade setting changes
+  useEffect(() => {
+    if (autoFade) {
+      // Start timers for existing new submissions
+      submissions.forEach(submission => {
+        if (submission.status === 'new') {
+          startFadeTimer(submission.id);
+        }
+      });
+    } else {
+      // Clear all timers
+      fadeTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      fadeTimeoutsRef.current.clear();
+    }
+  }, [autoFade, fadeDelay]);
 
   if (!isAdmin) {
     return null;
@@ -262,15 +335,30 @@ const AdminContactManager: React.FC = () => {
               Recent contact form submissions and inquiries
             </CardDescription>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={fetchSubmissions}
-            disabled={loading}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Settings className="h-4 w-4 text-gray-500" />
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="auto-fade"
+                  checked={autoFade}
+                  onCheckedChange={setAutoFade}
+                />
+                <Label htmlFor="auto-fade" className="text-sm">
+                  Auto-fade ({fadeDelay}s)
+                </Label>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={fetchSubmissions}
+              disabled={loading}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -296,13 +384,21 @@ const AdminContactManager: React.FC = () => {
             {submissions.map((submission) => (
               <div 
                 key={submission.id}
-                className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-500 hover:shadow-md"
+                style={{
+                  animation: autoFade && submission.status === 'new' 
+                    ? `fadeOut ${fadeDelay}s linear forwards` 
+                    : undefined
+                }}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-2">
                     <User className="h-4 w-4 text-gray-500" />
                     <span className="font-medium">{submission.name}</span>
                     <span className="text-gray-500 text-sm">({submission.email})</span>
+                    {autoFade && submission.status === 'new' && (
+                      <Timer className="h-3 w-3 text-orange-500" title="Auto-fading enabled" />
+                    )}
                   </div>
                   {getStatusBadge(submission.status)}
                 </div>
@@ -320,7 +416,7 @@ const AdminContactManager: React.FC = () => {
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(submission.created_at).toLocaleDateString()}
+                      {new Date(submission.created_at).toLocaleDateString()} {new Date(submission.created_at).toLocaleTimeString()}
                     </div>
                     {submission.file_attachments && submission.file_attachments.length > 0 && (
                       <div className="flex items-center">
@@ -356,7 +452,7 @@ const AdminContactManager: React.FC = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => window.open(`mailto:${submission.email}?subject=Re: ${submission.subject}`, '_blank')}
+                      onClick={() => window.open(`mailto:${submission.email}?subject=Re: ${submission.subject}&body=Hello ${submission.name},%0A%0AThank you for contacting Terra Echo Studios. I received your message about "${submission.subject}".%0A%0A---Original Message---%0A${encodeURIComponent(submission.message)}`, '_blank')}
                       className="text-xs h-6"
                     >
                       <Mail className="h-3 w-3 mr-1" />
@@ -369,6 +465,14 @@ const AdminContactManager: React.FC = () => {
           </div>
         )}
       </CardContent>
+      
+      <style jsx>{`
+        @keyframes fadeOut {
+          0% { opacity: 1; transform: translateX(0); }
+          90% { opacity: 0.1; transform: translateX(-10px); }
+          100% { opacity: 0; transform: translateX(-20px); height: 0; margin: 0; padding: 0; }
+        }
+      `}</style>
     </Card>
   );
 };
