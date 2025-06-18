@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
@@ -150,10 +149,10 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Send notification email to admin with corrected email address
+    // Send notification email to admin using Resend's default domain
     const adminEmailResponse = await resend.emails.send({
-      from: "Terra Echo Studios Contact <noreply@terraechostudios.com>",
-      to: ["terraechostudios@gmail.com"], // Fixed: using lowercase as requested
+      from: "Terra Echo Studios Contact <onboarding@resend.dev>",
+      to: ["terraechostudios@gmail.com"],
       subject: `🎵 New Contact Form: ${subject} - from ${name}`,
       html: adminEmailHtml,
       replyTo: email,
@@ -274,9 +273,9 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Send confirmation email to user
+    // Send confirmation email to user using Resend's default domain
     const userEmailResponse = await resend.emails.send({
-      from: "Terra Echo Studios <noreply@terraechostudios.com>",
+      from: "Terra Echo Studios <onboarding@resend.dev>",
       to: [email],
       subject: `✅ Thank you for contacting Terra Echo Studios - ${subject}`,
       html: userConfirmationHtml,
@@ -290,7 +289,7 @@ const handler = async (req: Request): Promise<Response> => {
         adminEmailId: adminEmailResponse.id,
         userEmailId: userEmailResponse.id,
         message: "Emails sent successfully to both admin and user",
-        adminEmail: "terraechostudios@gmail.com" // Added for confirmation
+        adminEmail: "terraechostudios@gmail.com"
       }), 
       {
         status: 200,
