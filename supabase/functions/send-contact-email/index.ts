@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
@@ -142,16 +143,16 @@ const handler = async (req: Request): Promise<Response> => {
             📨 This email was automatically generated from your Terra Echo Studios contact form
           </p>
           <p style="margin: 0;">
-            🔗 Visit: <a href="https://terraechostudios.com" style="color: #10b981; text-decoration: none;">terraechostudios.com</a> | 
+            🔗 Visit: <a href="https://terraechostudio.com" style="color: #10b981; text-decoration: none;">terraechostudio.com</a> | 
             📧 Admin: <a href="mailto:terraechostudios@gmail.com" style="color: #10b981; text-decoration: none;">terraechostudios@gmail.com</a>
           </p>
         </div>
       </div>
     `;
 
-    // Send notification email to admin using Resend's default domain
+    // Send notification email to admin using your custom domain
     const adminEmailResponse = await resend.emails.send({
-      from: "Terra Echo Studios Contact <onboarding@resend.dev>",
+      from: "Terra Echo Studios Contact <noreply@terraechostudio.com>",
       to: ["terraechostudios@gmail.com"],
       subject: `🎵 New Contact Form: ${subject} - from ${name}`,
       html: adminEmailHtml,
@@ -248,10 +249,10 @@ const handler = async (req: Request): Promise<Response> => {
               creative vision to life with exceptional sound quality.
             </p>
             <div style="margin-top: 16px;">
-              <a href="https://terraechostudios.com" style="color: #10b981; text-decoration: none; font-weight: 600; margin-right: 20px;">
+              <a href="https://terraechostudio.com" style="color: #10b981; text-decoration: none; font-weight: 600; margin-right: 20px;">
                 🌐 Visit Our Website
               </a>
-              <a href="https://terraechostudios.com/portfolio" style="color: #10b981; text-decoration: none; font-weight: 600;">
+              <a href="https://terraechostudio.com/portfolio" style="color: #10b981; text-decoration: none; font-weight: 600;">
                 🎵 View Our Work
               </a>
             </div>
@@ -273,9 +274,9 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Send confirmation email to user using Resend's default domain
+    // Send confirmation email to user using your custom domain
     const userEmailResponse = await resend.emails.send({
-      from: "Terra Echo Studios <onboarding@resend.dev>",
+      from: "Terra Echo Studios <noreply@terraechostudio.com>",
       to: [email],
       subject: `✅ Thank you for contacting Terra Echo Studios - ${subject}`,
       html: userConfirmationHtml,
