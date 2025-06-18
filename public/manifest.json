@@ -13,35 +13,35 @@
   "scope": "/",
   "icons": [
     {
-      "src": "/favicon.ico",
+      "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "type": "image/png"
     },
     {
-      "src": "/placeholder.svg",
-      "type": "image/svg+xml",
+      "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
+      "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/placeholder.svg",
-      "type": "image/svg+xml", 
+      "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
+      "type": "image/png", 
       "sizes": "512x512",
       "purpose": "any maskable"
     }
   ],
   "screenshots": [
     {
-      "src": "/placeholder.svg",
+      "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
       "sizes": "1280x720",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "form_factor": "wide",
       "label": "Terra Echo Studios - Professional Audio Engineering"
     },
     {
-      "src": "/placeholder.svg",
+      "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
       "sizes": "750x1334",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "form_factor": "narrow",
       "label": "Terra Echo Studios Mobile Experience"
     }
@@ -54,9 +54,9 @@
       "url": "/portfolio",
       "icons": [
         {
-          "src": "/placeholder.svg",
+          "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
           "sizes": "96x96",
-          "type": "image/svg+xml"
+          "type": "image/png"
         }
       ]
     },
@@ -67,9 +67,9 @@
       "url": "/contact",
       "icons": [
         {
-          "src": "/placeholder.svg",
+          "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
           "sizes": "96x96",
-          "type": "image/svg+xml"
+          "type": "image/png"
         }
       ]
     }

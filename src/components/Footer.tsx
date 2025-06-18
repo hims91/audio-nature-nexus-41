@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useSettings } from "@/hooks/useSettings";
 import { Facebook, Instagram, Twitter, Linkedin, Youtube } from 'lucide-react';
@@ -30,9 +31,9 @@ const Footer: React.FC = () => {
           {/* Logo and About */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <img alt="Sound Studio Logo" className="h-24 w-24 object-contain bg-white/90 rounded-md p-1" src="/lovable-uploads/c40f6fe7-967f-424f-be8a-11e43130d0b9.png" />
+              <img alt="Sound Studio Logo" className="h-24 w-24 object-contain bg-white/90 rounded-md p-1" src="/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png" />
               <span className="text-xl font-bold">Terra Echo 
-Studios </span>
+Studios </span>
             </div>
             
             <p className="text-sm text-nature-cream/80">

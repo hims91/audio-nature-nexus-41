@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,7 @@ const UnifiedNavbar: React.FC = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img alt="Terra Echo Studios Logo" className="h-16 w-16 object-contain" src="/lovable-uploads/d1a61084-5eaf-41e1-a5f6-704cbf8197fe.png" />
+            <img alt="Terra Echo Studios Logo" className="h-16 w-16 object-contain" src="/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png" />
             {isLoading ? (
               <Skeleton className="h-6 w-48" />
             ) : (
