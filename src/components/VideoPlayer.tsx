@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { Play } from "lucide-react";
+import { Play, AlertCircle, RefreshCw } from "lucide-react";
 
 interface VideoPlayerProps {
   videoUrl?: string;
@@ -13,6 +13,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [showPlayButton, setShowPlayButton] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,7 +26,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster }) => {
           observer.disconnect();
         }
       },
-      { rootMargin: "100px" } // Load when it's 100px away from viewport
+      { rootMargin: "100px" }
     );
 
     if (containerRef.current) {
@@ -34,7 +35,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster }) => {
 
     return () => {
       if (containerRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         observer.unobserve(containerRef.current);
       }
     };
@@ -45,21 +45,51 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster }) => {
     return null;
   }
   
-  // Properly encode the URL to handle spaces and special characters
-  const safeVideoUrl = videoUrl.startsWith("http") 
-    ? videoUrl 
-    : encodeURI(videoUrl);
+  // Enhanced URL validation and formatting
+  const formatVideoUrl = (url: string): string => {
+    if (!url || url.trim() === '') return '';
+    
+    // If it's already a proper HTTP/HTTPS URL, return as is
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+    
+    // If it's a Supabase storage URL pattern, return as is
+    if (url.includes('supabase.co/storage/')) {
+      return url;
+    }
+    
+    // For relative paths, encode properly
+    return encodeURI(url);
+  };
+
+  const safeVideoUrl = formatVideoUrl(videoUrl);
   
   const handleVideoLoad = () => {
+    console.log('✅ Video loaded successfully:', safeVideoUrl);
     setIsLoading(false);
     setVideoError(false);
+    setErrorMessage("");
   };
   
   const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    console.error("Video error loading:", videoUrl, e);
+    console.error("❌ Video error loading:", {
+      originalUrl: videoUrl,
+      safeUrl: safeVideoUrl,
+      error: e
+    });
+    
     setVideoError(true);
     setIsLoading(false);
-    setErrorMessage("Unable to load video. The file may be missing or unsupported.");
+    
+    // Enhanced error messaging
+    if (videoUrl.includes('supabase.co')) {
+      setErrorMessage("Video file not accessible. It may be in a private bucket or the file was removed.");
+    } else if (videoUrl.startsWith('/')) {
+      setErrorMessage("Video file not found in the public directory. Please check if the file exists.");
+    } else {
+      setErrorMessage("Unable to load video. The file may be missing, corrupted, or in an unsupported format.");
+    }
   };
 
   const handlePlayClick = () => {
@@ -68,19 +98,41 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster }) => {
       setShowPlayButton(false);
     }
   };
+
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    setVideoError(false);
+    setIsLoading(true);
+    
+    if (videoRef.current) {
+      videoRef.current.load();
+    }
+  };
   
   return (
     <div ref={containerRef} className="relative bg-black rounded-lg overflow-hidden shadow-lg group">
       {isIntersecting ? (
         <>
           {videoError ? (
-            <div className="bg-red-50 text-red-500 p-4 text-sm aspect-video flex flex-col items-center justify-center">
-              <p>{errorMessage}</p>
-              <p className="text-xs mt-2 text-nature-bark break-all">Path: {videoUrl}</p>
+            <div className="bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 p-6 text-sm aspect-video flex flex-col items-center justify-center space-y-3">
+              <AlertCircle className="h-12 w-12 mb-2" />
+              <p className="text-center font-medium">{errorMessage}</p>
+              <p className="text-xs text-red-500 dark:text-red-400 break-all text-center max-w-full">
+                URL: {videoUrl}
+              </p>
+              {retryCount < 3 && (
+                <button
+                  onClick={handleRetry}
+                  className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors flex items-center"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Retry ({retryCount + 1}/3)
+                </button>
+              )}
             </div>
           ) : (
             <>
-              {showPlayButton && (
+              {showPlayButton && !isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-10 backdrop-blur-sm transition-opacity duration-300 opacity-0 group-hover:opacity-100">
                   <button
                     onClick={handlePlayClick}
@@ -89,6 +141,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster }) => {
                   >
                     <Play className="w-8 h-8 text-white ml-1" />
                   </button>
+                </div>
+              )}
+
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
+                  <RefreshCw className="w-8 h-8 text-white animate-spin" />
                 </div>
               )}
 
@@ -104,9 +162,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster }) => {
                 playsInline
                 onPlay={() => setShowPlayButton(false)}
                 onPause={() => setShowPlayButton(true)}
+                key={`${safeVideoUrl}-${retryCount}`} // Force re-render on retry
               >
                 <source src={safeVideoUrl} type="video/mp4" />
                 <source src={safeVideoUrl} type="video/webm" />
+                <source src={safeVideoUrl} type="video/mov" />
                 Your browser does not support the video tag.
               </video>
             </>

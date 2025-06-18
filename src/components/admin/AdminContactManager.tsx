@@ -20,7 +20,8 @@ import {
   Image,
   Music,
   Video,
-  FileIcon
+  FileIcon,
+  AlertCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -269,6 +270,30 @@ const AdminContactManager: React.FC = () => {
     };
   }, [isAdmin, toast]);
 
+  // Enhanced file access handling
+  const handleFileAccess = async (file: any, index: number) => {
+    try {
+      console.log('📎 Attempting to access file:', file);
+      
+      // Try to access the file URL directly first
+      const response = await fetch(file.url, { method: 'HEAD' });
+      
+      if (response.ok) {
+        // File is accessible, open it
+        window.open(file.url, '_blank');
+      } else {
+        throw new Error(`File not accessible: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('❌ File access error:', error);
+      toast({
+        title: "File Access Error",
+        description: `Unable to access file "${file.filename}". It may have been moved or deleted.`,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!isAdmin) {
     return null;
   }
@@ -379,7 +404,7 @@ const AdminContactManager: React.FC = () => {
                     </p>
                   </div>
                   
-                  {/* File Attachments Display */}
+                  {/* Enhanced File Attachments Display */}
                   {submission.file_attachments && submission.file_attachments.length > 0 && (
                     <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
                       <div className="flex items-center mb-2">
@@ -405,7 +430,7 @@ const AdminContactManager: React.FC = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.open(file.url, '_blank')}
+                              onClick={() => handleFileAccess(file, index)}
                               className="text-xs"
                             >
                               <Download className="h-3 w-3 mr-1" />
@@ -413,6 +438,14 @@ const AdminContactManager: React.FC = () => {
                             </Button>
                           </div>
                         ))}
+                      </div>
+                      
+                      {/* File Access Warning */}
+                      <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded text-xs">
+                        <div className="flex items-center text-amber-700 dark:text-amber-300">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          <span>If files don't open, they may be in a private bucket or have been moved.</span>
+                        </div>
                       </div>
                     </div>
                   )}
