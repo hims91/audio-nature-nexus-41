@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useAdminProducts, useProductStats, useProductMutations } from '@/hooks/useAdminProducts';
+import { useAdminProductsRealtime } from '@/hooks/useAdminProductsRealtime';
 import { useCategories } from '@/hooks/useProducts';
 import AdminProductsHeader from './components/AdminProductsHeader';
 import AdminProductsStats from './components/AdminProductsStats';
@@ -13,6 +14,9 @@ const AdminProducts: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [stockFilter, setStockFilter] = useState<string>('all');
   const [currentTab, setCurrentTab] = useState('all');
+
+  // Enable real-time updates
+  useAdminProductsRealtime();
 
   const { data: categories = [] } = useCategories();
   const { data: productStats, isLoading: isLoadingStats } = useProductStats();

@@ -5,6 +5,7 @@ import LoadingSpinner from '@/components/animations/LoadingSpinner';
 
 // Lazy load admin components for better performance
 const AdminProducts = lazy(() => import('../../pages/admin/AdminProducts'));
+const AdminProductForm = lazy(() => import('../../pages/admin/components/AdminProductForm'));
 const AdminOrders = lazy(() => import('../../pages/admin/AdminOrders'));
 const AdminInventory = lazy(() => import('../../pages/admin/AdminInventory'));
 const AdminAnalytics = lazy(() => import('../../pages/admin/AdminAnalytics'));
@@ -30,6 +31,8 @@ const AdminRoutes: React.FC = () => {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="portfolio" element={<AdminPortfolio />} />
         <Route path="products" element={<AdminProducts />} />
+        <Route path="products/new" element={<AdminProductForm />} />
+        <Route path="products/:id/edit" element={<AdminProductForm />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="inventory" element={<AdminInventory />} />
         <Route path="analytics" element={<AdminAnalytics />} />

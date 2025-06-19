@@ -1,63 +1,38 @@
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 
-const MemoryOptimizer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Clean up memory leaks and optimize garbage collection
-  const cleanupMemory = useCallback(() => {
-    // Clear expired cache entries
-    const now = Date.now();
-    const expiredKeys: string[] = [];
-    
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('cache_')) {
-        try {
-          const item = JSON.parse(localStorage.getItem(key) || '');
-          if (item.expires && item.expires < now) {
-            expiredKeys.push(key);
-          }
-        } catch (e) {
-          // Remove corrupted cache entries
-          expiredKeys.push(key);
-        }
-      }
-    }
-    
-    expiredKeys.forEach(key => localStorage.removeItem(key));
-    
-    // Clear old performance metrics
-    const metrics = JSON.parse(sessionStorage.getItem('performance-metrics') || '[]');
-    const oneHourAgo = now - (60 * 60 * 1000);
-    const recentMetrics = metrics.filter((m: any) => m.timestamp > oneHourAgo);
-    sessionStorage.setItem('performance-metrics', JSON.stringify(recentMetrics));
-    
-    // Suggest garbage collection if available
-    if (window.gc && typeof window.gc === 'function') {
-      window.gc();
-    }
-  }, []);
+interface MemoryOptimizerProps {
+  children: React.ReactNode;
+}
+
+const MemoryOptimizer: React.FC<MemoryOptimizerProps> = ({ children }) => {
+  const cleanupRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
-    // Set up memory cleanup interval
-    const cleanupInterval = setInterval(cleanupMemory, 5 * 60 * 1000); // Every 5 minutes
-    
-    // Clean up on page visibility change
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        cleanupMemory();
+    // Memory optimization strategies
+    const cleanup = () => {
+      // Clear any intervals, timeouts, or event listeners
+      cleanupRef.current.forEach(fn => fn());
+      cleanupRef.current = [];
+    };
+
+    // Monitor memory usage
+    const memoryMonitor = setInterval(() => {
+      if (performance.memory) {
+        const { usedJSHeapSize, totalJSHeapSize, jsHeapSizeLimit } = performance.memory;
+        const memoryUsage = (usedJSHeapSize / jsHeapSizeLimit) * 100;
+        
+        // If memory usage is high, trigger garbage collection hints
+        if (memoryUsage > 80) {
+          console.warn('High memory usage detected:', memoryUsage.toFixed(2) + '%');
+        }
       }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Initial cleanup
-    cleanupMemory();
-    
-    return () => {
-      clearInterval(cleanupInterval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [cleanupMemory]);
+    }, 30000); // Check every 30 seconds
+
+    cleanupRef.current.push(() => clearInterval(memoryMonitor));
+
+    return cleanup;
+  }, []);
 
   return <>{children}</>;
 };
