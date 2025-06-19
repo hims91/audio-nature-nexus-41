@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { FixedSizeList as List } from 'react-window';
-import InfiniteLoader from 'react-window-infinite-loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -13,6 +12,7 @@ interface VirtualScrollingProps<T> {
   renderItem: (item: T, index: number) => React.ReactNode;
   itemHeight?: number;
   height?: number;
+  width?: number | string;
   className?: string;
 }
 
@@ -24,6 +24,7 @@ function VirtualScrolling<T>({
   renderItem,
   itemHeight = 200,
   height = 600,
+  width = '100%',
   className = ''
 }: VirtualScrollingProps<T>) {
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +38,7 @@ function VirtualScrolling<T>({
   }, [items.length]);
 
   // Load more items
-  const loadMoreItems = useCallback(async () => {
+  const loadMoreItems = useCallback(async (startIndex: number, stopIndex: number) => {
     if (isLoading || !hasNextPage) return;
     
     setIsLoading(true);
@@ -67,34 +68,30 @@ function VirtualScrolling<T>({
       );
     }
 
+    // Check if we need to load more items when approaching the end
+    if (index >= items.length - 5 && hasNextPage && !isLoading) {
+      loadMoreItems(index, index + 5);
+    }
+
     return (
       <div style={style} className="p-2">
         {renderItem(item, index)}
       </div>
     );
-  }, [items, renderItem]);
+  }, [items, renderItem, hasNextPage, isLoading, loadMoreItems]);
 
-  // Memoize the list component
+  // Simple virtual list without InfiniteLoader for now
   const VirtualList = useMemo(() => (
-    <InfiniteLoader
-      isItemLoaded={isItemLoaded}
+    <List
+      height={height}
+      width={width}
       itemCount={itemCount}
-      loadMoreItems={loadMoreItems}
+      itemSize={itemHeight}
+      className={className}
     >
-      {({ onItemsRendered, ref }) => (
-        <List
-          ref={ref}
-          height={height}
-          itemCount={itemCount}
-          itemSize={itemHeight}
-          onItemsRendered={onItemsRendered}
-          className={className}
-        >
-          {ItemRenderer}
-        </List>
-      )}
-    </InfiniteLoader>
-  ), [isItemLoaded, itemCount, loadMoreItems, height, itemHeight, className, ItemRenderer]);
+      {ItemRenderer}
+    </List>
+  ), [height, width, itemCount, itemHeight, className, ItemRenderer]);
 
   return VirtualList;
 }
