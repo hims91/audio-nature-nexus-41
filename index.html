@@ -4,9 +4,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Will Hall Sound Studios</title>
-    <meta name="description" content="Authentic Audio, Naturally Engineered." />
-    <meta name="author" content="Will Hall Sound Studios" />
+    <title>Terra Echo Studios</title>
+    <meta name="description" content="Professional Audio Engineering Services - Transform your sound with world-class mixing, mastering, and sound design." />
+    <meta name="author" content="Terra Echo Studios" />
     <link rel="icon" href="/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png" type="image/png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#065f46">
@@ -19,18 +19,18 @@
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://www.google-analytics.com">
 
-    <meta property="og:title" content="Will Hall Sound Studios" />
-    <meta property="og:description" content="Authentic Audio, Naturally Engineered." />
+    <meta property="og:title" content="Terra Echo Studios" />
+    <meta property="og:description" content="Professional Audio Engineering Services - Transform your sound with world-class mixing, mastering, and sound design." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@willhallsound" />
+    <meta name="twitter:site" content="@terraechostudios" />
     <meta name="twitter:image" content="/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png" />
 
     <!-- Performance optimizations -->
     <meta name="robots" content="index, follow, max-image-preview:large">
-    <link rel="canonical" href="https://will-hall-sound-studios.lovable.app/">
+    <link rel="canonical" href="https://terra-echo-studios.lovable.app/">
   </head>
 
   <body>
@@ -40,3 +40,411 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+```
+
+Now I need to update the manifest.json to ensure consistent branding:
+
+<lov-write file_path="public/manifest.json">
+{
+  "name": "Terra Echo Studios",
+  "short_name": "Terra Echo",
+  "description": "Professional Audio Engineering Services - Transform your sound with world-class mixing, mastering, and sound design.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F0FFF4",
+  "theme_color": "#22543D",
+  "orientation": "portrait-primary",
+  "categories": ["music", "audio", "business", "entertainment"],
+  "lang": "en-US",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
+      "type": "image/png", 
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Terra Echo Studios - Professional Audio Engineering"
+    },
+    {
+      "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Terra Echo Studios Mobile Experience"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Portfolio",
+      "short_name": "Portfolio",
+      "description": "View our professional audio engineering projects",
+      "url": "/portfolio",
+      "icons": [
+        {
+          "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Contact",
+      "short_name": "Contact",
+      "description": "Get in touch for your audio engineering needs",
+      "url": "/contact",
+      "icons": [
+        {
+          "src": "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
+```
+
+I also need to update the SocialMeta component to ensure consistent branding across all pages:
+
+<lov-write file_path="src/components/SEO/SocialMeta.tsx">
+import React from "react";
+import { Helmet } from "react-helmet-async";
+import { useSettings } from "@/hooks/useSettings";
+
+interface SocialMetaProps {
+  title: string;
+  description: string;
+  image?: string;
+  url?: string;
+  type?: "website" | "article" | "profile";
+  twitterCard?: "summary" | "summary_large_image" | "app" | "player";
+}
+
+const SocialMeta: React.FC<SocialMetaProps> = ({
+  title,
+  description,
+  image = "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
+  url,
+  type = "website",
+  twitterCard = "summary_large_image"
+}) => {
+  const { data: settings } = useSettings();
+  const currentUrl = url || window.location.href;
+  const fullImageUrl = image.startsWith('http') ? image : `${window.location.origin}${image}`;
+
+  const siteName = settings?.site_name || "Terra Echo Studios";
+
+  return (
+    <Helmet>
+      {/* Dynamic title */}
+      <title>{title}</title>
+      
+      {/* Open Graph / Facebook */}
+      <meta property="og:type" content={type} />
+      <meta property="og:url" content={currentUrl} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content={fullImageUrl} />
+      <meta property="og:image:alt" content={title} />
+      <meta property="og:site_name" content={siteName} />
+      <meta property="og:locale" content="en_US" />
+
+      {/* Twitter */}
+      <meta name="twitter:card" content={twitterCard} />
+      <meta name="twitter:url" content={currentUrl} />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={fullImageUrl} />
+      <meta name="twitter:image:alt" content={title} />
+      <meta name="twitter:site" content="@terraechostudios" />
+      <meta name="twitter:creator" content="@terraechostudios" />
+
+      {/* Additional meta tags */}
+      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      <link rel="canonical" href={currentUrl} />
+    </Helmet>
+  );
+};
+
+export default SocialMeta;
+```
+
+Finally, I need to update the SEOManager to ensure consistent branding across all pages:
+
+<lov-write file_path="src/components/SEO/SEOManager.tsx">
+import React from "react";
+import SocialMeta from "./SocialMeta";
+import StructuredData from "./StructuredData";
+import SitemapGenerator from "./SitemapGenerator";
+import { Helmet } from "react-helmet-async";
+
+interface SEOManagerProps {
+  title?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+  type?: "website" | "article" | "profile";
+  keywords?: string[];
+  author?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  structuredDataType?: "website" | "organization" | "service" | "portfolio";
+  structuredData?: Record<string, any>;
+}
+
+const SEOManager: React.FC<SEOManagerProps> = ({
+  title = "Terra Echo Studios | Professional Audio Engineering Services",
+  description = "Professional audio engineering services including mixing, mastering, sound design, and Dolby Atmos production. Transform your sound with our expert services.",
+  image,
+  url,
+  type = "website",
+  keywords = [
+    "audio engineering",
+    "mixing",
+    "mastering", 
+    "sound design",
+    "recording studio",
+    "podcasting",
+    "dolby atmos",
+    "professional audio services",
+    "music production",
+    "post production audio"
+  ],
+  author = "Terra Echo Studios",
+  publishedTime,
+  modifiedTime,
+  structuredDataType = "website",
+  structuredData = {}
+}) => {
+  const canonicalUrl = url || window.location.href;
+  const keywordsString = keywords.join(", ");
+
+  return (
+    <>
+      <Helmet>
+        {/* Basic Meta Tags */}
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <meta name="keywords" content={keywordsString} />
+        <meta name="author" content={author} />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Favicon */}
+        <link rel="icon" href="/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png" type="image/png" />
+        
+        {/* Article specific meta tags */}
+        {type === "article" && publishedTime && (
+          <meta property="article:published_time" content={publishedTime} />
+        )}
+        {type === "article" && modifiedTime && (
+          <meta property="article:modified_time" content={modifiedTime} />
+        )}
+        {type === "article" && author && (
+          <meta property="article:author" content={author} />
+        )}
+
+        {/* Robots and crawling */}
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        
+        {/* Mobile and PWA */}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#22543D" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Terra Echo Studios" />
+        
+        {/* Preconnect to external domains */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Language and locale */}
+        <meta httpEquiv="content-language" content="en-US" />
+        <meta property="og:locale" content="en_US" />
+      </Helmet>
+
+      <SocialMeta
+        title={title}
+        description={description}
+        image={image}
+        url={canonicalUrl}
+        type={type}
+      />
+
+      <StructuredData
+        type={structuredDataType}
+        data={structuredData}
+      />
+
+      <SitemapGenerator />
+    </>
+  );
+};
+
+export default SEOManager;
+```
+
+I need to update the ContactPage to ensure it uses the correct branding:
+
+<lov-write file_path="src/pages/ContactPage.tsx">
+import React from 'react';
+import UnifiedNavbar from '@/components/UnifiedNavbar';
+import ContactFormEnhanced from '@/components/enhanced/ContactFormEnhanced';
+import Footer from '@/components/Footer';
+import SEOManager from '@/components/SEO/SEOManager';
+import FadeInView from '@/components/animations/FadeInView';
+
+const ContactPage = () => {
+  return (
+    <>
+      <SEOManager
+        title="Contact Us | Terra Echo Studios - Professional Audio Engineering Services"
+        description="Get in touch with Terra Echo Studios for professional audio engineering services. Contact us for mixing, mastering, sound design, and Dolby Atmos production inquiries."
+        keywords={[
+          "contact terra echo studios",
+          "audio engineering contact",
+          "mixing mastering inquiry",
+          "sound design consultation",
+          "dolby atmos services",
+          "professional audio contact",
+          "studio booking"
+        ]}
+        structuredDataType="service"
+        structuredData={{
+          serviceType: "Audio Engineering Consultation",
+          description: "Professional audio engineering consultation and project inquiry"
+        }}
+      />
+
+      <div className="min-h-screen bg-white dark:bg-gray-900">
+        <UnifiedNavbar />
+        
+        <main className="pt-20">
+          <div className="container mx-auto px-4 py-12">
+            <FadeInView direction="up">
+              <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-bold text-nature-forest dark:text-white mb-4">
+                  Get In Touch
+                </h1>
+                <p className="text-xl text-nature-bark dark:text-gray-300 max-w-3xl mx-auto">
+                  Ready to transform your sound? Contact us today to discuss your project 
+                  and discover how our professional audio engineering services can elevate your work.
+                </p>
+              </div>
+            </FadeInView>
+
+            <FadeInView direction="up" delay={0.2}>
+              <div className="max-w-4xl mx-auto">
+                <ContactFormEnhanced />
+              </div>
+            </FadeInView>
+          </div>
+        </main>
+        
+        <Footer />
+      </div>
+    </>
+  );
+};
+
+export default ContactPage;
+```
+
+Finally, I need to update the Index page to ensure consistent branding:
+
+<lov-write file_path="src/pages/Index.tsx">
+import React from 'react';
+import UnifiedNavbar from '@/components/UnifiedNavbar';
+import Hero from '@/components/Hero';
+import AboutEnhanced from '@/components/enhanced/AboutEnhanced';
+import ServicesEnhanced from '@/components/enhanced/ServicesEnhanced';
+import Portfolio from '@/components/Portfolio';
+import Testimonials from '@/components/Testimonials';
+import ContactFormEnhanced from '@/components/enhanced/ContactFormEnhanced';
+import Footer from '@/components/Footer';
+import SEOManager from '@/components/SEO/SEOManager';
+import PWAInstallerEnhanced from '@/components/performance/PWAInstallerEnhanced';
+
+const Index = () => {
+  return (
+    <>
+      <SEOManager
+        title="Terra Echo Studios | Professional Audio Engineering Services"
+        description="Terra Echo Studios provides world-class audio engineering, mixing, mastering, sound design, and Dolby Atmos services. Transform your sound with our professional expertise and state-of-the-art equipment."
+        keywords={[
+          "audio engineering",
+          "mixing", 
+          "mastering",
+          "sound design",
+          "recording studio",
+          "podcasting",
+          "dolby atmos",
+          "professional audio services",
+          "music production",
+          "post production audio",
+          "terra echo studios"
+        ]}
+        structuredDataType="organization"
+        structuredData={{
+          name: "Terra Echo Studios",
+          telephone: "+1 (555) 123-4567",
+          email: "TerraEchoStudios@gmail.com",
+          address: "Los Angeles, CA",
+          sameAs: [
+            "https://www.facebook.com/terraechostudios",
+            "https://www.instagram.com/terraechostudios",
+            "https://www.linkedin.com/company/terraechostudios"
+          ]
+        }}
+      />
+
+      <div className="min-h-screen bg-white dark:bg-gray-900">
+        <UnifiedNavbar />
+        
+        <main>
+          <Hero />
+          <div id="about">
+            <AboutEnhanced />
+          </div>
+          <div id="services">
+            <ServicesEnhanced />
+          </div>
+          <div id="portfolio">
+            <Portfolio />
+          </div>
+          <div id="testimonials">
+            <Testimonials />
+          </div>
+          <div id="contact">
+            <ContactFormEnhanced />
+          </div>
+        </main>
+        
+        <Footer />
+        <PWAInstallerEnhanced />
+      </div>
+    </>
+  );
+};
+
+export default Index;
+```
