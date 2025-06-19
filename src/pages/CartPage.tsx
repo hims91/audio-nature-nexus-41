@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/utils/currency';
-import { LoadingSpinner } from '@/components/animations/LoadingSpinner';
+import LoadingSpinner from '@/components/animations/LoadingSpinner';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -36,7 +36,7 @@ const CartPage: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
           items: checkoutItems,
-          success_url: `${window.location.origin}/shop/success`,
+          success_url: `${window.location.origin}/order/success`,
           cancel_url: `${window.location.origin}/shop/cart`,
         },
       });
@@ -180,7 +180,7 @@ const CartPage: React.FC = () => {
 
                 {/* Clear Cart */}
                 <div className="flex justify-end">
-                  <Button variant="outline" onClick={clearCart}>
+                  <Button variant="outline" onClick={() => clearCart()}>
                     Clear Cart
                   </Button>
                 </div>

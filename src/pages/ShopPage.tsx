@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Filter, Grid, List } from 'lucide-react';
 import ProductCard from '@/components/shop/ProductCard';
 import { useProducts, useCategories } from '@/hooks/useProducts';
-import { LoadingSpinner } from '@/components/animations/LoadingSpinner';
+import LoadingSpinner from '@/components/animations/LoadingSpinner';
 
 const ShopPage: React.FC = () => {
   const [search, setSearch] = useState('');

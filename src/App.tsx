@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { EnhancedAuthProvider } from "@/contexts/EnhancedAuthContext";
-import { HelmetProvider } from "@/components/SEO/HelmetProvider";
+import HelmetProvider from "@/components/SEO/HelmetProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import Index from "./pages/Index";
 import AuthEnhanced from "./pages/AuthEnhanced";
@@ -16,6 +16,9 @@ import MaintenancePage from "./pages/MaintenancePage";
 import NotFound from "./pages/NotFound";
 import ShopPage from "./pages/ShopPage";
 import CartPage from "./pages/CartPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
+import OrderSuccessPage from "./pages/OrderSuccessPage";
+import OrderCancelPage from "./pages/OrderCancelPage";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPortfolio from "./pages/admin/AdminPortfolio";
@@ -34,7 +37,7 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <HelmetProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ThemeProvider defaultTheme="system">
             <TooltipProvider>
               <BrowserRouter>
                 <AuthProvider>
@@ -47,6 +50,9 @@ function App() {
                         <Route path="/contact" element={<ContactPage />} />
                         <Route path="/shop" element={<ShopPage />} />
                         <Route path="/shop/cart" element={<CartPage />} />
+                        <Route path="/shop/products/:slug" element={<ProductDetailPage />} />
+                        <Route path="/order/success" element={<OrderSuccessPage />} />
+                        <Route path="/order/cancel" element={<OrderCancelPage />} />
                         <Route path="/maintenance" element={<MaintenancePage />} />
                         
                         {/* Protected Routes */}

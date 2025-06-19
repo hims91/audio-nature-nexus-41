@@ -8,7 +8,7 @@ interface SocialMetaProps {
   description: string;
   image?: string;
   url?: string;
-  type?: "website" | "article" | "profile";
+  type?: "website" | "article" | "profile" | "product";
   twitterCard?: "summary" | "summary_large_image" | "app" | "player";
 }
 
