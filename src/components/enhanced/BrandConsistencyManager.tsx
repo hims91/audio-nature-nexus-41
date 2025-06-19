@@ -19,7 +19,7 @@ interface BrandConfig {
 }
 
 export const BRAND_CONFIG: BrandConfig = {
-  name: "Terra Echo Audio",
+  name: "Terra Echo Studios",
   tagline: "Professional Audio Engineering Services",
   logoUrl: "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
   colors: {

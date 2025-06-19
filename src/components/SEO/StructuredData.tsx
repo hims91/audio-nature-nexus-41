@@ -43,7 +43,7 @@ const StructuredData: React.FC<StructuredDataProps> = ({ type, data = {} }) => {
           "name": siteName,
           "description": siteDescription,
           "url": window.location.origin,
-          "logo": `${window.location.origin}/lovable-uploads/f7382800-2251-4349-b6ee-b2e753232d10.png`,
+          "logo": `${window.location.origin}/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png`,
           "contactPoint": {
             "@type": "ContactPoint",
             "email": contactEmail,
@@ -88,7 +88,7 @@ const StructuredData: React.FC<StructuredDataProps> = ({ type, data = {} }) => {
           "name": "Audio Engineering Portfolio",
           "creator": {
             "@type": "Person",
-            "name": "Will Hall"
+            "name": "Terra Echo Studios"
           },
           "description": "Portfolio of professional audio engineering projects",
           ...data

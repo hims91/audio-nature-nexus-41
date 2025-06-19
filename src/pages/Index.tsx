@@ -15,8 +15,8 @@ const Index = () => {
   return (
     <>
       <SEOManager
-        title="Terra Echo Audio | Professional Audio Engineering Services"
-        description="Terra Echo Audio provides world-class audio engineering, mixing, mastering, sound design, and Dolby Atmos services. Transform your sound with our professional expertise and state-of-the-art equipment."
+        title="Terra Echo Studios | Professional Audio Engineering Services"
+        description="Terra Echo Studios provides world-class audio engineering, mixing, mastering, sound design, and Dolby Atmos services. Transform your sound with our professional expertise and state-of-the-art equipment."
         keywords={[
           "audio engineering",
           "mixing", 
@@ -28,18 +28,18 @@ const Index = () => {
           "professional audio services",
           "music production",
           "post production audio",
-          "terra echo audio"
+          "terra echo studios"
         ]}
         structuredDataType="organization"
         structuredData={{
-          name: "Terra Echo Audio",
+          name: "Terra Echo Studios",
           telephone: "+1 (555) 123-4567",
           email: "TerraEchoStudios@gmail.com",
           address: "Los Angeles, CA",
           sameAs: [
-            "https://www.facebook.com/terraechoaudio",
-            "https://www.instagram.com/terraechoaudio",
-            "https://www.linkedin.com/company/terraechoaudio"
+            "https://www.facebook.com/terraechostudios",
+            "https://www.instagram.com/terraechostudios",
+            "https://www.linkedin.com/company/terraechostudios"
           ]
         }}
       />

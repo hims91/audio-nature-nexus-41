@@ -133,7 +133,7 @@ const AdminLayout: React.FC = () => {
           
           <div className="flex items-center justify-between w-full">
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              Terra Echo Audio Admin
+              Terra Echo Studios Admin
             </span>
             
             {/* User Profile Dropdown in top bar */}
