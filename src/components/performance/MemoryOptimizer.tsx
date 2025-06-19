@@ -5,6 +5,17 @@ interface MemoryOptimizerProps {
   children: React.ReactNode;
 }
 
+// Extend the Performance interface to include memory property
+declare global {
+  interface Performance {
+    memory?: {
+      usedJSHeapSize: number;
+      totalJSHeapSize: number;
+      jsHeapSizeLimit: number;
+    };
+  }
+}
+
 const MemoryOptimizer: React.FC<MemoryOptimizerProps> = ({ children }) => {
   const cleanupRef = useRef<(() => void)[]>([]);
 

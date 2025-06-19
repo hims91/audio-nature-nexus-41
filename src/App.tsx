@@ -20,7 +20,6 @@ import ProductDetailPage from '@/pages/ProductDetailPage';
 import CartPage from '@/pages/CartPage';
 import AuthEnhanced from '@/pages/AuthEnhanced';
 import ProfilePage from '@/pages/ProfilePage';
-import AdminRoutes from '@/components/admin/AdminRoutes';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ContactPage from '@/pages/ContactPage';
 import CustomerOrderHistory from '@/pages/CustomerOrderHistory';
@@ -78,9 +77,7 @@ function App() {
                             <Route path="/portfolio" element={<PortfolioPage />} />
                             <Route path="/admin/*" element={
                               <ProtectedRoute requiredRole="admin">
-                                <AdminLayout>
-                                  <AdminRoutes />
-                                </AdminLayout>
+                                <AdminLayout />
                               </ProtectedRoute>
                             } />
                             <Route path="/orders" element={

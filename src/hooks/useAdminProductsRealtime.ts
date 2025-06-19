@@ -3,6 +3,14 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+interface PostgresChangesPayload {
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  new?: { [key: string]: any };
+  old?: { [key: string]: any };
+  table: string;
+  schema: string;
+}
+
 export const useAdminProductsRealtime = () => {
   const queryClient = useQueryClient();
 
@@ -17,7 +25,7 @@ export const useAdminProductsRealtime = () => {
           schema: 'public',
           table: 'products'
         },
-        (payload) => {
+        (payload: PostgresChangesPayload) => {
           console.log('Product change detected:', payload);
           
           // Invalidate and refetch admin products queries
