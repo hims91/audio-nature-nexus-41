@@ -90,10 +90,10 @@ export const useCustomerOrdersTracking = () => {
 
   // Set up real-time subscription for all user orders
   useEffect(() => {
-    const { data: { user } } = supabase.auth.getUser();
-    
-    user.then((userData) => {
-      if (!userData.user) return;
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) return;
 
       const channel = supabase
         .channel('customer-orders-tracking')
@@ -103,7 +103,7 @@ export const useCustomerOrdersTracking = () => {
             event: 'UPDATE',
             schema: 'public',
             table: 'orders',
-            filter: `user_id=eq.${userData.user.id}`,
+            filter: `user_id=eq.${user.id}`,
           },
           (payload) => {
             console.log('Customer order updated:', payload);
@@ -118,7 +118,9 @@ export const useCustomerOrdersTracking = () => {
       return () => {
         supabase.removeChannel(channel);
       };
-    });
+    };
+
+    setupRealtime();
   }, []);
 
   // Merge real-time updates with original data

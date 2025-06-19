@@ -19,6 +19,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import ContactPage from '@/pages/ContactPage';
 import CustomerOrderHistory from '@/pages/CustomerOrderHistory';
 import PortfolioPage from '@/pages/PortfolioPage';
+import OrderDetailPage from '@/pages/OrderDetailPage';
 import NotFound from '@/pages/NotFound';
 
 // Create QueryClient instance
