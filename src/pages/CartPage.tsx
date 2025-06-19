@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,11 +9,17 @@ import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/utils/currency';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
+import DiscountCodeInput from '@/components/cart/DiscountCodeInput';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const CartPage: React.FC = () => {
   const { cartItems, cartTotal, updateQuantity, removeFromCart, clearCart, isLoading } = useCart();
+  const [appliedDiscount, setAppliedDiscount] = useState<{
+    id: string;
+    code: string;
+    discountAmount: number;
+  } | null>(null);
 
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) {
@@ -22,6 +28,10 @@ const CartPage: React.FC = () => {
       updateQuantity({ itemId, quantity: newQuantity });
     }
   };
+
+  const finalTotal = appliedDiscount 
+    ? Math.max(0, cartTotal - appliedDiscount.discountAmount)
+    : cartTotal;
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
@@ -36,6 +46,7 @@ const CartPage: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
           items: checkoutItems,
+          discount_code: appliedDiscount?.code,
           success_url: `${window.location.origin}/order/success`,
           cancel_url: `${window.location.origin}/shop/cart`,
         },
@@ -187,8 +198,16 @@ const CartPage: React.FC = () => {
               </div>
 
               {/* Order Summary */}
-              <div className="lg:col-span-1">
-                <Card className="sticky top-4">
+              <div className="lg:col-span-1 space-y-4">
+                {/* Discount Code Input */}
+                <DiscountCodeInput
+                  cartTotal={cartTotal}
+                  onDiscountApplied={setAppliedDiscount}
+                  appliedDiscount={appliedDiscount}
+                />
+
+                {/* Order Summary */}
+                <Card>
                   <CardHeader>
                     <CardTitle>Order Summary</CardTitle>
                   </CardHeader>
@@ -197,6 +216,14 @@ const CartPage: React.FC = () => {
                       <span>Subtotal</span>
                       <span>{formatPrice(cartTotal)}</span>
                     </div>
+                    
+                    {appliedDiscount && (
+                      <div className="flex justify-between text-green-600 dark:text-green-400">
+                        <span>Discount ({appliedDiscount.code})</span>
+                        <span>-{formatPrice(appliedDiscount.discountAmount)}</span>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between">
                       <span>Shipping</span>
                       <span>Calculated at checkout</span>
@@ -208,7 +235,7 @@ const CartPage: React.FC = () => {
                     <hr />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>{formatPrice(cartTotal)}</span>
+                      <span>{formatPrice(finalTotal)}</span>
                     </div>
 
                     <Button 
