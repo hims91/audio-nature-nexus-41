@@ -65,6 +65,11 @@ function App() {
                     <CustomerOrderHistory />
                   </ProtectedRoute>
                 } />
+                <Route path="/orders/:orderId" element={
+                  <ProtectedRoute>
+                    <OrderDetailPage />
+                  </ProtectedRoute>
+                } />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster />

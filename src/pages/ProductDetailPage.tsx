@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -14,6 +15,9 @@ import { toast } from 'sonner';
 import SocialMeta from '@/components/SEO/SocialMeta';
 import ProductSchema from '@/components/SEO/ProductSchema';
 import OptimizedImage from '@/components/performance/OptimizedImage';
+import ProductReviews from '@/components/shop/ProductReviews';
+import UnifiedNavbar from '@/components/UnifiedNavbar';
+import Footer from '@/components/Footer';
 
 const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -25,21 +29,29 @@ const ProductDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
+      <>
+        <UnifiedNavbar />
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+        <Footer />
+      </>
     );
   }
 
   if (error || !product) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
-        <p className="text-gray-600 dark:text-gray-400 mb-8">The product you're looking for doesn't exist.</p>
-        <Button asChild>
-          <Link to="/shop">Back to Shop</Link>
-        </Button>
-      </div>
+      <>
+        <UnifiedNavbar />
+        <div className="min-h-screen flex flex-col items-center justify-center">
+          <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">The product you're looking for doesn't exist.</p>
+          <Button asChild>
+            <Link to="/shop">Back to Shop</Link>
+          </Button>
+        </div>
+        <Footer />
+      </>
     );
   }
 
@@ -86,6 +98,7 @@ const ProductDetailPage: React.FC = () => {
       />
       
       <ProductSchema product={product} />
+      <UnifiedNavbar />
 
       <div className="min-h-screen bg-white dark:bg-gray-900">
         <div className="container mx-auto px-4 py-8">
@@ -102,7 +115,7 @@ const ProductDetailPage: React.FC = () => {
             <span className="text-gray-900 dark:text-white">{product.name}</span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
             {/* Product Images */}
             <div className="space-y-4">
               <div className="aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
@@ -283,8 +296,14 @@ const ProductDetailPage: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* Product Reviews Section */}
+          <div className="mt-12">
+            <ProductReviews productId={product.id} />
+          </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 };

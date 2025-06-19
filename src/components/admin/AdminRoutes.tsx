@@ -13,6 +13,7 @@ const AdminSettings = lazy(() => import('../../pages/admin/AdminSettings'));
 const AdminPortfolio = lazy(() => import('../../pages/admin/AdminPortfolio'));
 const AdminDashboard = lazy(() => import('../../pages/admin/AdminDashboard'));
 const AdminDiscountCodes = lazy(() => import('../../pages/admin/AdminDiscountCodes'));
+const AdminReviews = lazy(() => import('../../pages/admin/AdminReviews'));
 
 // Loading component for lazy routes
 const LazyLoadingFallback = () => (
@@ -34,6 +35,7 @@ const AdminRoutes: React.FC = () => {
         <Route path="analytics" element={<AdminAnalytics />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="discount-codes" element={<AdminDiscountCodes />} />
+        <Route path="reviews" element={<AdminReviews />} />
         <Route path="settings" element={<AdminSettings />} />
       </Routes>
     </Suspense>
