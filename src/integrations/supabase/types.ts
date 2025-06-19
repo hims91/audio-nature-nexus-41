@@ -126,6 +126,250 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_logs: {
+        Row: {
+          change_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          new_quantity: number
+          notes: string | null
+          previous_quantity: number
+          product_id: string | null
+          quantity_change: number
+          reference_id: string | null
+          variant_id: string | null
+        }
+        Insert: {
+          change_type: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_quantity: number
+          notes?: string | null
+          previous_quantity: number
+          product_id?: string | null
+          quantity_change: number
+          reference_id?: string | null
+          variant_id?: string | null
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_quantity?: number
+          notes?: string | null
+          previous_quantity?: number
+          product_id?: string | null
+          quantity_change?: number
+          reference_id?: string | null
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_logs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_logs_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          sku: string | null
+          total_price_cents: number
+          unit_price_cents: number
+          variant_id: string | null
+          variant_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          sku?: string | null
+          total_price_cents: number
+          unit_price_cents: number
+          variant_id?: string | null
+          variant_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          sku?: string | null
+          total_price_cents?: number
+          unit_price_cents?: number
+          variant_id?: string | null
+          variant_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          admin_notes: string | null
+          billing_address_line1: string | null
+          billing_address_line2: string | null
+          billing_city: string | null
+          billing_country: string | null
+          billing_first_name: string | null
+          billing_last_name: string | null
+          billing_postal_code: string | null
+          billing_state: string | null
+          created_at: string
+          customer_notes: string | null
+          delivered_at: string | null
+          discount_cents: number | null
+          email: string
+          id: string
+          order_number: string
+          payment_status: string
+          shipped_at: string | null
+          shipping_address_line1: string | null
+          shipping_address_line2: string | null
+          shipping_cents: number | null
+          shipping_city: string | null
+          shipping_country: string | null
+          shipping_first_name: string | null
+          shipping_last_name: string | null
+          shipping_phone: string | null
+          shipping_postal_code: string | null
+          shipping_state: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          subtotal_cents: number
+          tax_cents: number | null
+          total_cents: number
+          tracking_number: string | null
+          tracking_url: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          billing_address_line1?: string | null
+          billing_address_line2?: string | null
+          billing_city?: string | null
+          billing_country?: string | null
+          billing_first_name?: string | null
+          billing_last_name?: string | null
+          billing_postal_code?: string | null
+          billing_state?: string | null
+          created_at?: string
+          customer_notes?: string | null
+          delivered_at?: string | null
+          discount_cents?: number | null
+          email: string
+          id?: string
+          order_number: string
+          payment_status?: string
+          shipped_at?: string | null
+          shipping_address_line1?: string | null
+          shipping_address_line2?: string | null
+          shipping_cents?: number | null
+          shipping_city?: string | null
+          shipping_country?: string | null
+          shipping_first_name?: string | null
+          shipping_last_name?: string | null
+          shipping_phone?: string | null
+          shipping_postal_code?: string | null
+          shipping_state?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          subtotal_cents: number
+          tax_cents?: number | null
+          total_cents: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          billing_address_line1?: string | null
+          billing_address_line2?: string | null
+          billing_city?: string | null
+          billing_country?: string | null
+          billing_first_name?: string | null
+          billing_last_name?: string | null
+          billing_postal_code?: string | null
+          billing_state?: string | null
+          created_at?: string
+          customer_notes?: string | null
+          delivered_at?: string | null
+          discount_cents?: number | null
+          email?: string
+          id?: string
+          order_number?: string
+          payment_status?: string
+          shipped_at?: string | null
+          shipping_address_line1?: string | null
+          shipping_address_line2?: string | null
+          shipping_cents?: number | null
+          shipping_city?: string | null
+          shipping_country?: string | null
+          shipping_first_name?: string | null
+          shipping_last_name?: string | null
+          shipping_phone?: string | null
+          shipping_postal_code?: string | null
+          shipping_state?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          subtotal_cents?: number
+          tax_cents?: number | null
+          total_cents?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       permissions: {
         Row: {
           action: string
@@ -201,6 +445,228 @@ export type Database = {
         }
         Relationships: []
       }
+      product_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_images: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          id: string
+          image_url: string
+          is_primary: boolean | null
+          product_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          is_primary?: boolean | null
+          product_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_primary?: boolean | null
+          product_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_quantity: number | null
+          is_active: boolean | null
+          name: string
+          option1_name: string | null
+          option1_value: string | null
+          option2_name: string | null
+          option2_value: string | null
+          option3_name: string | null
+          option3_value: string | null
+          price_cents: number | null
+          product_id: string
+          sku: string | null
+          stripe_price_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_quantity?: number | null
+          is_active?: boolean | null
+          name: string
+          option1_name?: string | null
+          option1_value?: string | null
+          option2_name?: string | null
+          option2_value?: string | null
+          option3_name?: string | null
+          option3_value?: string | null
+          price_cents?: number | null
+          product_id: string
+          sku?: string | null
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_quantity?: number | null
+          is_active?: boolean | null
+          name?: string
+          option1_name?: string | null
+          option1_value?: string | null
+          option2_name?: string | null
+          option2_value?: string | null
+          option3_name?: string | null
+          option3_value?: string | null
+          price_cents?: number | null
+          product_id?: string
+          sku?: string | null
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          allow_backorders: boolean | null
+          category_id: string | null
+          compare_at_price_cents: number | null
+          created_at: string
+          description: string | null
+          id: string
+          inventory_quantity: number | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          price_cents: number
+          requires_shipping: boolean | null
+          short_description: string | null
+          sku: string | null
+          slug: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          track_inventory: boolean | null
+          updated_at: string
+          weight_grams: number | null
+        }
+        Insert: {
+          allow_backorders?: boolean | null
+          category_id?: string | null
+          compare_at_price_cents?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          inventory_quantity?: number | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          price_cents: number
+          requires_shipping?: boolean | null
+          short_description?: string | null
+          sku?: string | null
+          slug: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          track_inventory?: boolean | null
+          updated_at?: string
+          weight_grams?: number | null
+        }
+        Update: {
+          allow_backorders?: boolean | null
+          category_id?: string | null
+          compare_at_price_cents?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          inventory_quantity?: number | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          price_cents?: number
+          requires_shipping?: boolean | null
+          short_description?: string | null
+          sku?: string | null
+          slug?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          track_inventory?: boolean | null
+          updated_at?: string
+          weight_grams?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_categories: {
         Row: {
           color_theme: string | null
@@ -250,6 +716,54 @@ export type Database = {
             columns: ["permission_id"]
             isOneToOne: false
             referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shopping_cart: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+          session_id: string | null
+          updated_at: string
+          user_id: string | null
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity?: number
+          session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+          session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_cart_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopping_cart_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
             referencedColumns: ["id"]
           },
         ]
@@ -382,6 +896,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_order_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string

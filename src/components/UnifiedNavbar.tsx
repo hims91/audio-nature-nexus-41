@@ -1,150 +1,127 @@
 
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogOut } from "lucide-react";
-import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
-import UserProfileDropdown from "./auth/UserProfileDropdown";
-import { useSettings } from "@/hooks/useSettings";
-import { Skeleton } from "@/components/ui/skeleton";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { BrandLogo } from '@/components/enhanced/BrandConsistencyManager';
+import { useAuth } from '@/contexts/AuthContext';
+import UserProfileDropdown from '@/components/auth/UserProfileDropdown';
+import CartIcon from '@/components/shop/CartIcon';
 
-const UnifiedNavbar: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, signOut, isAdmin } = useEnhancedAuth();
-  const { data: settings, isLoading } = useSettings();
-  const navigate = useNavigate();
-  const location = useLocation();
+const UnifiedNavbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (location.state?.scrollTo) {
-      const element = document.getElementById(location.state.scrollTo);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navigation = [
+    { name: 'Home', href: '/' },
+    { name: 'About', href: '/#about' },
+    { name: 'Services', href: '/#services' },
+    { name: 'Portfolio', href: '/#portfolio' },
+    { name: 'Shop', href: '/shop' },
+    { name: 'Contact', href: '/#contact' },
+  ];
+
+  const scrollToSection = (href: string) => {
+    if (href.startsWith('/#')) {
+      const elementId = href.substring(2);
+      const element = document.getElementById(elementId);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
-      navigate(location.pathname, { replace: true });
     }
-  }, [location, navigate]);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const scrollToSection = (id: string) => {
-    if (window.location.pathname === '/') {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    } else {
-      navigate('/', { state: { scrollTo: id } });
-    }
-    setIsMenuOpen(false);
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-    setIsMenuOpen(false);
-  };
-
-  const handleAuthClick = () => {
-    navigate('/auth');
-    setIsMenuOpen(false);
-  };
-
-  const handleAdminDashboard = () => {
-    navigate('/admin/dashboard');
-    setIsMenuOpen(false);
+    setIsOpen(false);
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-sm z-50 shadow-sm">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img alt="Terra Echo Studios Logo" className="h-16 w-16 object-contain" src="/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png" />
-            {isLoading ? (
-              <Skeleton className="h-6 w-48" />
-            ) : (
-              <span className="text-xl font-bold text-nature-forest my-0">{settings?.site_name}</span>
-            )}
+    <nav className={`fixed w-full z-50 transition-all duration-300 ${
+      isScrolled 
+        ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg' 
+        : 'bg-transparent'
+    }`}>
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center py-4">
+          {/* Logo */}
+          <Link to="/" className="flex-shrink-0">
+            <BrandLogo size="md" />
+          </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-8">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                onClick={() => item.href.startsWith('/#') && scrollToSection(item.href)}
+                className="text-gray-700 dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf transition-colors font-medium"
+              >
+                {item.name}
+              </Link>
+            ))}
           </div>
-          
-          <div className="hidden md:flex items-center space-x-8">
-            <button onClick={() => scrollToSection("about")} className="text-nature-bark hover:text-nature-forest transition-colors">
-              About
-            </button>
-            <button onClick={() => scrollToSection("services")} className="text-nature-bark hover:text-nature-forest transition-colors">
-              Services
-            </button>
-            <button onClick={() => scrollToSection("portfolio")} className="text-nature-bark hover:text-nature-forest transition-colors">
-              Portfolio
-            </button>
-            <button onClick={() => scrollToSection("testimonials")} className="text-nature-bark hover:text-nature-forest transition-colors">
-              Testimonials
-            </button>
-            
+
+          {/* Desktop Actions */}
+          <div className="hidden lg:flex items-center space-x-4">
+            <CartIcon />
             {user ? (
-              <div className="flex items-center space-x-4">
-                <UserProfileDropdown />
-              </div>
+              <UserProfileDropdown />
             ) : (
-              <div className="flex items-center space-x-4">
-                <Button onClick={() => scrollToSection("contact")} className="bg-nature-forest hover:bg-nature-leaf text-white">
-                  Contact
-                </Button>
-                <Button onClick={handleAuthClick} variant="outline" className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
-                  Sign In
-                </Button>
-              </div>
+              <Button asChild variant="outline" className="border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
+                <Link to="/auth">Sign In</Link>
+              </Button>
             )}
           </div>
-          
-          <div className="md:hidden">
-            <button onClick={toggleMenu} className="text-nature-forest focus:outline-none">
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden flex items-center space-x-2">
+            <CartIcon />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
           </div>
         </div>
-        
-        {isMenuOpen && (
-          <div className="md:hidden pt-4 pb-6 space-y-4 animate-fade-in">
-            <button onClick={() => scrollToSection("about")} className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors">
-              About
-            </button>
-            <button onClick={() => scrollToSection("services")} className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors">
-              Services
-            </button>
-            <button onClick={() => scrollToSection("portfolio")} className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors">
-              Portfolio
-            </button>
-            <button onClick={() => scrollToSection("testimonials")} className="block w-full text-left py-2 text-nature-bark hover:text-nature-forest transition-colors">
-              Testimonials
-            </button>
-            
-            {user ? (
-              <div className="space-y-2 border-t pt-4 mt-4">
-                {isAdmin && (
-                  <Button onClick={handleAdminDashboard} className="w-full bg-nature-forest hover:bg-nature-leaf text-white">
-                    <User className="mr-2 h-4 w-4" />
-                    Admin Dashboard
-                  </Button>
+
+        {/* Mobile Navigation */}
+        {isOpen && (
+          <div className="lg:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-lg shadow-lg">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => item.href.startsWith('/#') ? scrollToSection(item.href) : setIsOpen(false)}
+                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf transition-colors font-medium"
+                >
+                  {item.name}
+                </Link>
+              ))}
+              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                {user ? (
+                  <UserProfileDropdown />
+                ) : (
+                  <Link
+                    to="/auth"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-3 py-2 text-nature-forest font-medium"
+                  >
+                    Sign In
+                  </Link>
                 )}
-                <Button onClick={handleSignOut} variant="outline" className="w-full border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </Button>
               </div>
-            ) : (
-              <div className="space-y-2 border-t pt-4 mt-4">
-                <Button onClick={() => scrollToSection("contact")} className="w-full bg-nature-forest hover:bg-nature-leaf text-white">
-                  Contact
-                </Button>
-                <Button onClick={handleAuthClick} variant="outline" className="w-full border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white">
-                  Sign In
-                </Button>
-              </div>
-            )}
+            </div>
           </div>
         )}
       </div>
