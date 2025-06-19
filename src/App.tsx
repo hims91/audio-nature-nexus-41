@@ -20,14 +20,6 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
 import OrderCancelPage from "./pages/OrderCancelPage";
 import AdminLayout from "./components/admin/AdminLayout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminPortfolio from "./pages/admin/AdminPortfolio";
-import AdminAnalytics from "./pages/admin/AdminAnalytics";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminProducts from "./pages/admin/AdminProducts";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminInventory from "./pages/admin/AdminInventory";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminGuard from "./components/admin/AdminGuard";
 import ErrorBoundary from "./components/security/ErrorBoundary";
@@ -66,23 +58,13 @@ function App() {
                         } />
                         
                         {/* Admin Routes */}
-                        <Route path="/admin" element={
+                        <Route path="/admin/*" element={
                           <ProtectedRoute>
                             <AdminGuard>
                               <AdminLayout />
                             </AdminGuard>
                           </ProtectedRoute>
-                        }>
-                          <Route index element={<AdminDashboard />} />
-                          <Route path="dashboard" element={<AdminDashboard />} />
-                          <Route path="portfolio" element={<AdminPortfolio />} />
-                          <Route path="products" element={<AdminProducts />} />
-                          <Route path="orders" element={<AdminOrders />} />
-                          <Route path="inventory" element={<AdminInventory />} />
-                          <Route path="analytics" element={<AdminAnalytics />} />
-                          <Route path="users" element={<AdminUsers />} />
-                          <Route path="settings" element={<AdminSettings />} />
-                        </Route>
+                        } />
                         
                         <Route path="*" element={<NotFound />} />
                       </Routes>

@@ -12,6 +12,8 @@ import { formatPrice } from '@/utils/currency';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
 import { toast } from 'sonner';
 import SocialMeta from '@/components/SEO/SocialMeta';
+import ProductSchema from '@/components/SEO/ProductSchema';
+import OptimizedImage from '@/components/performance/OptimizedImage';
 
 const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -82,6 +84,8 @@ const ProductDetailPage: React.FC = () => {
         image={primaryImage?.image_url}
         type="product"
       />
+      
+      <ProductSchema product={product} />
 
       <div className="min-h-screen bg-white dark:bg-gray-900">
         <div className="container mx-auto px-4 py-8">
@@ -103,10 +107,12 @@ const ProductDetailPage: React.FC = () => {
             <div className="space-y-4">
               <div className="aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
                 {images.length > 0 ? (
-                  <img
+                  <OptimizedImage
                     src={images[selectedImage]?.image_url || primaryImage?.image_url}
                     alt={images[selectedImage]?.alt_text || product.name}
                     className="w-full h-full object-cover"
+                    priority={true}
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -128,10 +134,11 @@ const ProductDetailPage: React.FC = () => {
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }`}
                     >
-                      <img
+                      <OptimizedImage
                         src={image.image_url}
                         alt={image.alt_text || `${product.name} ${index + 1}`}
                         className="w-full h-full object-cover"
+                        sizes="(max-width: 768px) 25vw, 12.5vw"
                       />
                     </button>
                   ))}

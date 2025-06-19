@@ -1,7 +1,8 @@
 
-import React from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import React, { Suspense, lazy } from "react";
+import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import LoadingSpinner from "@/components/animations/LoadingSpinner";
 import { 
   LayoutDashboard, 
   FolderOpen, 
@@ -18,6 +19,9 @@ import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/enhanced/BrandConsistencyManager";
 import UserProfileDropdown from "@/components/auth/UserProfileDropdown";
 import { useState } from "react";
+
+// Lazy load the AdminRoutes component
+const AdminRoutes = lazy(() => import('./AdminRoutes'));
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
@@ -161,7 +165,13 @@ const AdminLayout: React.FC = () => {
 
         {/* Page content */}
         <main className="p-4 lg:p-6">
-          <Outlet />
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-12">
+              <LoadingSpinner size="lg" />
+            </div>
+          }>
+            <AdminRoutes />
+          </Suspense>
         </main>
       </div>
     </div>

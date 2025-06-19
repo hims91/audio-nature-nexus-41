@@ -238,8 +238,8 @@ const AdminInventory: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="all">All Products</SelectItem>
                   <SelectItem value="out-of-stock">Out of Stock</SelectItem>
-                  <SelectItem value="low-stock">Low Stock (≤5)</SelectItem>
-                  <SelectItem value="in-stock">In Stock (>5)</SelectItem>
+                  <SelectItem value="low-stock">Low Stock (&le; 5)</SelectItem>
+                  <SelectItem value="in-stock">In Stock (&gt; 5)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
