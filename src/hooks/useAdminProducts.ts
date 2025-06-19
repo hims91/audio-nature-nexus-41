@@ -138,7 +138,7 @@ export const useProductMutations = () => {
   });
 
   const updateProduct = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Product> }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
       const { data, error } = await supabase
         .from('products')
         .update(updates)

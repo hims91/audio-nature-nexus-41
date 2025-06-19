@@ -3,14 +3,14 @@ import { Routes, Route } from 'react-router-dom';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
 
 // Lazy load admin components for better performance
-const AdminProducts = lazy(() => import('./AdminProducts'));
-const AdminOrders = lazy(() => import('./AdminOrders'));
-const AdminInventory = lazy(() => import('./AdminInventory'));
-const AdminAnalytics = lazy(() => import('./AdminAnalytics'));
-const AdminUsers = lazy(() => import('./AdminUsers'));
-const AdminSettings = lazy(() => import('./AdminSettings'));
-const AdminPortfolio = lazy(() => import('./AdminPortfolio'));
-const AdminDashboard = lazy(() => import('./AdminDashboard'));
+const AdminProducts = lazy(() => import('../../pages/admin/AdminProducts'));
+const AdminOrders = lazy(() => import('../../pages/admin/AdminOrders'));
+const AdminInventory = lazy(() => import('../../pages/admin/AdminInventory'));
+const AdminAnalytics = lazy(() => import('../../pages/admin/AdminAnalytics'));
+const AdminUsers = lazy(() => import('../../pages/admin/AdminUsers'));
+const AdminSettings = lazy(() => import('../../pages/admin/AdminSettings'));
+const AdminPortfolio = lazy(() => import('../../pages/admin/AdminPortfolio'));
+const AdminDashboard = lazy(() => import('../../pages/admin/AdminDashboard'));
 
 // Loading component for lazy routes
 const LazyLoadingFallback = () => (

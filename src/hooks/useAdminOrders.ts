@@ -57,7 +57,7 @@ export const useAdminOrders = (filters?: {
       if (error) throw error;
       
       return { 
-        orders: data || [], 
+        orders: (data || []) as Order[], 
         total: count || 0 
       };
     },

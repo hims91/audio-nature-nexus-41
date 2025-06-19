@@ -45,12 +45,8 @@ const ProductSchema: React.FC<ProductSchemaProps> = memo(({ product }) => {
   if (product.compare_at_price_cents && product.compare_at_price_cents > product.price_cents) {
     schema.offers = {
       ...schema.offers,
-      "@type": "Offer",
-      "priceSpecification": {
-        "@type": "UnitPriceSpecification",
-        "price": (product.price_cents / 100).toFixed(2),
-        "priceCurrency": "USD"
-      }
+      "highPrice": (product.compare_at_price_cents / 100).toFixed(2),
+      "lowPrice": (product.price_cents / 100).toFixed(2)
     };
   }
 

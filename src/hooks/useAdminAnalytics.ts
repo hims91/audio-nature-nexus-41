@@ -21,7 +21,7 @@ export const useInventoryTracking = () => {
       return data || [];
     },
     staleTime: 30000, // 30 seconds
-    cacheTime: 300000, // 5 minutes
+    gcTime: 300000, // 5 minutes
   });
 };
 
