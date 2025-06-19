@@ -25,6 +25,9 @@ import AdminPortfolio from "./pages/admin/AdminPortfolio";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminInventory from "./pages/admin/AdminInventory";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminGuard from "./components/admin/AdminGuard";
 import ErrorBoundary from "./components/security/ErrorBoundary";
@@ -73,6 +76,9 @@ function App() {
                           <Route index element={<AdminDashboard />} />
                           <Route path="dashboard" element={<AdminDashboard />} />
                           <Route path="portfolio" element={<AdminPortfolio />} />
+                          <Route path="products" element={<AdminProducts />} />
+                          <Route path="orders" element={<AdminOrders />} />
+                          <Route path="inventory" element={<AdminInventory />} />
                           <Route path="analytics" element={<AdminAnalytics />} />
                           <Route path="users" element={<AdminUsers />} />
                           <Route path="settings" element={<AdminSettings />} />

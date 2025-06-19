@@ -7,7 +7,8 @@ import {
   Users, 
   FolderOpen, 
   Star,
-  TrendingUp,
+  Package,
+  ShoppingBag,
   Mail,
   Settings
 } from 'lucide-react';
@@ -45,18 +46,18 @@ const AdminDashboard: React.FC = () => {
       href: '/admin/portfolio'
     },
     {
-      title: 'Total Users',
-      value: '1+', // This would come from user management
-      description: 'Registered accounts',
-      icon: Users,
-      href: '/admin/users'
+      title: 'Products',
+      value: '0', // Will be updated with real data
+      description: 'Active products',
+      icon: Package,
+      href: '/admin/products'
     },
     {
-      title: 'Analytics',
-      value: 'View',
-      description: 'Site performance data',
-      icon: TrendingUp,
-      href: '/admin/analytics'
+      title: 'Orders',
+      value: '0', // Will be updated with real data
+      description: 'Total orders',
+      icon: ShoppingBag,
+      href: '/admin/orders'
     }
   ];
 

@@ -9,7 +9,10 @@ import {
   Settings, 
   BarChart3,
   Menu,
-  X
+  X,
+  ShoppingBag,
+  Package,
+  TrendingDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/enhanced/BrandConsistencyManager";
@@ -30,6 +33,21 @@ const AdminLayout: React.FC = () => {
       name: "Portfolio",
       href: "/admin/portfolio",
       icon: FolderOpen,
+    },
+    {
+      name: "Products",
+      href: "/admin/products",
+      icon: Package,
+    },
+    {
+      name: "Orders",
+      href: "/admin/orders",
+      icon: ShoppingBag,
+    },
+    {
+      name: "Inventory",
+      href: "/admin/inventory",
+      icon: TrendingDown,
     },
     {
       name: "Analytics",
