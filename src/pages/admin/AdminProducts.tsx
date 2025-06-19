@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,9 +42,9 @@ import {
 
 const AdminProducts: React.FC = () => {
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [stockFilter, setStockFilter] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [stockFilter, setStockFilter] = useState<string>('all');
   const [currentTab, setCurrentTab] = useState('all');
 
   const { data: categories = [] } = useCategories();
@@ -51,7 +52,7 @@ const AdminProducts: React.FC = () => {
   
   const filters = {
     search: search || undefined,
-    categoryId: categoryFilter || undefined,
+    categoryId: categoryFilter !== 'all' ? categoryFilter : undefined,
     isActive: statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined,
     isOutOfStock: stockFilter === 'out-of-stock' ? true : undefined,
   };
@@ -199,7 +200,7 @@ const AdminProducts: React.FC = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
@@ -213,7 +214,7 @@ const AdminProducts: React.FC = () => {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
@@ -224,7 +225,7 @@ const AdminProducts: React.FC = () => {
                   <SelectValue placeholder="All Stock" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Stock</SelectItem>
+                  <SelectItem value="all">All Stock</SelectItem>
                   <SelectItem value="out-of-stock">Out of Stock</SelectItem>
                   <SelectItem value="low-stock">Low Stock</SelectItem>
                 </SelectContent>
