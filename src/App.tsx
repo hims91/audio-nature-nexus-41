@@ -9,6 +9,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { EnhancedAuthProvider } from '@/contexts/EnhancedAuthContext';
 import SEOManager from '@/components/SEO/SEOManager';
 import PWAInstallerEnhanced from '@/components/performance/PWAInstallerEnhanced';
+import ErrorBoundary from '@/components/security/ErrorBoundary';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Index from '@/pages/Index';
 import ShopPage from '@/pages/ShopPage';
@@ -24,11 +25,21 @@ import PortfolioPage from '@/pages/PortfolioPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
 import NotFound from '@/pages/NotFound';
 
-// Create QueryClient instance
+// Create QueryClient instance with optimized settings for performance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
+      retry: (failureCount, error: any) => {
+        // Don't retry on 4xx errors
+        if (error?.status >= 400 && error?.status < 500) return false;
+        return failureCount < 2;
+      },
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+    mutations: {
       retry: 1,
     },
   },
@@ -36,55 +47,57 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <AuthProvider>
-          <EnhancedAuthProvider>
-            <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-              <Router>
-                <div className="min-h-screen bg-gradient-to-br from-nature-mist via-white to-nature-sage/10 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-                  <PWAInstallerEnhanced />
-                  <SEOManager />
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/shop" element={<ShopPage />} />
-                    <Route path="/shop/products/:slug" element={<ProductDetailPage />} />
-                    <Route path="/cart" element={<CartPage />} />
-                    <Route path="/auth" element={<AuthEnhanced />} />
-                    <Route path="/profile" element={
-                      <ProtectedRoute>
-                        <ProfilePage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/portfolio" element={<PortfolioPage />} />
-                    <Route path="/admin/*" element={
-                      <ProtectedRoute requiredRole="admin">
-                        <AdminLayout>
-                          <AdminRoutes />
-                        </AdminLayout>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/orders" element={
-                      <ProtectedRoute>
-                        <CustomerOrderHistory />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/orders/:orderId" element={
-                      <ProtectedRoute>
-                        <OrderDetailPage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                  <Toaster />
-                </div>
-              </Router>
-            </ThemeProvider>
-          </EnhancedAuthProvider>
-        </AuthProvider>
-      </HelmetProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <HelmetProvider>
+          <AuthProvider>
+            <EnhancedAuthProvider>
+              <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+                <Router>
+                  <div className="min-h-screen bg-gradient-to-br from-nature-mist via-white to-nature-sage/10 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+                    <PWAInstallerEnhanced />
+                    <SEOManager />
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/shop" element={<ShopPage />} />
+                      <Route path="/shop/products/:slug" element={<ProductDetailPage />} />
+                      <Route path="/cart" element={<CartPage />} />
+                      <Route path="/auth" element={<AuthEnhanced />} />
+                      <Route path="/profile" element={
+                        <ProtectedRoute>
+                          <ProfilePage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/portfolio" element={<PortfolioPage />} />
+                      <Route path="/admin/*" element={
+                        <ProtectedRoute requiredRole="admin">
+                          <AdminLayout>
+                            <AdminRoutes />
+                          </AdminLayout>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/orders" element={
+                        <ProtectedRoute>
+                          <CustomerOrderHistory />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/orders/:orderId" element={
+                        <ProtectedRoute>
+                          <OrderDetailPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                    <Toaster />
+                  </div>
+                </Router>
+              </ThemeProvider>
+            </EnhancedAuthProvider>
+          </AuthProvider>
+        </HelmetProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
