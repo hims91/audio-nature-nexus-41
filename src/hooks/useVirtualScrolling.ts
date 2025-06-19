@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 interface UseVirtualScrollingProps<T> {
@@ -25,15 +25,19 @@ export const useVirtualScrolling = <T>({
     queryFn: () => queryFn(currentPage, pageSize),
     enabled: enabled && hasNextPage,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    onSuccess: (result) => {
+  });
+
+  // Handle successful data fetch
+  useEffect(() => {
+    if (data) {
       setPages(prev => {
         const newPages = [...prev];
-        newPages[currentPage] = result.data;
+        newPages[currentPage] = data.data;
         return newPages;
       });
-      setHasNextPage(result.hasMore);
-    },
-  });
+      setHasNextPage(data.hasMore);
+    }
+  }, [data, currentPage]);
 
   // Flatten all loaded items
   const items = useMemo(() => {

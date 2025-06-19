@@ -53,45 +53,51 @@ function App() {
           <AuthProvider>
             <EnhancedAuthProvider>
               <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-                <Router>
-                  <div className="min-h-screen bg-gradient-to-br from-nature-mist via-white to-nature-sage/10 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-                    <PWAInstallerEnhanced />
-                    <SEOManager />
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/shop" element={<ShopPage />} />
-                      <Route path="/shop/products/:slug" element={<ProductDetailPage />} />
-                      <Route path="/cart" element={<CartPage />} />
-                      <Route path="/auth" element={<AuthEnhanced />} />
-                      <Route path="/profile" element={
-                        <ProtectedRoute>
-                          <ProfilePage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/contact" element={<ContactPage />} />
-                      <Route path="/portfolio" element={<PortfolioPage />} />
-                      <Route path="/admin/*" element={
-                        <ProtectedRoute requiredRole="admin">
-                          <AdminLayout>
-                            <AdminRoutes />
-                          </AdminLayout>
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/orders" element={
-                        <ProtectedRoute>
-                          <CustomerOrderHistory />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/orders/:orderId" element={
-                        <ProtectedRoute>
-                          <OrderDetailPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                    <Toaster />
-                  </div>
-                </Router>
+                <DatabaseOptimizerProvider queryClient={queryClient}>
+                  <MemoryOptimizer>
+                    <ErrorTrackerProvider>
+                      <Router>
+                        <div className="min-h-screen bg-gradient-to-br from-nature-mist via-white to-nature-sage/10 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+                          <PWAInstallerEnhanced />
+                          <SEOManager />
+                          <Routes>
+                            <Route path="/" element={<Index />} />
+                            <Route path="/shop" element={<ShopPage />} />
+                            <Route path="/shop/products/:slug" element={<ProductDetailPage />} />
+                            <Route path="/cart" element={<CartPage />} />
+                            <Route path="/auth" element={<AuthEnhanced />} />
+                            <Route path="/profile" element={
+                              <ProtectedRoute>
+                                <ProfilePage />
+                              </ProtectedRoute>
+                            } />
+                            <Route path="/contact" element={<ContactPage />} />
+                            <Route path="/portfolio" element={<PortfolioPage />} />
+                            <Route path="/admin/*" element={
+                              <ProtectedRoute requiredRole="admin">
+                                <AdminLayout>
+                                  <AdminRoutes />
+                                </AdminLayout>
+                              </ProtectedRoute>
+                            } />
+                            <Route path="/orders" element={
+                              <ProtectedRoute>
+                                <CustomerOrderHistory />
+                              </ProtectedRoute>
+                            } />
+                            <Route path="/orders/:orderId" element={
+                              <ProtectedRoute>
+                                <OrderDetailPage />
+                              </ProtectedRoute>
+                            } />
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                          <Toaster />
+                        </div>
+                      </Router>
+                    </ErrorTrackerProvider>
+                  </MemoryOptimizer>
+                </DatabaseOptimizerProvider>
               </ThemeProvider>
             </EnhancedAuthProvider>
           </AuthProvider>

@@ -1,11 +1,7 @@
 
 import React, { useEffect, useCallback } from 'react';
 
-interface MemoryOptimizerProps {
-  children: React.ReactNode;
-}
-
-const MemoryOptimizer: React.FC<MemoryOptimizerProps> = ({ children }) => {
+const MemoryOptimizer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Clean up memory leaks and optimize garbage collection
   const cleanupMemory = useCallback(() => {
     // Clear expired cache entries
