@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,7 @@ import { Label } from '@/components/ui/label';
 
 const AdminInventory: React.FC = () => {
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [stockFilter, setStockFilter] = useState<string>('all');
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [newStock, setNewStock] = useState<number>(0);
@@ -54,7 +55,7 @@ const AdminInventory: React.FC = () => {
   
   const filters = {
     search: search || undefined,
-    categoryId: categoryFilter || undefined,
+    categoryId: categoryFilter !== 'all' ? categoryFilter : undefined,
     isOutOfStock: stockFilter === 'out-of-stock' ? true : undefined,
   };
 
@@ -222,7 +223,7 @@ const AdminInventory: React.FC = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
@@ -270,7 +271,7 @@ const AdminInventory: React.FC = () => {
                 <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No inventory found</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {search || categoryFilter || stockFilter !== 'all'
+                  {search || categoryFilter !== 'all' || stockFilter !== 'all'
                     ? 'Try adjusting your filters'
                     : 'No products have inventory tracking enabled'
                   }

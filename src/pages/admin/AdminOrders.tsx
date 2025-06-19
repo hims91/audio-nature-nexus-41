@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,16 +58,16 @@ const paymentStatusConfig = {
 
 const AdminOrders: React.FC = () => {
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [paymentFilter, setPaymentFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [paymentFilter, setPaymentFilter] = useState<string>('all');
   const [currentTab, setCurrentTab] = useState('all');
 
   const { data: orderStats, isLoading: isLoadingStats } = useOrderStats();
   
   const filters = {
     search: search || undefined,
-    status: statusFilter || undefined,
-    paymentStatus: paymentFilter || undefined,
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+    paymentStatus: paymentFilter !== 'all' ? paymentFilter : undefined,
   };
 
   const { data: ordersData, isLoading: isLoadingOrders } = useAdminOrders(filters);
@@ -210,7 +211,7 @@ const AdminOrders: React.FC = () => {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   {Object.entries(statusConfig).map(([key, config]) => (
                     <SelectItem key={key} value={key}>
                       {config.label}
@@ -224,7 +225,7 @@ const AdminOrders: React.FC = () => {
                   <SelectValue placeholder="Payment Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Payments</SelectItem>
+                  <SelectItem value="all">All Payments</SelectItem>
                   {Object.entries(paymentStatusConfig).map(([key, config]) => (
                     <SelectItem key={key} value={key}>
                       {config.label}
@@ -270,7 +271,7 @@ const AdminOrders: React.FC = () => {
                     <ShoppingBag className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No orders found</h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      {search || statusFilter || paymentFilter
+                      {search || statusFilter !== 'all' || paymentFilter !== 'all'
                         ? 'Try adjusting your filters'
                         : 'Orders will appear here once customers start purchasing'
                       }
