@@ -41,14 +41,7 @@ const ProductSchema: React.FC<ProductSchemaProps> = memo(({ product }) => {
     }
   };
 
-  // Add comparison price if available
-  if (product.compare_at_price_cents && product.compare_at_price_cents > product.price_cents) {
-    schema.offers = {
-      ...schema.offers,
-      "highPrice": (product.compare_at_price_cents / 100).toFixed(2),
-      "lowPrice": (product.price_cents / 100).toFixed(2)
-    };
-  }
+  // Schema is complete - comparison pricing handled by main price field
 
   return (
     <Helmet>

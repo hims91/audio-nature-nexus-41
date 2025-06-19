@@ -29,7 +29,7 @@ export const useInventoryTracking = () => {
 export const useLowStockAlerts = () => {
   const { data: products = [] } = useQuery({
     queryKey: ['low-stock-alerts'],
-    queryFn: async (): Promise<Product[]> => {
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -42,7 +42,7 @@ export const useLowStockAlerts = () => {
         .order('inventory_quantity', { ascending: true });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     },
     refetchInterval: 60000, // Refresh every minute
   });

@@ -82,7 +82,7 @@ export const useAdminOrder = (id: string) => {
         if (error.code === 'PGRST116') return null;
         throw error;
       }
-      return data;
+      return data as Order;
     },
     enabled: !!id,
   });
@@ -131,7 +131,7 @@ export const useRecentOrders = (limit: number = 5) => {
         .limit(limit);
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Order[];
     },
   });
 };
@@ -167,7 +167,7 @@ export const useOrderMutations = () => {
 
   const updateOrderStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const updates: Partial<Order> = { status };
+      const updates: any = { status };
       
       // Auto-update timestamps based on status
       if (status === 'shipped') {

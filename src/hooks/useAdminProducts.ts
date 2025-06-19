@@ -116,7 +116,7 @@ export const useProductMutations = () => {
   const queryClient = useQueryClient();
 
   const createProduct = useMutation({
-    mutationFn: async (productData: Partial<Product>) => {
+    mutationFn: async (productData: any) => {
       const { data, error } = await supabase
         .from('products')
         .insert(productData)
@@ -182,7 +182,7 @@ export const useProductMutations = () => {
   });
 
   const bulkUpdateProducts = useMutation({
-    mutationFn: async (updates: { ids: string[]; updates: Partial<Product> }) => {
+    mutationFn: async (updates: { ids: string[]; updates: any }) => {
       const { data, error } = await supabase
         .from('products')
         .update(updates.updates)
