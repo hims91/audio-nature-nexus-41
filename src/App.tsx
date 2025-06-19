@@ -1,29 +1,35 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/theme-provider';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from '@/components/ui/toaster';
-import { useSiteSettings } from '@/hooks/useSiteSettings';
-import { SEOManager } from '@/components/SEO/SEOManager';
-import { PWAInstallerEnhanced } from '@/components/PWA/PWAInstallerEnhanced';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import HomePage from '@/pages/HomePage';
+import SEOManager from '@/components/SEO/SEOManager';
+import PWAInstallerEnhanced from '@/components/performance/PWAInstallerEnhanced';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import Index from '@/pages/Index';
 import ShopPage from '@/pages/ShopPage';
 import ProductDetailPage from '@/pages/ProductDetailPage';
-import CategoryPage from '@/pages/CategoryPage';
 import CartPage from '@/pages/CartPage';
-import CheckoutPage from '@/pages/CheckoutPage';
-import OrderConfirmationPage from '@/pages/OrderConfirmationPage';
-import LoginPage from '@/pages/LoginPage';
-import RegisterPage from '@/pages/RegisterPage';
-import AccountPage from '@/pages/AccountPage';
+import AuthEnhanced from '@/pages/AuthEnhanced';
+import ProfilePage from '@/pages/ProfilePage';
 import AdminRoutes from '@/components/admin/AdminRoutes';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ContactPage from '@/pages/ContactPage';
-import AboutPage from '@/pages/AboutPage';
-import OrderDetailPage from '@/pages/OrderDetailPage';
 import CustomerOrderHistory from '@/pages/CustomerOrderHistory';
+import PortfolioPage from '@/pages/PortfolioPage';
+import NotFound from '@/pages/NotFound';
+
+// Create QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 function App() {
   return (
@@ -35,30 +41,18 @@ function App() {
               <PWAInstallerEnhanced />
               <SEOManager />
               <Routes>
-                <Route path="/" element={<HomePage />} />
+                <Route path="/" element={<Index />} />
                 <Route path="/shop" element={<ShopPage />} />
                 <Route path="/shop/products/:slug" element={<ProductDetailPage />} />
-                <Route path="/shop/categories/:slug" element={<CategoryPage />} />
                 <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={
+                <Route path="/auth" element={<AuthEnhanced />} />
+                <Route path="/profile" element={
                   <ProtectedRoute>
-                    <CheckoutPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/order-confirmation" element={
-                  <ProtectedRoute>
-                    <OrderConfirmationPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/account" element={
-                  <ProtectedRoute>
-                    <AccountPage />
+                    <ProfilePage />
                   </ProtectedRoute>
                 } />
                 <Route path="/contact" element={<ContactPage />} />
-                <Route path="/about" element={<AboutPage />} />
+                <Route path="/portfolio" element={<PortfolioPage />} />
                 <Route path="/admin/*" element={
                   <ProtectedRoute requiredRole="admin">
                     <AdminLayout>
@@ -71,12 +65,9 @@ function App() {
                     <CustomerOrderHistory />
                   </ProtectedRoute>
                 } />
-                <Route path="/orders/:orderId" element={
-                  <ProtectedRoute>
-                    <OrderDetailPage />
-                  </ProtectedRoute>
-                } />
+                <Route path="*" element={<NotFound />} />
               </Routes>
+              <Toaster />
             </div>
           </Router>
         </ThemeProvider>

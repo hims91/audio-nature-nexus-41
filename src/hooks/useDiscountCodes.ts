@@ -50,7 +50,8 @@ export const useAdminDiscountCodes = (filters?: {
       const { data, error } = await query;
       if (error) throw error;
       
-      return data || [];
+      // Type assertion to ensure proper typing
+      return (data || []) as DiscountCode[];
     },
   });
 };
@@ -68,7 +69,7 @@ export const useDiscountCodeMutations = () => {
         .single();
       
       if (error) throw error;
-      return data;
+      return data as DiscountCode;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-discount-codes'] });
@@ -90,7 +91,7 @@ export const useDiscountCodeMutations = () => {
         .single();
       
       if (error) throw error;
-      return data;
+      return data as DiscountCode;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-discount-codes'] });

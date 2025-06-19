@@ -13,14 +13,25 @@ export const useProductReviews = (productId: string) => {
         .from('product_reviews')
         .select(`
           *,
-          user_profile:user_profiles(first_name, last_name, username)
+          user_profiles!product_reviews_user_id_fkey(first_name, last_name, username)
         `)
         .eq('product_id', productId)
         .eq('is_approved', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      
+      // Transform the data to match our expected structure
+      const reviews = (data || []).map(review => ({
+        ...review,
+        user_profile: review.user_profiles ? {
+          first_name: review.user_profiles.first_name,
+          last_name: review.user_profiles.last_name,
+          username: review.user_profiles.username,
+        } : undefined
+      }));
+
+      return reviews as ProductReview[];
     },
     enabled: !!productId,
   });
@@ -47,7 +58,7 @@ export const useReviewMutations = () => {
         .single();
       
       if (error) throw error;
-      return data;
+      return data as ProductReview;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['product-reviews', data.product_id] });
@@ -76,7 +87,7 @@ export const useAdminReviewMutations = () => {
         .single();
       
       if (error) throw error;
-      return data;
+      return data as ProductReview;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['product-reviews'] });
