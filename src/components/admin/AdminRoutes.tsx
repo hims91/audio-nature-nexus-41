@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
@@ -11,6 +12,7 @@ const AdminUsers = lazy(() => import('../../pages/admin/AdminUsers'));
 const AdminSettings = lazy(() => import('../../pages/admin/AdminSettings'));
 const AdminPortfolio = lazy(() => import('../../pages/admin/AdminPortfolio'));
 const AdminDashboard = lazy(() => import('../../pages/admin/AdminDashboard'));
+const AdminDiscountCodes = lazy(() => import('../../pages/admin/AdminDiscountCodes'));
 
 // Loading component for lazy routes
 const LazyLoadingFallback = () => (
@@ -31,6 +33,7 @@ const AdminRoutes: React.FC = () => {
         <Route path="inventory" element={<AdminInventory />} />
         <Route path="analytics" element={<AdminAnalytics />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="discount-codes" element={<AdminDiscountCodes />} />
         <Route path="settings" element={<AdminSettings />} />
       </Routes>
     </Suspense>

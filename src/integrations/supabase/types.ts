@@ -126,6 +126,57 @@ export type Database = {
         }
         Relationships: []
       }
+      discount_codes: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          maximum_discount_cents: number | null
+          minimum_order_cents: number | null
+          starts_at: string | null
+          updated_at: string
+          usage_count: number | null
+          usage_limit: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          maximum_discount_cents?: number | null
+          minimum_order_cents?: number | null
+          starts_at?: string | null
+          updated_at?: string
+          usage_count?: number | null
+          usage_limit?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          maximum_discount_cents?: number | null
+          minimum_order_cents?: number | null
+          starts_at?: string | null
+          updated_at?: string
+          usage_count?: number | null
+          usage_limit?: number | null
+        }
+        Relationships: []
+      }
       inventory_logs: {
         Row: {
           change_type: string
@@ -262,9 +313,14 @@ export type Database = {
           customer_notes: string | null
           delivered_at: string | null
           discount_cents: number | null
+          discount_code: string | null
+          discount_code_id: string | null
           email: string
+          fulfillment_status: string | null
           id: string
           order_number: string
+          payment_gateway: string | null
+          payment_method: string | null
           payment_status: string
           shipped_at: string | null
           shipping_address_line1: string | null
@@ -302,9 +358,14 @@ export type Database = {
           customer_notes?: string | null
           delivered_at?: string | null
           discount_cents?: number | null
+          discount_code?: string | null
+          discount_code_id?: string | null
           email: string
+          fulfillment_status?: string | null
           id?: string
           order_number: string
+          payment_gateway?: string | null
+          payment_method?: string | null
           payment_status?: string
           shipped_at?: string | null
           shipping_address_line1?: string | null
@@ -342,9 +403,14 @@ export type Database = {
           customer_notes?: string | null
           delivered_at?: string | null
           discount_cents?: number | null
+          discount_code?: string | null
+          discount_code_id?: string | null
           email?: string
+          fulfillment_status?: string | null
           id?: string
           order_number?: string
+          payment_gateway?: string | null
+          payment_method?: string | null
           payment_status?: string
           shipped_at?: string | null
           shipping_address_line1?: string | null
@@ -368,7 +434,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_discount_code_id_fkey"
+            columns: ["discount_code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       permissions: {
         Row: {
@@ -512,6 +586,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_reviews: {
+        Row: {
+          created_at: string
+          helpful_count: number | null
+          id: string
+          is_approved: boolean | null
+          is_verified_purchase: boolean | null
+          product_id: string
+          rating: number
+          review_text: string | null
+          title: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          is_approved?: boolean | null
+          is_verified_purchase?: boolean | null
+          product_id: string
+          rating: number
+          review_text?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          is_approved?: boolean | null
+          is_verified_purchase?: boolean | null
+          product_id?: string
+          rating?: number
+          review_text?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -930,6 +1054,15 @@ export type Database = {
       user_has_permission: {
         Args: { user_id: string; permission_name: string }
         Returns: boolean
+      }
+      validate_discount_code: {
+        Args: { code_text: string; order_total_cents: number }
+        Returns: {
+          is_valid: boolean
+          discount_id: string
+          discount_amount_cents: number
+          error_message: string
+        }[]
       }
     }
     Enums: {

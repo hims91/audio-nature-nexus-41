@@ -37,6 +37,9 @@ export interface Product {
   category?: ProductCategory;
   images?: ProductImage[];
   variants?: ProductVariant[];
+  reviews?: ProductReview[];
+  average_rating?: number;
+  review_count?: number;
 }
 
 export interface ProductImage {
@@ -68,6 +71,42 @@ export interface ProductVariant {
   updated_at: string;
 }
 
+export interface ProductReview {
+  id: string;
+  product_id: string;
+  user_id?: string;
+  rating: number;
+  title?: string;
+  review_text?: string;
+  is_verified_purchase: boolean;
+  is_approved: boolean;
+  helpful_count: number;
+  created_at: string;
+  updated_at: string;
+  user_profile?: {
+    first_name?: string;
+    last_name?: string;
+    username?: string;
+  };
+}
+
+export interface DiscountCode {
+  id: string;
+  code: string;
+  description?: string;
+  discount_type: 'percentage' | 'fixed_amount';
+  discount_value: number;
+  minimum_order_cents: number;
+  maximum_discount_cents?: number;
+  usage_limit?: number;
+  usage_count: number;
+  is_active: boolean;
+  starts_at?: string;
+  expires_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CartItem {
   id: string;
   user_id?: string;
@@ -88,11 +127,16 @@ export interface Order {
   email: string;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
   payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
+  fulfillment_status?: 'unfulfilled' | 'partial' | 'fulfilled';
+  payment_method?: string;
+  payment_gateway?: string;
   subtotal_cents: number;
   shipping_cents: number;
   tax_cents: number;
   discount_cents: number;
   total_cents: number;
+  discount_code?: string;
+  discount_code_id?: string;
   shipping_first_name?: string;
   shipping_last_name?: string;
   shipping_address_line1?: string;
@@ -121,6 +165,7 @@ export interface Order {
   created_at: string;
   updated_at: string;
   items?: OrderItem[];
+  discount_code_details?: DiscountCode;
 }
 
 export interface OrderItem {
