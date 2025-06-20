@@ -131,7 +131,7 @@ const CartPage: React.FC = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              onClick={() => updateQuantity({ itemId: item.id, quantity: item.quantity - 1 })}
                               disabled={item.quantity <= 1}
                             >
                               <Minus className="h-4 w-4" />
@@ -142,7 +142,7 @@ const CartPage: React.FC = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              onClick={() => updateQuantity({ itemId: item.id, quantity: item.quantity + 1 })}
                             >
                               <Plus className="h-4 w-4" />
                             </Button>
