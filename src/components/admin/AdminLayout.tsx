@@ -31,7 +31,7 @@ const AdminLayout: React.FC = () => {
   const navigation = [
     {
       name: "Dashboard",
-      href: "/admin/dashboard",
+      href: "/admin",
       icon: LayoutDashboard,
     },
     {
@@ -71,6 +71,13 @@ const AdminLayout: React.FC = () => {
     },
   ];
 
+  const isActive = (href: string) => {
+    if (href === "/admin") {
+      return location.pathname === "/admin" || location.pathname === "/admin/";
+    }
+    return location.pathname.startsWith(href);
+  };
+
   return (
     <AdminErrorBoundary>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -107,14 +114,14 @@ const AdminLayout: React.FC = () => {
           <nav className="mt-8 px-4">
             <ul className="space-y-2">
               {navigation.map((item) => {
-                const isActive = location.pathname === item.href;
+                const itemIsActive = isActive(item.href);
                 return (
                   <li key={item.name}>
                     <Link
                       to={item.href}
                       className={cn(
                         "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-                        isActive
+                        itemIsActive
                           ? "bg-nature-forest text-white"
                           : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                       )}
@@ -122,7 +129,7 @@ const AdminLayout: React.FC = () => {
                     >
                       <item.icon className={cn(
                         "h-5 w-5 mr-3",
-                        isActive ? "text-white" : "text-gray-400"
+                        itemIsActive ? "text-white" : "text-gray-400"
                       )} />
                       {item.name}
                     </Link>
