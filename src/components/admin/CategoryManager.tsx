@@ -15,6 +15,8 @@ interface CategoryFormData {
   name: string;
   slug: string;
   description: string;
+  is_active: boolean;
+  sort_order: number;
 }
 
 const CategoryManager: React.FC = () => {
@@ -23,7 +25,9 @@ const CategoryManager: React.FC = () => {
   const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
     slug: '',
-    description: ''
+    description: '',
+    is_active: true,
+    sort_order: 0
   });
 
   const { data: categories = [], isLoading } = useCategories();
@@ -75,7 +79,9 @@ const CategoryManager: React.FC = () => {
     setFormData({
       name: category.name,
       slug: category.slug,
-      description: category.description || ''
+      description: category.description || '',
+      is_active: category.is_active,
+      sort_order: category.sort_order
     });
     setIsDialogOpen(true);
   };
@@ -97,7 +103,9 @@ const CategoryManager: React.FC = () => {
     setFormData({
       name: '',
       slug: '',
-      description: ''
+      description: '',
+      is_active: true,
+      sort_order: 0
     });
   };
 

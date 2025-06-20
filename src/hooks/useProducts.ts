@@ -2,52 +2,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  short_description?: string;
-  price_cents: number;
-  compare_at_price_cents?: number;
-  sku?: string;
-  category_id?: string;
-  inventory_quantity: number;
-  track_inventory: boolean;
-  allow_backorders: boolean;
-  weight_grams?: number;
-  requires_shipping: boolean;
-  is_active: boolean;
-  is_featured: boolean;
-  created_at: string;
-  updated_at: string;
-  category?: Category;
-  images?: Array<{
-    id: string;
-    image_url: string;
-    alt_text?: string;
-    is_primary: boolean;
-    sort_order: number;
-  }>;
-}
+import { Product, ProductCategory, ProductImage, ProductVariant } from '@/types/ecommerce';
 
 // Categories hooks
 export const useCategories = () => {
   return useQuery({
     queryKey: ['categories'],
-    queryFn: async (): Promise<Category[]> => {
+    queryFn: async (): Promise<ProductCategory[]> => {
       const { data, error } = await supabase
         .from('product_categories')
         .select('*')
@@ -63,14 +24,10 @@ export const useCategoryMutations = () => {
   const queryClient = useQueryClient();
 
   const createCategory = useMutation({
-    mutationFn: async (categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (categoryData: Omit<ProductCategory, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('product_categories')
-        .insert({
-          ...categoryData,
-          is_active: true,
-          sort_order: 0
-        })
+        .insert(categoryData)
         .select()
         .single();
 
@@ -88,7 +45,7 @@ export const useCategoryMutations = () => {
   });
 
   const updateCategory = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Category> }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<ProductCategory> }) => {
       const { data, error } = await supabase
         .from('product_categories')
         .update(updates)
@@ -150,7 +107,8 @@ export const useProducts = (filters?: {
         .select(`
           *,
           category:product_categories(*),
-          images:product_images(*)
+          images:product_images(*),
+          variants:product_variants(*)
         `);
 
       if (filters?.categoryId) {
@@ -188,7 +146,8 @@ export const useProduct = (slug: string) => {
         .select(`
           *,
           category:product_categories(*),
-          images:product_images(*)
+          images:product_images(*),
+          variants:product_variants(*)
         `)
         .eq('slug', slug)
         .eq('is_active', true)
