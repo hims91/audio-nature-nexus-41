@@ -1,7 +1,5 @@
-
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-
 interface BrandConfig {
   name: string;
   tagline: string;
@@ -17,15 +15,16 @@ interface BrandConfig {
     location: string;
   };
 }
-
 export const BRAND_CONFIG: BrandConfig = {
   name: "Terra Echo Studios",
   tagline: "Professional Audio Engineering Services",
   logoUrl: "/lovable-uploads/7b1e0e62-bb07-45e5-b955-59e6626241d5.png",
   colors: {
-    primary: "#22543D", // nature-forest
-    secondary: "#68D391", // nature-leaf  
-    accent: "#F0FFF4"    // nature-mist
+    primary: "#22543D",
+    // nature-forest
+    secondary: "#68D391",
+    // nature-leaf  
+    accent: "#F0FFF4" // nature-mist
   },
   contact: {
     email: "TerraEchoStudios@gmail.com",
@@ -33,106 +32,88 @@ export const BRAND_CONFIG: BrandConfig = {
     location: "Los Angeles, CA"
   }
 };
-
-export const BrandLogo: React.FC<{ 
+export const BrandLogo: React.FC<{
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   showText?: boolean;
-}> = ({ 
-  size = "md", 
+}> = ({
+  size = "md",
   className = "",
-  showText = true 
+  showText = true
 }) => {
   const sizeClasses = {
     sm: "h-8 w-8",
-    md: "h-12 w-12", 
+    md: "h-12 w-12",
     lg: "h-16 w-16",
     xl: "h-24 w-24"
   };
-
   const textSizeClasses = {
     sm: "text-lg",
     md: "text-xl",
-    lg: "text-2xl", 
+    lg: "text-2xl",
     xl: "text-3xl"
   };
-
-  return (
-    <div className={`flex items-center space-x-3 ${className}`}>
-      <img 
-        src={BRAND_CONFIG.logoUrl}
-        alt={BRAND_CONFIG.name}
-        className={`${sizeClasses[size]} object-contain`}
-      />
-      {showText && (
-        <div className="flex flex-col">
+  return <div className={`flex items-center space-x-3 ${className}`}>
+      <img src={BRAND_CONFIG.logoUrl} alt={BRAND_CONFIG.name} className={`${sizeClasses[size]} object-contain`} />
+      {showText && <div className="flex flex-col">
           <span className={`font-bold text-nature-forest dark:text-white ${textSizeClasses[size]}`}>
             {BRAND_CONFIG.name}
           </span>
-          {size !== "sm" && (
-            <span className="text-xs text-nature-bark dark:text-gray-400">
-              {BRAND_CONFIG.tagline}
-            </span>
-          )}
-        </div>
-      )}
-    </div>
-  );
+          {size !== "sm"}
+        </div>}
+    </div>;
 };
-
-export const BrandBadge: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
-  children, 
-  className = "" 
+export const BrandBadge: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({
+  children,
+  className = ""
 }) => {
-  return (
-    <Badge className={`bg-nature-forest text-white hover:bg-nature-leaf ${className}`}>
+  return <Badge className={`bg-nature-forest text-white hover:bg-nature-leaf ${className}`}>
       {children}
-    </Badge>
-  );
+    </Badge>;
 };
-
-export const BrandHeading: React.FC<{ 
-  children: React.ReactNode; 
+export const BrandHeading: React.FC<{
+  children: React.ReactNode;
   level?: 1 | 2 | 3 | 4;
   className?: string;
-}> = ({ children, level = 1, className = "" }) => {
+}> = ({
+  children,
+  level = 1,
+  className = ""
+}) => {
   const baseClass = "font-bold text-nature-forest dark:text-white";
   const sizeClass = {
     1: "text-4xl md:text-5xl",
-    2: "text-3xl md:text-4xl", 
+    2: "text-3xl md:text-4xl",
     3: "text-2xl md:text-3xl",
     4: "text-xl md:text-2xl"
   }[level];
-
   const Component = `h${level}` as keyof JSX.IntrinsicElements;
-  
-  return (
-    <Component className={`${baseClass} ${sizeClass} ${className}`}>
+  return <Component className={`${baseClass} ${sizeClass} ${className}`}>
       {children}
-    </Component>
-  );
+    </Component>;
 };
-
-export const BrandText: React.FC<{ 
+export const BrandText: React.FC<{
   children: React.ReactNode;
   variant?: "primary" | "secondary" | "muted";
   className?: string;
-}> = ({ children, variant = "primary", className = "" }) => {
+}> = ({
+  children,
+  variant = "primary",
+  className = ""
+}) => {
   const variantClass = {
     primary: "text-nature-forest dark:text-white",
-    secondary: "text-nature-bark dark:text-gray-300", 
+    secondary: "text-nature-bark dark:text-gray-300",
     muted: "text-nature-stone dark:text-gray-400"
   }[variant];
-
-  return (
-    <span className={`${variantClass} ${className}`}>
+  return <span className={`${variantClass} ${className}`}>
       {children}
-    </span>
-  );
+    </span>;
 };
-
 const BrandConsistencyManager: React.FC = () => {
   return null; // This is just a utility component for brand consistency
 };
-
 export default BrandConsistencyManager;
