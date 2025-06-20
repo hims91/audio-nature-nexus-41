@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, CreditCard } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/utils/currency';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
@@ -183,16 +183,23 @@ const CartPage: React.FC = () => {
                       </div>
                       <div className="flex justify-between">
                         <span>Shipping:</span>
-                        <span className="text-green-600">Free</span>
+                        <span className="text-green-600">Calculated at checkout</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tax:</span>
+                        <span className="text-gray-600">Calculated at checkout</span>
                       </div>
                       <div className="border-t pt-4">
                         <div className="flex justify-between font-semibold text-lg">
-                          <span>Total:</span>
+                          <span>Subtotal:</span>
                           <span>{formatPrice(cartTotal)}</span>
                         </div>
                       </div>
-                      <Button className="w-full mt-6" size="lg">
-                        Proceed to Checkout
+                      <Button className="w-full mt-6" size="lg" asChild>
+                        <Link to="/checkout">
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Proceed to Checkout
+                        </Link>
                       </Button>
                       <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
                         Secure checkout powered by Stripe

@@ -18,6 +18,9 @@ import Index from '@/pages/Index';
 import ShopPage from '@/pages/ShopPage';
 import ProductDetailPage from '@/pages/ProductDetailPage';
 import CartPage from '@/pages/CartPage';
+import CheckoutPage from '@/components/shop/CheckoutPage';
+import OrderSuccessPage from '@/pages/OrderSuccessPage';
+import OrderCancelPage from '@/pages/OrderCancelPage';
 import AuthEnhanced from '@/pages/AuthEnhanced';
 import ProfilePage from '@/pages/ProfilePage';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -67,6 +70,9 @@ function App() {
                             <Route path="/shop" element={<ShopPage />} />
                             <Route path="/shop/products/:slug" element={<ProductDetailPage />} />
                             <Route path="/cart" element={<CartPage />} />
+                            <Route path="/checkout" element={<CheckoutPage />} />
+                            <Route path="/order-success" element={<OrderSuccessPage />} />
+                            <Route path="/order-cancel" element={<OrderCancelPage />} />
                             <Route path="/auth" element={<AuthEnhanced />} />
                             <Route path="/profile" element={
                               <ProtectedRoute>
