@@ -14,9 +14,11 @@ import { Order } from '@/types/ecommerce';
 import { toast } from 'sonner';
 
 interface OrderStatusManagerProps {
-  order: Order;
+  order: any; // Using any to match the existing order structure
   onUpdate?: () => void;
 }
+
+type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
 
 const statusOptions = [
   { value: 'pending', label: 'Pending', icon: AlertCircle, color: 'bg-yellow-100 text-yellow-800' },
@@ -27,7 +29,7 @@ const statusOptions = [
 ];
 
 const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({ order, onUpdate }) => {
-  const [selectedStatus, setSelectedStatus] = useState(order.status);
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus>(order.status as OrderStatus);
   const [trackingNumber, setTrackingNumber] = useState(order.tracking_number || '');
   const [trackingUrl, setTrackingUrl] = useState(order.tracking_url || '');
   const [adminNotes, setAdminNotes] = useState(order.admin_notes || '');
@@ -48,8 +50,8 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({ order, onUpdate
     setIsUpdating(true);
 
     try {
-      const updates: Partial<Order> = {
-        status: selectedStatus as Order['status'],
+      const updates: any = {
+        status: selectedStatus,
         tracking_number: trackingNumber || null,
         tracking_url: trackingUrl || null,
         admin_notes: adminNotes || null,
@@ -106,7 +108,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({ order, onUpdate
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="status">Update Status</Label>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <Select value={selectedStatus} onValueChange={(value: OrderStatus) => setSelectedStatus(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
