@@ -66,24 +66,40 @@ const generateOrderEmailHtml = (order: OrderConfirmationRequest['order']) => {
     </tr>
   `).join('');
 
+  const trackingSection = order.tracking_number ? `
+    <div style="margin: 20px 0; padding: 15px; background-color: #f0f9ff; border-radius: 8px;">
+      <h3 style="margin-top: 0; color: #0369a1;">Shipping Update</h3>
+      <p><strong>Tracking Number:</strong> ${order.tracking_number}</p>
+      ${order.tracking_url ? `<p><a href="${order.tracking_url}" style="color: #0369a1; text-decoration: none;">Track Your Package</a></p>` : ''}
+    </div>
+  ` : '';
+
   return `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Order Confirmation - ${order.order_number}</title>
+      <title>Order ${order.status === 'delivered' ? 'Delivered' : 'Update'} - ${order.order_number}</title>
     </head>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
         <h1 style="color: #10b981;">Terra Echo Studios</h1>
-        <h2 style="color: #6b7280;">Order Confirmation</h2>
+        <h2 style="color: #6b7280;">Order ${order.status === 'shipped' ? 'Shipped' : order.status === 'delivered' ? 'Delivered' : 'Update'}</h2>
       </div>
       
       <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-        <h3 style="margin-top: 0;">Thank you for your order!</h3>
+        <h3 style="margin-top: 0;">
+          ${order.status === 'shipped' ? 'Your order is on its way!' : 
+            order.status === 'delivered' ? 'Your order has been delivered!' : 
+            'Order status update'}
+        </h3>
         <p>Hi ${order.shipping_first_name || 'Customer'},</p>
-        <p>We've received your order and will process it soon. Here are the details:</p>
+        <p>
+          ${order.status === 'shipped' ? 'Great news! Your order has been shipped and is on its way to you.' :
+            order.status === 'delivered' ? 'Your order has been successfully delivered. We hope you enjoy your purchase!' :
+            `Your order status has been updated to: ${order.status}`}
+        </p>
         
         <div style="margin: 20px 0;">
           <strong>Order Number:</strong> ${order.order_number}<br>
@@ -91,6 +107,8 @@ const generateOrderEmailHtml = (order: OrderConfirmationRequest['order']) => {
           <strong>Payment Status:</strong> ${order.payment_status}
         </div>
       </div>
+
+      ${trackingSection}
 
       <div style="margin-bottom: 20px;">
         <h3>Order Items</h3>
