@@ -77,6 +77,48 @@ const AdminProductForm: React.FC = () => {
 
   const watchTrackInventory = watch('track_inventory');
 
+  // Generate unique SKU if needed
+  const generateUniqueSKU = async (productName: string): Promise<string> => {
+    const baseSKU = productName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+      .substring(0, 20);
+    
+    let sku = baseSKU;
+    let counter = 1;
+    
+    // Check if SKU exists
+    while (true) {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id')
+        .eq('sku', sku)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error checking SKU:', error);
+        break;
+      }
+      
+      if (!data) {
+        // SKU is unique
+        break;
+      }
+      
+      // If editing and the SKU belongs to current product, it's fine
+      if (isEditing && id && data.id === id) {
+        break;
+      }
+      
+      // Generate new SKU with counter
+      sku = `${baseSKU}-${counter}`;
+      counter++;
+    }
+    
+    return sku;
+  };
+
   useEffect(() => {
     if (product && isEditing) {
       reset({
@@ -138,11 +180,18 @@ const AdminProductForm: React.FC = () => {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
+      // Generate unique SKU if not provided or empty
+      let finalSKU = data.sku?.trim();
+      if (!finalSKU && !isEditing) {
+        finalSKU = await generateUniqueSKU(data.name);
+      }
+
       const formattedData = {
         ...data,
         category_id: data.category_id === 'none' ? null : data.category_id,
         price_cents: Math.round(data.price_cents * 100),
         compare_at_price_cents: data.compare_at_price_cents ? Math.round(data.compare_at_price_cents * 100) : null,
+        sku: finalSKU || null, // Set to null if empty to avoid unique constraint issues
       };
 
       let productId: string;
@@ -162,7 +211,13 @@ const AdminProductForm: React.FC = () => {
       navigate('/admin/products');
     } catch (error) {
       console.error('Error saving product:', error);
-      toast.error(`Failed to ${isEditing ? 'update' : 'create'} product`);
+      
+      // Handle specific SKU constraint error
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+        toast.error('SKU already exists. Please use a different SKU or leave it empty to auto-generate.');
+      } else {
+        toast.error(`Failed to ${isEditing ? 'update' : 'create'} product`);
+      }
     }
   };
 
@@ -333,12 +388,15 @@ const AdminProductForm: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="sku">SKU</Label>
+                  <Label htmlFor="sku">SKU (Optional)</Label>
                   <Input
                     id="sku"
                     {...register('sku')}
-                    placeholder="Product SKU"
+                    placeholder="Leave empty to auto-generate"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Leave empty to automatically generate a unique SKU
+                  </p>
                 </div>
 
                 <div>
