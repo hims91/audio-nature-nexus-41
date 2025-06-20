@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,12 +10,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatPrice } from '@/utils/currency';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
 import FadeInView from '@/components/animations/FadeInView';
-import OrderStatusManager from '@/components/admin/OrderStatusManager';
 
 const AdminOrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
-  const { data: order, isLoading, refetch } = useQuery({
+  const { data: order, isLoading } = useQuery({
     queryKey: ['admin-order', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -125,11 +125,6 @@ const AdminOrderDetail: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-          </FadeInView>
-
-          {/* Add Order Status Manager */}
-          <FadeInView direction="up" delay={0.5}>
-            <OrderStatusManager order={order} onUpdate={refetch} />
           </FadeInView>
         </div>
 
