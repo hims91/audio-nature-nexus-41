@@ -11,6 +11,14 @@ interface EnhancedDashboardStats {
   last_order_date: string | null;
 }
 
+interface DatabaseStatsResponse {
+  total_orders: number;
+  total_spent_cents: number;
+  pending_orders: number;
+  recent_orders: number;
+  last_order_date: string | null;
+}
+
 export const useEnhancedDashboardStats = () => {
   const [realTimeStats, setRealTimeStats] = useState<Partial<EnhancedDashboardStats>>({});
 
@@ -20,20 +28,23 @@ export const useEnhancedDashboardStats = () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('User not authenticated');
 
-      // Use the existing get_user_dashboard_stats function for now
+      // Call the get_user_order_summary function
       const { data, error } = await supabase.rpc('get_user_dashboard_stats', {
         p_user_id: user.user.id
       });
 
       if (error) throw error;
       
-      // Convert the existing stats to our enhanced format
+      // Properly cast the response
+      const statsData = data as unknown as DatabaseStatsResponse;
+      
+      // Convert to our enhanced format
       const enhancedStats: EnhancedDashboardStats = {
-        total_orders: data?.total_orders || 0,
-        total_spent_cents: data?.total_spent_cents || 0,
+        total_orders: statsData?.total_orders || 0,
+        total_spent_cents: statsData?.total_spent_cents || 0,
         pending_orders: 0, // Will be calculated from orders table
-        recent_orders: data?.recent_orders || 0,
-        last_order_date: null // Will be fetched separately
+        recent_orders: statsData?.recent_orders || 0,
+        last_order_date: statsData?.last_order_date || null
       };
 
       return enhancedStats;
