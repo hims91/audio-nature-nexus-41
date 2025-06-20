@@ -1,28 +1,25 @@
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingBag, DollarSign, Clock, TrendingUp } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { ShoppingBag, DollarSign, Clock, TrendingUp, AlertCircle } from 'lucide-react';
 import { formatPrice } from '@/utils/currency';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
-import type { DashboardStats } from '@/types/dashboard';
+import { useEnhancedDashboardStats } from '@/hooks/useEnhancedDashboardStats';
+import { formatDistanceToNow } from 'date-fns';
 
 const QuickStatsCards: React.FC = () => {
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: async () => {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('User not authenticated');
+  const { stats, isLoading, error } = useEnhancedDashboardStats();
 
-      const { data, error } = await supabase.rpc('get_user_dashboard_stats', {
-        p_user_id: user.user.id
-      });
-
-      if (error) throw error;
-      return data as unknown as DashboardStats;
-    },
-  });
+  if (error) {
+    return (
+      <Card className="col-span-full">
+        <CardContent className="p-6 text-center">
+          <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+          <p className="text-red-600">Failed to load dashboard statistics</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const statsCards = [
     {
@@ -40,19 +37,20 @@ const QuickStatsCards: React.FC = () => {
       bgColor: 'bg-green-50',
     },
     {
-      title: 'Recent Orders',
-      value: stats?.recent_orders || 0,
+      title: 'Pending Orders',
+      value: stats?.pending_orders || 0,
       icon: Clock,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      subtitle: 'Last 30 days',
+      subtitle: 'Awaiting processing',
     },
     {
-      title: 'Member Since',
-      value: stats?.member_since ? new Date(stats.member_since).getFullYear() : new Date().getFullYear(),
+      title: 'Recent Activity',
+      value: stats?.recent_orders || 0,
       icon: TrendingUp,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
+      subtitle: 'Last 30 days',
     },
   ];
 
@@ -75,7 +73,7 @@ const QuickStatsCards: React.FC = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {statsCards.map((stat, index) => (
-        <Card key={index}>
+        <Card key={index} className="transition-all hover:shadow-md">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               {stat.title}
@@ -96,6 +94,16 @@ const QuickStatsCards: React.FC = () => {
           </CardContent>
         </Card>
       ))}
+      
+      {stats?.last_order_date && (
+        <Card className="md:col-span-2 lg:col-span-4">
+          <CardContent className="p-4">
+            <div className="text-center text-sm text-gray-600">
+              Last order: {formatDistanceToNow(new Date(stats.last_order_date), { addSuffix: true })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
