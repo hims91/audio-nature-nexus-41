@@ -2,7 +2,7 @@
 import React from 'react';
 import { User } from '@supabase/supabase-js';
 import { Card, CardContent } from '@/components/ui/card';
-import { OptimizedAvatar } from '@/components/performance/OptimizedAvatar';
+import OptimizedAvatar from '@/components/performance/OptimizedAvatar';
 import { formatDistanceToNow } from 'date-fns';
 
 interface WelcomeSectionProps {
@@ -26,7 +26,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({ user, userProfile }) =>
           <OptimizedAvatar
             src={userProfile?.avatar_url}
             alt={fullName}
-            fallback={firstName?.[0] || 'U'}
+            fallbackText={firstName?.[0] || 'U'}
             className="h-16 w-16 text-lg"
           />
           <div>

@@ -6,6 +6,7 @@ import { ShoppingBag, DollarSign, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatPrice } from '@/utils/currency';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
+import type { DashboardStats } from '@/types/dashboard';
 
 const QuickStatsCards: React.FC = () => {
   const { data: stats, isLoading } = useQuery({
@@ -19,7 +20,7 @@ const QuickStatsCards: React.FC = () => {
       });
 
       if (error) throw error;
-      return data;
+      return data as DashboardStats;
     },
   });
 
