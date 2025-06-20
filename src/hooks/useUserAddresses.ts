@@ -115,10 +115,19 @@ export const useUserAddresses = () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('User not authenticated');
 
-      const { error } = await supabase.rpc('set_default_address', {
-        address_id: addressId,
-        user_id: user.user.id
-      });
+      // Manual implementation since the RPC function doesn't exist in types yet
+      // First, unset all default addresses for the user
+      await supabase
+        .from('user_addresses')
+        .update({ is_default: false })
+        .eq('user_id', user.user.id);
+
+      // Then set the new default
+      const { error } = await supabase
+        .from('user_addresses')
+        .update({ is_default: true })
+        .eq('id', addressId)
+        .eq('user_id', user.user.id);
 
       if (error) throw error;
       return addressId;

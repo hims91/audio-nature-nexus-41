@@ -64,16 +64,22 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit, onCancel, 
               <Input
                 id="first_name"
                 {...register('first_name', { required: 'First name is required' })}
-                error={errors.first_name?.message}
+                className={errors.first_name ? 'border-red-500' : ''}
               />
+              {errors.first_name && (
+                <p className="text-sm text-red-500 mt-1">{errors.first_name.message}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="last_name">Last Name *</Label>
               <Input
                 id="last_name"
                 {...register('last_name', { required: 'Last name is required' })}
-                error={errors.last_name?.message}
+                className={errors.last_name ? 'border-red-500' : ''}
               />
+              {errors.last_name && (
+                <p className="text-sm text-red-500 mt-1">{errors.last_name.message}</p>
+              )}
             </div>
           </div>
 
@@ -87,8 +93,11 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit, onCancel, 
             <Input
               id="address_line1"
               {...register('address_line1', { required: 'Address is required' })}
-              error={errors.address_line1?.message}
+              className={errors.address_line1 ? 'border-red-500' : ''}
             />
+            {errors.address_line1 && (
+              <p className="text-sm text-red-500 mt-1">{errors.address_line1.message}</p>
+            )}
           </div>
 
           <div>
@@ -102,24 +111,33 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSubmit, onCancel, 
               <Input
                 id="city"
                 {...register('city', { required: 'City is required' })}
-                error={errors.city?.message}
+                className={errors.city ? 'border-red-500' : ''}
               />
+              {errors.city && (
+                <p className="text-sm text-red-500 mt-1">{errors.city.message}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="state">State *</Label>
               <Input
                 id="state"
                 {...register('state', { required: 'State is required' })}
-                error={errors.state?.message}
+                className={errors.state ? 'border-red-500' : ''}
               />
+              {errors.state && (
+                <p className="text-sm text-red-500 mt-1">{errors.state.message}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="postal_code">Postal Code *</Label>
               <Input
                 id="postal_code"
                 {...register('postal_code', { required: 'Postal code is required' })}
-                error={errors.postal_code?.message}
+                className={errors.postal_code ? 'border-red-500' : ''}
               />
+              {errors.postal_code && (
+                <p className="text-sm text-red-500 mt-1">{errors.postal_code.message}</p>
+              )}
             </div>
           </div>
 
