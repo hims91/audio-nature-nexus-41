@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -23,6 +22,7 @@ import OrderSuccessPage from '@/pages/OrderSuccessPage';
 import OrderCancelPage from '@/pages/OrderCancelPage';
 import AuthEnhanced from '@/pages/AuthEnhanced';
 import ProfilePage from '@/pages/ProfilePage';
+import DashboardPage from '@/pages/DashboardPage';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ContactPage from '@/pages/ContactPage';
 import CustomerOrderHistory from '@/pages/CustomerOrderHistory';
@@ -77,6 +77,11 @@ function App() {
                             <Route path="/profile" element={
                               <ProtectedRoute>
                                 <ProfilePage />
+                              </ProtectedRoute>
+                            } />
+                            <Route path="/dashboard/*" element={
+                              <ProtectedRoute>
+                                <DashboardPage />
                               </ProtectedRoute>
                             } />
                             <Route path="/contact" element={<ContactPage />} />

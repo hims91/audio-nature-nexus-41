@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { User, LogOut } from 'lucide-react';
+import { User, LogOut, LayoutDashboard } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +76,16 @@ const UserProfileDropdown: React.FC = () => {
         
         <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
         
+        <DropdownMenuItem 
+          onClick={() => {
+            navigate('/dashboard');
+            setIsOpen(false);
+          }}
+          className="flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+        >
+          <LayoutDashboard className="w-4 h-4 text-nature-forest" />
+          <span>Dashboard</span>
+        </DropdownMenuItem>
 
         {isAdmin && (
           <DropdownMenuItem 
@@ -88,7 +99,6 @@ const UserProfileDropdown: React.FC = () => {
             <span>Admin Dashboard</span>
           </DropdownMenuItem>
         )}
-        
         
         <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
         

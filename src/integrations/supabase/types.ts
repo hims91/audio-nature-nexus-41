@@ -943,6 +943,147 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          resource_id: string | null
+          resource_type: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_addresses: {
+        Row: {
+          address_line1: string
+          address_line2: string | null
+          city: string
+          company: string | null
+          country: string
+          created_at: string
+          first_name: string
+          id: string
+          is_default: boolean | null
+          last_name: string
+          phone: string | null
+          postal_code: string
+          state: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address_line1: string
+          address_line2?: string | null
+          city: string
+          company?: string | null
+          country?: string
+          created_at?: string
+          first_name: string
+          id?: string
+          is_default?: boolean | null
+          last_name: string
+          phone?: string | null
+          postal_code: string
+          state: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address_line1?: string
+          address_line2?: string | null
+          city?: string
+          company?: string | null
+          country?: string
+          created_at?: string
+          first_name?: string
+          id?: string
+          is_default?: boolean | null
+          last_name?: string
+          phone?: string | null
+          postal_code?: string
+          state?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          currency: string | null
+          dashboard_widgets: Json | null
+          email_notifications: boolean | null
+          id: string
+          language: string | null
+          marketing_emails: boolean | null
+          order_updates: boolean | null
+          product_recommendations: boolean | null
+          push_notifications: boolean | null
+          theme: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          dashboard_widgets?: Json | null
+          email_notifications?: boolean | null
+          id?: string
+          language?: string | null
+          marketing_emails?: boolean | null
+          order_updates?: boolean | null
+          product_recommendations?: boolean | null
+          push_notifications?: boolean | null
+          theme?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          dashboard_widgets?: Json | null
+          email_notifications?: boolean | null
+          id?: string
+          language?: string | null
+          marketing_emails?: boolean | null
+          order_updates?: boolean | null
+          product_recommendations?: boolean | null
+          push_notifications?: boolean | null
+          theme?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -1024,6 +1165,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_dashboard_stats: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string
@@ -1036,6 +1181,15 @@ export type Database = {
         Args: {
           p_action: string
           p_resource_type: string
+          p_resource_id?: string
+          p_details?: Json
+        }
+        Returns: string
+      }
+      log_user_activity: {
+        Args: {
+          p_action: string
+          p_resource_type?: string
           p_resource_id?: string
           p_details?: Json
         }
