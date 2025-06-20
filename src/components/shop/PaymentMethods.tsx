@@ -1,14 +1,13 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { CreditCard, Calendar, RefreshCw, Shield, CheckCircle } from 'lucide-react';
+import { CreditCard, Shield, CheckCircle } from 'lucide-react';
 import { formatPrice } from '@/utils/currency';
 
 interface PaymentMethod {
   id: string;
-  type: 'card' | 'subscription' | 'installment';
+  type: 'card';
   name: string;
   description: string;
   price: number;
@@ -33,24 +32,11 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
   onConfirm,
   isProcessing = false
 }) => {
-  const getMethodIcon = (type: string) => {
-    switch (type) {
-      case 'card':
-        return <CreditCard className="h-5 w-5" />;
-      case 'subscription':
-        return <Calendar className="h-5 w-5" />;
-      case 'installment':
-        return <RefreshCw className="h-5 w-5" />;
-      default:
-        return <CreditCard className="h-5 w-5" />;
-    }
-  };
-
   const selectedPaymentMethod = methods.find(method => method.id === selectedMethod);
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {methods.map((method) => (
           <Card 
             key={method.id}
@@ -61,18 +47,10 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
             } ${method.popular ? 'relative' : ''}`}
             onClick={() => onMethodSelect(method.id)}
           >
-            {method.popular && (
-              <Badge 
-                className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-nature-forest"
-              >
-                Most Popular
-              </Badge>
-            )}
-            
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  {getMethodIcon(method.type)}
+                  <CreditCard className="h-5 w-5" />
                   <CardTitle className="text-lg">{method.name}</CardTitle>
                 </div>
                 {selectedMethod === method.id && (
@@ -94,17 +72,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
                       {formatPrice(method.originalPrice)}
                     </span>
                   )}
-                  {method.type === 'subscription' && (
-                    <span className="text-sm text-gray-600">/month</span>
-                  )}
                 </div>
-
-                {/* Discount Badge */}
-                {method.discount && (
-                  <Badge variant="secondary" className="text-green-600">
-                    Save {method.discount}%
-                  </Badge>
-                )}
 
                 {/* Features */}
                 <ul className="space-y-1">
@@ -132,37 +100,6 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
         <span>Secure payment processing powered by Stripe</span>
       </div>
 
-      {/* Selected Method Details */}
-      {selectedPaymentMethod && (
-        <Card className="bg-nature-mist border-nature-forest">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium text-nature-forest">
-                  Selected: {selectedPaymentMethod.name}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {selectedPaymentMethod.description}
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-nature-forest">
-                  {formatPrice(selectedPaymentMethod.price)}
-                  {selectedPaymentMethod.type === 'subscription' && (
-                    <span className="text-sm font-normal">/month</span>
-                  )}
-                </div>
-                {selectedPaymentMethod.discount && (
-                  <div className="text-sm text-green-600">
-                    Save {selectedPaymentMethod.discount}%
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Action Button */}
       <Button 
         onClick={onConfirm}
@@ -172,7 +109,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
       >
         {isProcessing ? (
           <>
-            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            <CreditCard className="h-4 w-4 mr-2 animate-pulse" />
             Processing Payment...
           </>
         ) : selectedPaymentMethod ? (
@@ -185,12 +122,6 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
       {/* Payment Method Specific Info */}
       {selectedPaymentMethod && (
         <div className="text-xs text-gray-500 text-center space-y-1">
-          {selectedPaymentMethod.type === 'subscription' && (
-            <p>You can cancel or modify your subscription at any time from your account settings.</p>
-          )}
-          {selectedPaymentMethod.type === 'installment' && (
-            <p>Your payment will be split into manageable installments with no additional fees.</p>
-          )}
           <p>All payments are secured with 256-bit SSL encryption.</p>
         </div>
       )}

@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
 import { CreditCard, Truck, Shield, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +17,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import UnifiedNavbar from '@/components/UnifiedNavbar';
 import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
+import TaxCalculator from './TaxCalculator';
 
 interface ShippingInfo {
   first_name: string;
@@ -31,10 +31,6 @@ interface ShippingInfo {
   phone?: string;
 }
 
-interface BillingInfo extends ShippingInfo {
-  same_as_shipping: boolean;
-}
-
 interface TaxInfo {
   rate: number;
   amount: number;
@@ -46,8 +42,7 @@ const CheckoutPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  const [step, setStep] = useState<'shipping' | 'payment' | 'review'>('shipping');
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'subscription'>('card');
+  const [step, setStep] = useState<'shipping' | 'review'>('shipping');
   const [isProcessing, setIsProcessing] = useState(false);
   const [taxInfo, setTaxInfo] = useState<TaxInfo | null>(null);
   const [shippingCost, setShippingCost] = useState(500); // $5 default
@@ -63,47 +58,6 @@ const CheckoutPage: React.FC = () => {
     country: 'US',
     phone: ''
   });
-
-  const [billingInfo, setBillingInfo] = useState<BillingInfo>({
-    ...shippingInfo,
-    same_as_shipping: true
-  });
-
-  // Calculate tax when shipping info changes
-  useEffect(() => {
-    if (shippingInfo.state && shippingInfo.postal_code && cartTotal > 0) {
-      calculateTax();
-    }
-  }, [shippingInfo.state, shippingInfo.postal_code, cartTotal]);
-
-  const calculateTax = async () => {
-    try {
-      // Mock tax calculation - replace with real tax service
-      const taxRate = getTaxRate(shippingInfo.state);
-      const taxAmount = Math.round(cartTotal * taxRate);
-      
-      setTaxInfo({
-        rate: taxRate,
-        amount: taxAmount,
-        jurisdiction: shippingInfo.state
-      });
-    } catch (error) {
-      console.error('Tax calculation failed:', error);
-      setTaxInfo(null);
-    }
-  };
-
-  const getTaxRate = (state: string): number => {
-    // Mock tax rates - replace with real tax service integration
-    const taxRates: Record<string, number> = {
-      'CA': 0.0875, // California
-      'NY': 0.08,   // New York
-      'TX': 0.0625, // Texas
-      'FL': 0.06,   // Florida
-      'WA': 0.065,  // Washington
-    };
-    return taxRates[state] || 0.05; // Default 5%
-  };
 
   const handleCreateCheckout = async () => {
     if (!user) {
@@ -121,6 +75,8 @@ const CheckoutPage: React.FC = () => {
         quantity: item.quantity
       }));
 
+      console.log('Creating checkout with items:', checkoutItems);
+
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
           items: checkoutItems,
@@ -128,9 +84,10 @@ const CheckoutPage: React.FC = () => {
           customer_email: user.email,
           success_url: `${window.location.origin}/order-success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${window.location.origin}/cart`,
-          payment_mode: paymentMethod === 'subscription' ? 'subscription' : 'payment'
         }
       });
+
+      console.log('Checkout response:', data, error);
 
       if (error) throw error;
 
@@ -148,25 +105,12 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  const handleRetryPayment = async (orderId: string) => {
-    setIsProcessing(true);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('retry-payment', {
-        body: { order_id: orderId }
-      });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error: any) {
-      console.error('Payment retry failed:', error);
-      toast.error(error.message || 'Failed to retry payment');
-    } finally {
-      setIsProcessing(false);
-    }
+  const handleTaxCalculated = (taxBreakdown: any) => {
+    setTaxInfo({
+      rate: taxBreakdown.totalTax / taxBreakdown.subtotal,
+      amount: taxBreakdown.totalTax,
+      jurisdiction: taxBreakdown.jurisdiction
+    });
   };
 
   const totalAmount = cartTotal + shippingCost + (taxInfo?.amount || 0);
@@ -235,17 +179,17 @@ const CheckoutPage: React.FC = () => {
             <div className="lg:col-span-2 space-y-6">
               {/* Step Indicator */}
               <div className="flex items-center space-x-4 mb-6">
-                {['shipping', 'payment', 'review'].map((stepName, index) => (
+                {['shipping', 'review'].map((stepName, index) => (
                   <div key={stepName} className="flex items-center">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                       step === stepName ? 'bg-nature-forest text-white' : 
-                      ['shipping', 'payment', 'review'].indexOf(step) > index ? 'bg-green-500 text-white' : 
+                      ['shipping', 'review'].indexOf(step) > index ? 'bg-green-500 text-white' : 
                       'bg-gray-200 text-gray-600'
                     }`}>
                       {index + 1}
                     </div>
                     <span className="ml-2 text-sm font-medium capitalize">{stepName}</span>
-                    {index < 2 && <div className="w-12 h-0.5 bg-gray-200 ml-4" />}
+                    {index < 1 && <div className="w-12 h-0.5 bg-gray-200 ml-4" />}
                   </div>
                 ))}
               </div>
@@ -347,70 +291,12 @@ const CheckoutPage: React.FC = () => {
                     </div>
 
                     <Button 
-                      onClick={() => setStep('payment')} 
+                      onClick={() => setStep('review')} 
                       className="w-full"
                       disabled={!shippingInfo.first_name || !shippingInfo.last_name || !shippingInfo.address_line1 || !shippingInfo.city || !shippingInfo.state || !shippingInfo.postal_code}
                     >
-                      Continue to Payment
+                      Continue to Review
                     </Button>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Payment Method */}
-              {step === 'payment' && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      Payment Method
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                        paymentMethod === 'card' ? 'border-nature-forest bg-nature-mist' : 'border-gray-200'
-                      }`} onClick={() => setPaymentMethod('card')}>
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-4 h-4 rounded-full border-2 ${
-                            paymentMethod === 'card' ? 'border-nature-forest bg-nature-forest' : 'border-gray-300'
-                          }`} />
-                          <div>
-                            <h3 className="font-medium">One-time Payment</h3>
-                            <p className="text-sm text-gray-600">Pay once for your order</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                        paymentMethod === 'subscription' ? 'border-nature-forest bg-nature-mist' : 'border-gray-200'
-                      }`} onClick={() => setPaymentMethod('subscription')}>
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-4 h-4 rounded-full border-2 ${
-                            paymentMethod === 'subscription' ? 'border-nature-forest bg-nature-forest' : 'border-gray-300'
-                          }`} />
-                          <div>
-                            <h3 className="font-medium">Subscription</h3>
-                            <p className="text-sm text-gray-600">Monthly billing</p>
-                            <Badge variant="secondary" className="text-xs mt-1">Save 15%</Badge>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <Shield className="h-4 w-4" />
-                      <span>Secure payment powered by Stripe</span>
-                    </div>
-
-                    <div className="flex space-x-4">
-                      <Button variant="outline" onClick={() => setStep('shipping')}>
-                        Back
-                      </Button>
-                      <Button onClick={() => setStep('review')} className="flex-1">
-                        Review Order
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
               )}
@@ -436,13 +322,14 @@ const CheckoutPage: React.FC = () => {
 
                     <div className="space-y-2">
                       <h4 className="font-medium">Payment Method</h4>
-                      <p className="text-sm text-gray-600">
-                        {paymentMethod === 'card' ? 'One-time Payment' : 'Monthly Subscription'}
-                      </p>
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <Shield className="h-4 w-4" />
+                        <span>Secure payment powered by Stripe</span>
+                      </div>
                     </div>
 
                     <div className="flex space-x-4">
-                      <Button variant="outline" onClick={() => setStep('payment')}>
+                      <Button variant="outline" onClick={() => setStep('shipping')}>
                         Back
                       </Button>
                       <Button 
@@ -456,12 +343,30 @@ const CheckoutPage: React.FC = () => {
                             Processing...
                           </>
                         ) : (
-                          `Complete Order - ${formatPrice(totalAmount)}`
+                          <>
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Complete Order - {formatPrice(totalAmount)}
+                          </>
                         )}
                       </Button>
                     </div>
                   </CardContent>
                 </Card>
+              )}
+
+              {/* Tax Calculator */}
+              {shippingInfo.state && shippingInfo.postal_code && (
+                <TaxCalculator
+                  subtotal={cartTotal}
+                  shippingAddress={{
+                    state: shippingInfo.state,
+                    city: shippingInfo.city,
+                    postal_code: shippingInfo.postal_code,
+                    country: shippingInfo.country
+                  }}
+                  onTaxCalculated={handleTaxCalculated}
+                  className="mt-6"
+                />
               )}
             </div>
 
@@ -513,26 +418,14 @@ const CheckoutPage: React.FC = () => {
                         <span>{formatPrice(taxInfo.amount)}</span>
                       </div>
                     )}
-                    {paymentMethod === 'subscription' && (
-                      <div className="flex justify-between text-sm text-green-600">
-                        <span>Subscription Discount:</span>
-                        <span>-{formatPrice(Math.round(cartTotal * 0.15))}</span>
-                      </div>
-                    )}
                   </div>
 
                   <Separator />
 
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total:</span>
-                    <span>{formatPrice(paymentMethod === 'subscription' ? totalAmount - Math.round(cartTotal * 0.15) : totalAmount)}</span>
+                    <span>{formatPrice(totalAmount)}</span>
                   </div>
-
-                  {paymentMethod === 'subscription' && (
-                    <p className="text-xs text-gray-600 text-center">
-                      Billed monthly. Cancel anytime.
-                    </p>
-                  )}
                 </CardContent>
               </Card>
             </div>
