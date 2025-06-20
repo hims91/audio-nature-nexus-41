@@ -11,7 +11,7 @@ const CartIcon: React.FC = () => {
 
   return (
     <Button variant="ghost" size="sm" asChild className="relative">
-      <Link to="/shop/cart">
+      <Link to="/cart">
         <ShoppingCart className="h-5 w-5" />
         {cartItemCount > 0 && (
           <Badge 
