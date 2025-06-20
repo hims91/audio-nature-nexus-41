@@ -2,7 +2,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { EnhancedAuthProvider } from '@/contexts/EnhancedAuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { Toaster } from 'sonner';
 
@@ -29,7 +29,7 @@ function App() {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
+        <EnhancedAuthProvider>
           <CartProvider>
             <div className="min-h-screen bg-background">
               <Navbar />
@@ -55,7 +55,7 @@ function App() {
               <Toaster />
             </div>
           </CartProvider>
-        </AuthProvider>
+        </EnhancedAuthProvider>
       </QueryClientProvider>
     </BrowserRouter>
   );
