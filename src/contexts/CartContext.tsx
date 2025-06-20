@@ -19,8 +19,33 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const cartHook = useCart();
 
+  // Wrap the functions to match the expected signatures
+  const wrappedUpdateQuantity = (itemId: string, quantity: number) => {
+    cartHook.updateQuantity({ itemId, quantity });
+  };
+
+  const wrappedRemoveFromCart = (itemId: string) => {
+    cartHook.removeFromCart(itemId);
+  };
+
+  const wrappedClearCart = () => {
+    cartHook.clearCart();
+  };
+
+  const contextValue: CartContextType = {
+    cartItems: cartHook.cartItems,
+    cartTotal: cartHook.cartTotal,
+    cartItemCount: cartHook.cartItemCount,
+    addToCart: cartHook.addToCart,
+    updateQuantity: wrappedUpdateQuantity,
+    removeFromCart: wrappedRemoveFromCart,
+    clearCart: wrappedClearCart,
+    isAddingToCart: cartHook.isAddingToCart,
+    isLoading: cartHook.isLoading,
+  };
+
   return (
-    <CartContext.Provider value={cartHook}>
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );
