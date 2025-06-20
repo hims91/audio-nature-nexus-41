@@ -15,7 +15,7 @@ export const useDashboardStats = () => {
       });
 
       if (error) throw error;
-      return data as DashboardStats;
+      return data as unknown as DashboardStats;
     },
   });
 };
