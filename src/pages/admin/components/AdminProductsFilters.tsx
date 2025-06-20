@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search } from 'lucide-react';
 import FadeInView from '@/components/animations/FadeInView';
 
-interface ProductFiltersProps {
+interface AdminProductsFiltersProps {
   search: string;
   setSearch: (value: string) => void;
   categoryFilter: string;
@@ -15,10 +15,10 @@ interface ProductFiltersProps {
   setStatusFilter: (value: string) => void;
   stockFilter: string;
   setStockFilter: (value: string) => void;
-  categories: any[];
+  categories: Array<{ id: string; name: string }>;
 }
 
-const AdminProductsFilters: React.FC<ProductFiltersProps> = ({
+const AdminProductsFilters: React.FC<AdminProductsFiltersProps> = ({
   search,
   setSearch,
   categoryFilter,
@@ -66,20 +66,21 @@ const AdminProductsFilters: React.FC<ProductFiltersProps> = ({
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="all">All Products</SelectItem>
+                <SelectItem value="active">Active Only</SelectItem>
+                <SelectItem value="inactive">Inactive Only</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={stockFilter} onValueChange={setStockFilter}>
               <SelectTrigger>
-                <SelectValue placeholder="All Stock" />
+                <SelectValue placeholder="Stock Level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Stock</SelectItem>
+                <SelectItem value="all">All Stock Levels</SelectItem>
                 <SelectItem value="out-of-stock">Out of Stock</SelectItem>
                 <SelectItem value="low-stock">Low Stock</SelectItem>
+                <SelectItem value="in-stock">In Stock</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -1,47 +1,34 @@
 
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import LoadingSpinner from '@/components/animations/LoadingSpinner';
-
-// Lazy load admin components for better performance
-const AdminProducts = lazy(() => import('../../pages/admin/AdminProducts'));
-const AdminProductForm = lazy(() => import('../../pages/admin/components/AdminProductForm'));
-const AdminOrders = lazy(() => import('../../pages/admin/AdminOrders'));
-const AdminInventory = lazy(() => import('../../pages/admin/AdminInventory'));
-const AdminAnalytics = lazy(() => import('../../pages/admin/AdminAnalytics'));
-const AdminUsers = lazy(() => import('../../pages/admin/AdminUsers'));
-const AdminSettings = lazy(() => import('../../pages/admin/AdminSettings'));
-const AdminPortfolio = lazy(() => import('../../pages/admin/AdminPortfolio'));
-const AdminDashboard = lazy(() => import('../../pages/admin/AdminDashboard'));
-const AdminDiscountCodes = lazy(() => import('../../pages/admin/AdminDiscountCodes'));
-const AdminReviews = lazy(() => import('../../pages/admin/AdminReviews'));
-
-// Loading component for lazy routes
-const LazyLoadingFallback = () => (
-  <div className="flex items-center justify-center py-12">
-    <LoadingSpinner size="lg" />
-  </div>
-);
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import AdminProducts from '@/pages/admin/AdminProducts';
+import AdminProductForm from '@/pages/admin/components/AdminProductForm';
+import AdminCategories from '@/pages/admin/AdminCategories';
+import AdminInventory from '@/pages/admin/AdminInventory';
+import AdminOrders from '@/pages/admin/AdminOrders';
+import AdminOrderDetail from '@/pages/admin/AdminOrderDetail';
+import AdminSettings from '@/pages/admin/AdminSettings';
+import AdminContactManager from '@/components/admin/AdminContactManager';
+import AdminUserManagement from '@/components/admin/AdminUserManagement';
+import AdminAnalyticsCharts from '@/components/admin/AdminAnalyticsCharts';
 
 const AdminRoutes: React.FC = () => {
   return (
-    <Suspense fallback={<LazyLoadingFallback />}>
-      <Routes>
-        <Route index element={<AdminDashboard />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="portfolio" element={<AdminPortfolio />} />
-        <Route path="products" element={<AdminProducts />} />
-        <Route path="products/new" element={<AdminProductForm />} />
-        <Route path="products/:id/edit" element={<AdminProductForm />} />
-        <Route path="orders" element={<AdminOrders />} />
-        <Route path="inventory" element={<AdminInventory />} />
-        <Route path="analytics" element={<AdminAnalytics />} />
-        <Route path="users" element={<AdminUsers />} />
-        <Route path="discount-codes" element={<AdminDiscountCodes />} />
-        <Route path="reviews" element={<AdminReviews />} />
-        <Route path="settings" element={<AdminSettings />} />
-      </Routes>
-    </Suspense>
+    <Routes>
+      <Route index element={<AdminDashboard />} />
+      <Route path="products" element={<AdminProducts />} />
+      <Route path="products/new" element={<AdminProductForm />} />
+      <Route path="products/:id/edit" element={<AdminProductForm />} />
+      <Route path="categories" element={<AdminCategories />} />
+      <Route path="inventory" element={<AdminInventory />} />
+      <Route path="orders" element={<AdminOrders />} />
+      <Route path="orders/:id" element={<AdminOrderDetail />} />
+      <Route path="analytics" element={<AdminAnalyticsCharts />} />
+      <Route path="users" element={<AdminUserManagement />} />
+      <Route path="contact" element={<AdminContactManager />} />
+      <Route path="settings" element={<AdminSettings />} />
+    </Routes>
   );
 };
 

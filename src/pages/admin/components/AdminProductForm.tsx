@@ -14,6 +14,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import FadeInView from '@/components/animations/FadeInView';
+import ProductImageUpload from '@/components/admin/ProductImageUpload';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProductFormData {
   name: string;
@@ -35,10 +37,20 @@ interface ProductFormData {
   meta_description?: string;
 }
 
+interface ProductImage {
+  id?: string;
+  image_url: string;
+  alt_text?: string;
+  is_primary: boolean;
+  sort_order: number;
+}
+
 const AdminProductForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
+  
+  const [productImages, setProductImages] = useState<ProductImage[]>([]);
   
   const { data: categories = [] } = useCategories();
   const { data: product, isLoading: isLoadingProduct } = useAdminProduct(id || '');
@@ -72,8 +84,8 @@ const AdminProductForm: React.FC = () => {
         slug: product.slug,
         description: product.description || '',
         short_description: product.short_description || '',
-        price_cents: product.price_cents,
-        compare_at_price_cents: product.compare_at_price_cents || undefined,
+        price_cents: product.price_cents / 100, // Convert to dollars for display
+        compare_at_price_cents: product.compare_at_price_cents ? product.compare_at_price_cents / 100 : undefined,
         sku: product.sku || '',
         category_id: product.category_id || 'none',
         inventory_quantity: product.inventory_quantity,
@@ -86,8 +98,43 @@ const AdminProductForm: React.FC = () => {
         meta_title: product.meta_title || '',
         meta_description: product.meta_description || ''
       });
+
+      // Set product images
+      if (product.images) {
+        setProductImages(product.images);
+      }
     }
   }, [product, isEditing, reset]);
+
+  const saveProductImages = async (productId: string, images: ProductImage[]) => {
+    // Delete existing images if updating
+    if (isEditing && id) {
+      await supabase
+        .from('product_images')
+        .delete()
+        .eq('product_id', id);
+    }
+
+    // Insert new images
+    if (images.length > 0) {
+      const imageRecords = images.map((img, index) => ({
+        product_id: productId,
+        image_url: img.image_url,
+        alt_text: img.alt_text,
+        is_primary: img.is_primary,
+        sort_order: index
+      }));
+
+      const { error } = await supabase
+        .from('product_images')
+        .insert(imageRecords);
+
+      if (error) {
+        console.error('Error saving product images:', error);
+        throw error;
+      }
+    }
+  };
 
   const onSubmit = async (data: ProductFormData) => {
     try {
@@ -98,14 +145,20 @@ const AdminProductForm: React.FC = () => {
         compare_at_price_cents: data.compare_at_price_cents ? Math.round(data.compare_at_price_cents * 100) : null,
       };
 
+      let productId: string;
+
       if (isEditing && id) {
-        await updateProduct.mutateAsync({ id, updates: formattedData });
-        toast.success('Product updated successfully');
+        const result = await updateProduct.mutateAsync({ id, updates: formattedData });
+        productId = id;
       } else {
-        await createProduct.mutateAsync(formattedData);
-        toast.success('Product created successfully');
+        const result = await createProduct.mutateAsync(formattedData);
+        productId = result.id;
       }
-      
+
+      // Save product images
+      await saveProductImages(productId, productImages);
+
+      toast.success(`Product ${isEditing ? 'updated' : 'created'} successfully`);
       navigate('/admin/products');
     } catch (error) {
       console.error('Error saving product:', error);
@@ -154,7 +207,16 @@ const AdminProductForm: React.FC = () => {
       </FadeInView>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Product Images */}
         <FadeInView direction="up" delay={0.1}>
+          <ProductImageUpload
+            images={productImages}
+            onImagesChange={setProductImages}
+          />
+        </FadeInView>
+
+        {/* Basic Information */}
+        <FadeInView direction="up" delay={0.2}>
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
@@ -215,7 +277,8 @@ const AdminProductForm: React.FC = () => {
           </Card>
         </FadeInView>
 
-        <FadeInView direction="up" delay={0.2}>
+        {/* Pricing & Category */}
+        <FadeInView direction="up" delay={0.3}>
           <Card>
             <CardHeader>
               <CardTitle>Pricing & Category</CardTitle>
@@ -292,7 +355,8 @@ const AdminProductForm: React.FC = () => {
           </Card>
         </FadeInView>
 
-        <FadeInView direction="up" delay={0.3}>
+        {/* Inventory & Shipping */}
+        <FadeInView direction="up" delay={0.4}>
           <Card>
             <CardHeader>
               <CardTitle>Inventory & Shipping</CardTitle>
@@ -339,13 +403,14 @@ const AdminProductForm: React.FC = () => {
           </Card>
         </FadeInView>
 
-        <FadeInView direction="up" delay={0.4}>
+        {/* SEO & Status */}
+        <FadeInView direction="up" delay={0.5}>
           <Card>
             <CardHeader>
               <CardTitle>SEO & Status</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor="meta_title">Meta Title</Label>
                   <Input
@@ -387,7 +452,8 @@ const AdminProductForm: React.FC = () => {
           </Card>
         </FadeInView>
 
-        <FadeInView direction="up" delay={0.5}>
+        {/* Submit */}
+        <FadeInView direction="up" delay={0.6}>
           <div className="flex justify-end space-x-4">
             <Button
               type="button"
