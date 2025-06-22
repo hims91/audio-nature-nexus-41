@@ -9,7 +9,9 @@ import {
   FileVideo, 
   Image as ImageIcon,
   Star,
-  ExternalLink
+  ExternalLink,
+  Clock,
+  Calendar
 } from "lucide-react";
 
 interface PortfolioItemsListProps {
@@ -23,6 +25,14 @@ const PortfolioItemsList: React.FC<PortfolioItemsListProps> = ({
   selectedId, 
   onSelectItem 
 }) => {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: '2-digit'
+    });
+  };
+
   if (items.length === 0) {
     return (
       <div className="text-center py-6 text-nature-bark">
@@ -72,6 +82,20 @@ const PortfolioItemsList: React.FC<PortfolioItemsListProps> = ({
                 
                 <div className="text-xs text-nature-bark truncate mb-1.5">
                   {item.client}
+                </div>
+
+                {/* Date information */}
+                <div className="flex flex-col gap-0.5 mb-1.5 text-[0.65rem] text-nature-bark/80">
+                  {item.recordedDate && (
+                    <div className="flex items-center">
+                      <Clock className="h-2.5 w-2.5 mr-1" />
+                      <span>Rec: {formatDate(item.recordedDate)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center">
+                    <Calendar className="h-2.5 w-2.5 mr-1" />
+                    <span>Added: {formatDate(item.createdAt)}</span>
+                  </div>
                 </div>
                 
                 <div className="flex flex-wrap gap-1">

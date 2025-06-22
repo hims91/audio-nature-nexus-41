@@ -1,3 +1,4 @@
+
 import type { Database } from "@/integrations/supabase/types";
 
 // Database type from Supabase
@@ -25,6 +26,7 @@ export interface PortfolioItem {
   videoUrl?: string | null;
   externalLinks: ExternalLink[];
   featured: boolean;
+  recordedDate?: string | null;
   createdAt: string;
   updatedAt?: string;
   userId?: string | null;
@@ -56,6 +58,7 @@ export const mapDBToPortfolioItem = (dbItem: PortfolioItemDB): PortfolioItem => 
     videoUrl: dbItem.video_url,
     externalLinks,
     featured: dbItem.featured || false,
+    recordedDate: dbItem.recorded_date,
     createdAt: dbItem.created_at,
     updatedAt: dbItem.updated_at,
     userId: dbItem.user_id
@@ -74,6 +77,7 @@ export const mapPortfolioItemToDB = (item: Partial<PortfolioItem>): PortfolioIte
     video_url: item.videoUrl,
     external_links: (item.externalLinks || []) as any,
     featured: item.featured || false,
+    recorded_date: item.recordedDate,
     user_id: item.userId
   };
 };

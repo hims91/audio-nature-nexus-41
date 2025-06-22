@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PortfolioItem, ExternalLink } from "@/types/portfolio";
 import { Card, CardContent } from "@/components/ui/card";
@@ -66,6 +67,14 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
   const handleFeaturedChange = (checked: boolean) => {
     setFormData(prev => ({ ...prev, featured: checked }));
   };
+
+  // Handle recorded date change
+  const handleRecordedDateChange = (date: Date | undefined) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      recordedDate: date ? date.toISOString().split('T')[0] : null 
+    }));
+  };
   
   // Handle external links
   const handleAddExternalLink = (link: ExternalLink) => {
@@ -116,6 +125,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
       description: formData.description,
       featured: formData.featured,
       externalLinks: formData.externalLinks,
+      recordedDate: formData.recordedDate,
       // Explicitly include all media URLs with fallbacks
       coverImageUrl: formData.coverImageUrl || '',
       audioUrl: formData.audioUrl || '',
@@ -171,6 +181,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                 onInputChange={handleInputChange}
                 onCategoryChange={handleCategoryChange}
                 onFeaturedChange={handleFeaturedChange}
+                onRecordedDateChange={handleRecordedDateChange}
                 isLoading={isLoading}
               />
             </TabsContent>

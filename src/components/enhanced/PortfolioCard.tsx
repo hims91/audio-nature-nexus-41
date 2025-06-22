@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Star } from "lucide-react";
+import { Calendar, User, Star, Clock } from "lucide-react";
 import { type PortfolioItem } from "@/types/portfolio";
 import HoverSoundPreview from "../interactive/HoverSoundPreview";
 import Card3D from "../effects/Card3D";
@@ -33,7 +33,8 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'short'
+      month: 'short',
+      day: 'numeric'
     });
   };
 
@@ -122,8 +123,22 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
               <div className="flex items-center text-sm text-nature-bark dark:text-gray-400">
                 <User className="w-4 h-4 mr-1" />
                 {item.client}
-                <Calendar className="w-4 h-4 ml-4 mr-1" />
-                {formatDate(item.createdAt)}
+              </div>
+              
+              {/* Date information with priority for recorded date */}
+              <div className="flex flex-col gap-1 mt-2 text-xs text-nature-bark dark:text-gray-400">
+                {item.recordedDate && (
+                  <div className="flex items-center">
+                    <Clock className="w-3 h-3 mr-1" />
+                    <span className="font-medium">Recorded:</span>
+                    <span className="ml-1">{formatDate(item.recordedDate)}</span>
+                  </div>
+                )}
+                <div className="flex items-center">
+                  <Calendar className="w-3 h-3 mr-1" />
+                  <span className="font-medium">Added:</span>
+                  <span className="ml-1">{formatDate(item.createdAt)}</span>
+                </div>
               </div>
             </div>
 

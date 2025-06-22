@@ -482,6 +482,7 @@ export type Database = {
           external_links: Json | null
           featured: boolean | null
           id: string
+          recorded_date: string | null
           title: string
           updated_at: string
           user_id: string | null
@@ -497,6 +498,7 @@ export type Database = {
           external_links?: Json | null
           featured?: boolean | null
           id?: string
+          recorded_date?: string | null
           title: string
           updated_at?: string
           user_id?: string | null
@@ -512,6 +514,7 @@ export type Database = {
           external_links?: Json | null
           featured?: boolean | null
           id?: string
+          recorded_date?: string | null
           title?: string
           updated_at?: string
           user_id?: string | null

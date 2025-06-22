@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { PortfolioFormData } from "./PortfolioFormData";
 
 interface DetailsTabProps {
@@ -12,6 +13,7 @@ interface DetailsTabProps {
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onCategoryChange: (value: string) => void;
   onFeaturedChange: (checked: boolean) => void;
+  onRecordedDateChange: (date: Date | undefined) => void;
   isLoading: boolean;
 }
 
@@ -28,8 +30,11 @@ const DetailsTab: React.FC<DetailsTabProps> = ({
   onInputChange,
   onCategoryChange,
   onFeaturedChange,
+  onRecordedDateChange,
   isLoading
 }) => {
+  const recordedDate = formData.recordedDate ? new Date(formData.recordedDate) : undefined;
+
   return (
     <div className="py-4 space-y-4">
       <div>
@@ -74,6 +79,19 @@ const DetailsTab: React.FC<DetailsTabProps> = ({
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="recorded-date">Recorded Date</Label>
+        <p className="text-xs text-muted-foreground mb-2">
+          When was this project originally recorded? (Optional)
+        </p>
+        <DatePicker
+          date={recordedDate}
+          onSelect={onRecordedDateChange}
+          placeholder="Select recording date"
+          disabled={isLoading}
+        />
       </div>
       
       <div>
