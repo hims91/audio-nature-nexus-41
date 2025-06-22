@@ -130,7 +130,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => {
                 {item.recordedDate && (
                   <div className="flex items-center">
                     <Clock className="w-3 h-3 mr-1" />
-                    <span className="font-medium">Recorded:</span>
+                    <span className="font-medium">Completed:</span>
                     <span className="ml-1">{formatDate(item.recordedDate)}</span>
                   </div>
                 )}

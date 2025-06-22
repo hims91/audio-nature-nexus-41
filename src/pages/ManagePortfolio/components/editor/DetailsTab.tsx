@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -82,14 +81,14 @@ const DetailsTab: React.FC<DetailsTabProps> = ({
       </div>
 
       <div>
-        <Label htmlFor="recorded-date">Recorded Date</Label>
+        <Label htmlFor="recorded-date">Completion Date</Label>
         <p className="text-xs text-muted-foreground mb-2">
-          When was this project originally recorded? (Optional)
+          When was this project completed? (Optional)
         </p>
         <DatePicker
           date={recordedDate}
           onSelect={onRecordedDateChange}
-          placeholder="Select recording date"
+          placeholder="Select completion date"
           disabled={isLoading}
         />
       </div>

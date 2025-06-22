@@ -89,7 +89,7 @@ const PortfolioItemsList: React.FC<PortfolioItemsListProps> = ({
                   {item.recordedDate && (
                     <div className="flex items-center">
                       <Clock className="h-2.5 w-2.5 mr-1" />
-                      <span>Rec: {formatDate(item.recordedDate)}</span>
+                      <span>Completed: {formatDate(item.recordedDate)}</span>
                     </div>
                   )}
                   <div className="flex items-center">
