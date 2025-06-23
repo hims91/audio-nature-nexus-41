@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { CreditCard, Truck, Shield, ArrowLeft } from 'lucide-react';
+import { CreditCard, Truck, Shield, ArrowLeft, ExternalLink } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice } from '@/utils/currency';
@@ -129,7 +128,12 @@ const CheckoutPage: React.FC = () => {
       if (data?.url) {
         // Clear cart before redirecting
         await clearCart();
-        // Redirect to Stripe Checkout
+        
+        // Show a message to user about redirect
+        toast.success('Redirecting to secure payment...');
+        
+        // Use window.location.href for full redirect (not iframe)
+        // This ensures Stripe Checkout opens properly at the top level
         window.location.href = data.url;
       } else {
         throw new Error('No checkout URL received');
@@ -470,6 +474,10 @@ const CheckoutPage: React.FC = () => {
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Shield className="h-4 w-4" />
                         <span>Secure payment powered by Stripe</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-sm text-orange-600 bg-orange-50 p-2 rounded">
+                        <ExternalLink className="h-4 w-4" />
+                        <span>You will be redirected to Stripe's secure checkout page</span>
                       </div>
                     </div>
 
