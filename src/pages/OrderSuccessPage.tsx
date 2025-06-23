@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Package, Truck, Download, ArrowRight } from 'lucide-react';
+import { CheckCircle, Package, Truck, Download, ArrowRight, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice } from '@/utils/currency';
@@ -13,6 +13,7 @@ import LoadingSpinner from '@/components/animations/LoadingSpinner';
 import UnifiedNavbar from '@/components/UnifiedNavbar';
 import Footer from '@/components/Footer';
 import FadeInView from '@/components/animations/FadeInView';
+import { toast } from 'sonner';
 
 interface OrderDetails {
   id: string;
@@ -38,20 +39,20 @@ const OrderSuccessPage: React.FC = () => {
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const sessionId = searchParams.get('session_id');
 
-  useEffect(() => {
-    if (sessionId) {
-      fetchOrderDetails();
-    } else {
+  const fetchOrderDetails = async (retryAttempt = 0) => {
+    if (!sessionId) {
       setError('No session ID provided');
       setIsLoading(false);
+      return;
     }
-  }, [sessionId]);
 
-  const fetchOrderDetails = async () => {
     try {
+      console.log(`Fetching order details for session: ${sessionId} (attempt ${retryAttempt + 1})`);
+      
       // First, try to get order by session ID
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -62,13 +63,28 @@ const OrderSuccessPage: React.FC = () => {
         .eq('stripe_session_id', sessionId)
         .single();
 
-      if (orderError) {
-        throw new Error('Order not found');
+      if (orderError && orderError.code !== 'PGRST116') {
+        throw new Error(`Database error: ${orderError.message}`);
       }
 
+      if (!orderData) {
+        // If no order found and we haven't retried too many times, wait and retry
+        if (retryAttempt < 5) {
+          console.log(`Order not found, retrying in ${(retryAttempt + 1) * 2} seconds...`);
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+            fetchOrderDetails(retryAttempt + 1);
+          }, (retryAttempt + 1) * 2000); // Exponential backoff
+          return;
+        } else {
+          throw new Error('Order not found after multiple attempts. The payment may still be processing.');
+        }
+      }
+
+      console.log('Order found:', orderData);
       setOrder(orderData);
 
-      // Clear the cart after successful order
+      // Clear the cart after successful order retrieval
       if (user) {
         await supabase
           .from('shopping_cart')
@@ -76,14 +92,16 @@ const OrderSuccessPage: React.FC = () => {
           .eq('user_id', user.id);
       } else {
         // Clear guest cart
-        const sessionId = localStorage.getItem('cart_session_id');
-        if (sessionId) {
+        const guestSessionId = localStorage.getItem('cart_session_id');
+        if (guestSessionId) {
           await supabase
             .from('shopping_cart')
             .delete()
-            .eq('session_id', sessionId);
+            .eq('session_id', guestSessionId);
         }
       }
+
+      console.log('Cart cleared successfully');
 
     } catch (err: any) {
       console.error('Failed to fetch order details:', err);
@@ -93,12 +111,33 @@ const OrderSuccessPage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    fetchOrderDetails();
+  }, [sessionId]);
+
+  const handleRetry = () => {
+    setIsLoading(true);
+    setError(null);
+    setRetryCount(0);
+    fetchOrderDetails();
+  };
+
   if (isLoading) {
     return (
       <>
         <UnifiedNavbar />
         <div className="min-h-screen bg-white dark:bg-gray-900 pt-20 flex items-center justify-center">
-          <LoadingSpinner />
+          <div className="text-center">
+            <LoadingSpinner />
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              {retryCount > 0 ? `Loading order details... (attempt ${retryCount + 1})` : 'Loading order details...'}
+            </p>
+            {retryCount > 2 && (
+              <p className="mt-2 text-sm text-gray-500">
+                Your payment is being processed. This may take a few moments.
+              </p>
+            )}
+          </div>
         </div>
         <Footer />
       </>
@@ -113,11 +152,24 @@ const OrderSuccessPage: React.FC = () => {
           <div className="container mx-auto px-4 py-8">
             <Card className="max-w-md mx-auto text-center">
               <CardContent className="pt-6">
-                <h2 className="text-xl font-semibold mb-4">Order Not Found</h2>
-                <p className="text-gray-600 mb-6">{error}</p>
-                <Button asChild>
-                  <Link to="/shop">Continue Shopping</Link>
-                </Button>
+                <h2 className="text-xl font-semibold mb-4">Order Processing</h2>
+                <p className="text-gray-600 mb-6">
+                  {error || 'We are still processing your order. Please wait a moment and try again.'}
+                </p>
+                <div className="space-y-3">
+                  <Button onClick={handleRetry} className="w-full">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Check Order Status
+                  </Button>
+                  <Button variant="outline" asChild className="w-full">
+                    <Link to="/shop">Continue Shopping</Link>
+                  </Button>
+                  {user && (
+                    <Button variant="outline" asChild className="w-full">
+                      <Link to="/orders">View Order History</Link>
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

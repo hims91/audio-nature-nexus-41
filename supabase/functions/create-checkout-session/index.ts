@@ -1,86 +1,59 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Stripe from 'https://esm.sh/stripe@14.21.0';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
-
-interface CheckoutItem {
-  product_id: string;
-  variant_id?: string;
-  quantity: number;
-}
-
-interface ShippingAddress {
-  first_name: string;
-  last_name: string;
-  address_line1: string;
-  address_line2?: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  country: string;
-  phone?: string;
-}
-
-interface CheckoutRequest {
-  items: CheckoutItem[];
-  shipping_address?: ShippingAddress;
-  customer_email?: string;
-  success_url: string;
-  cancel_url: string;
-}
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
 };
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+const handler = async (req: Request): Promise<Response> => {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     logStep('Starting checkout session creation...');
-    
+
+    // Initialize Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     });
-
     logStep('Stripe initialized successfully');
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Parse request body
+    const { items, shipping_address, customer_email, success_url, cancel_url } = await req.json();
+    logStep('Received checkout request', { 
+      items: items?.length, 
+      customer_email, 
+      has_shipping: !!shipping_address 
+    });
 
-    logStep('Supabase client initialized');
-
-    const { items, shipping_address, customer_email, success_url, cancel_url }: CheckoutRequest = await req.json();
-
-    logStep('Received checkout request', { items: items.length, customer_email, has_shipping: !!shipping_address });
-
-    // Validate required fields
     if (!items || items.length === 0) {
       throw new Error('No items provided');
     }
 
-    if (!customer_email) {
-      throw new Error('Customer email is required');
-    }
-
-    // Fetch product and variant data from Supabase
-    const line_items = [];
-    let order_total = 0;
+    // Process cart items and build line items
+    const lineItems = [];
+    let orderItems = [];
+    let subtotalCents = 0;
 
     for (const item of items) {
-      logStep(`Processing item: ${item.product_id}`);
+      logStep('Processing item', item.product_id);
       
-      // Get product data
+      // Get product details
       const { data: product, error: productError } = await supabase
         .from('products')
         .select('*')
@@ -88,17 +61,17 @@ serve(async (req) => {
         .single();
 
       if (productError || !product) {
-        logStep('Product fetch error:', productError);
+        logStep('Product not found', { productId: item.product_id, error: productError });
         throw new Error(`Product not found: ${item.product_id}`);
       }
 
-      logStep(`Found product: ${product.name}`);
+      logStep('Found product', product.name);
 
-      let price_cents = product.price_cents;
-      let name = product.name;
-      let description = product.short_description || '';
+      let price = product.price_cents;
+      let productName = product.name;
+      let variantName = null;
 
-      // Get variant data if variant_id is provided
+      // Handle variants
       if (item.variant_id) {
         const { data: variant, error: variantError } = await supabase
           .from('product_variants')
@@ -106,226 +79,160 @@ serve(async (req) => {
           .eq('id', item.variant_id)
           .single();
 
-        if (variantError || !variant) {
-          logStep('Variant fetch error:', variantError);
-          throw new Error(`Variant not found: ${item.variant_id}`);
+        if (variant && !variantError) {
+          price = variant.price_cents || product.price_cents;
+          variantName = variant.name;
         }
-
-        if (variant.price_cents) {
-          price_cents = variant.price_cents;
-        }
-        name = `${product.name} - ${variant.name}`;
-        logStep(`Using variant: ${variant.name}`);
       }
 
-      // Check inventory
-      const available_quantity = item.variant_id 
-        ? (await supabase.from('product_variants').select('inventory_quantity').eq('id', item.variant_id).single()).data?.inventory_quantity || 0
-        : product.inventory_quantity;
+      const itemTotal = price * item.quantity;
+      subtotalCents += itemTotal;
 
-      if (product.track_inventory && available_quantity < item.quantity && !product.allow_backorders) {
-        throw new Error(`Insufficient inventory for ${name}. Available: ${available_quantity}, Requested: ${item.quantity}`);
-      }
-
-      // Get primary product image
-      const { data: images } = await supabase
-        .from('product_images')
-        .select('image_url')
-        .eq('product_id', product.id)
-        .eq('is_primary', true)
-        .limit(1);
-
-      const image_url = images?.[0]?.image_url;
-
-      line_items.push({
+      // Add to Stripe line items
+      lineItems.push({
         price_data: {
           currency: 'usd',
           product_data: {
-            name,
-            description,
-            images: image_url ? [image_url] : [],
-            metadata: {
-              product_id: item.product_id,
-              variant_id: item.variant_id || '',
-            },
+            name: variantName ? `${productName} - ${variantName}` : productName,
           },
-          unit_amount: price_cents,
+          unit_amount: price,
         },
         quantity: item.quantity,
       });
 
-      order_total += price_cents * item.quantity;
-      logStep(`Added line item: ${name}, price: ${price_cents}, qty: ${item.quantity}`);
+      // Store for order creation
+      orderItems.push({
+        product_id: item.product_id,
+        variant_id: item.variant_id,
+        quantity: item.quantity,
+        unit_price_cents: price,
+        total_price_cents: itemTotal,
+        product_name: productName,
+        variant_name: variantName,
+      });
+
+      logStep('Added line item', { name: productName, price, qty: item.quantity });
     }
 
-    logStep(`Total order amount: ${order_total} cents`);
+    logStep('Total order amount', { subtotal: subtotalCents });
 
-    // Check if a Stripe customer record exists for this user
-    let customerId;
-    if (customer_email) {
-      const customers = await stripe.customers.list({ email: customer_email, limit: 1 });
-      if (customers.data.length > 0) {
-        customerId = customers.data[0].id;
-        logStep(`Found existing customer: ${customerId}`);
-      }
-    }
-
-    // Create Stripe checkout session
-    const session_config: any = {
-      payment_method_types: ['card'],
-      line_items,
+    // Create Stripe checkout session first
+    logStep('Creating Stripe checkout session...');
+    const session = await stripe.checkout.sessions.create({
+      customer_email: customer_email,
+      line_items: lineItems,
       mode: 'payment',
-      success_url,
-      cancel_url,
-      automatic_tax: { enabled: true },
+      success_url: success_url,
+      cancel_url: cancel_url,
       shipping_address_collection: {
-        allowed_countries: ['US', 'CA'],
+        allowed_countries: ['US'],
       },
-      billing_address_collection: 'required',
+      payment_intent_data: {
+        metadata: {
+          customer_email: customer_email,
+        },
+      },
       metadata: {
-        source: 'terra_echo_studios',
-        order_total: order_total.toString(),
+        customer_email: customer_email,
       },
+    });
+
+    logStep('Checkout session created', session.id);
+
+    // Create order record in database
+    logStep('Creating order record...');
+    
+    // Get user ID if customer is authenticated
+    let userId = null;
+    try {
+      const authHeader = req.headers.get('Authorization');
+      if (authHeader) {
+        const token = authHeader.replace('Bearer ', '');
+        const { data: userData } = await supabase.auth.getUser(token);
+        userId = userData?.user?.id || null;
+      }
+    } catch (error) {
+      logStep('Could not get user ID', error);
+      // Continue without user ID for guest checkout
+    }
+
+    const orderData = {
+      user_id: userId,
+      email: customer_email,
+      status: 'pending',
+      payment_status: 'pending',
+      subtotal_cents: subtotalCents,
+      shipping_cents: 0, // Will be updated by webhook
+      tax_cents: 0, // Will be updated by webhook
+      discount_cents: 0,
+      total_cents: subtotalCents, // Will be updated by webhook with final amount
+      stripe_session_id: session.id,
+      // Store shipping address if provided
+      ...(shipping_address && {
+        shipping_first_name: shipping_address.first_name,
+        shipping_last_name: shipping_address.last_name,
+        shipping_address_line1: shipping_address.address_line1,
+        shipping_address_line2: shipping_address.address_line2,
+        shipping_city: shipping_address.city,
+        shipping_state: shipping_address.state,
+        shipping_postal_code: shipping_address.postal_code,
+        shipping_country: shipping_address.country || 'US',
+        shipping_phone: shipping_address.phone,
+      }),
     };
 
-    // Add customer email if provided
-    if (customer_email) {
-      if (customerId) {
-        session_config.customer = customerId;
-      } else {
-        session_config.customer_email = customer_email;
-      }
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert(orderData)
+      .select()
+      .single();
+
+    if (orderError) {
+      logStep('Error creating order', orderError);
+      throw new Error(`Failed to create order: ${orderError.message}`);
     }
 
-    // Add shipping options
-    session_config.shipping_options = [
-      {
-        shipping_rate_data: {
-          type: 'fixed_amount',
-          fixed_amount: { amount: 500, currency: 'usd' }, // $5 flat rate
-          display_name: 'Standard Shipping',
-          delivery_estimate: {
-            minimum: { unit: 'business_day', value: 5 },
-            maximum: { unit: 'business_day', value: 7 },
-          },
-        },
-      },
-      {
-        shipping_rate_data: {
-          type: 'fixed_amount',
-          fixed_amount: { amount: 1500, currency: 'usd' }, // $15 express
-          display_name: 'Express Shipping',
-          delivery_estimate: {
-            minimum: { unit: 'business_day', value: 1 },
-            maximum: { unit: 'business_day', value: 3 },
-          },
-        },
-      },
-    ];
+    logStep('Order created successfully', { orderId: order.id, orderNumber: order.order_number });
 
-    logStep('Creating Stripe checkout session...');
-    const session = await stripe.checkout.sessions.create(session_config);
+    // Create order items
+    const orderItemsWithOrderId = orderItems.map(item => ({
+      ...item,
+      order_id: order.id,
+    }));
 
-    logStep(`Checkout session created: ${session.id}`);
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(orderItemsWithOrderId);
 
-    // Create order record in Supabase with proper column names
-    if (customer_email) {
-      try {
-        const { data: orderData, error: orderError } = await supabase
-          .from('orders')
-          .insert({
-            email: customer_email,
-            subtotal_cents: order_total,
-            shipping_cents: 0, // Will be updated after checkout completion
-            tax_cents: 0, // Will be updated after checkout completion
-            total_cents: order_total, // Will be updated after checkout completion
-            total_amount_cents: order_total, // For compatibility
-            status: 'pending',
-            payment_status: 'pending',
-            stripe_session_id: session.id,
-            shipping_first_name: shipping_address?.first_name,
-            shipping_last_name: shipping_address?.last_name,
-            shipping_address_line1: shipping_address?.address_line1,
-            shipping_address_line2: shipping_address?.address_line2,
-            shipping_city: shipping_address?.city,
-            shipping_state: shipping_address?.state,
-            shipping_postal_code: shipping_address?.postal_code,
-            shipping_country: shipping_address?.country || 'US',
-            shipping_phone: shipping_address?.phone,
-          })
-          .select()
-          .single();
-
-        if (orderError) {
-          logStep('Error creating order:', orderError);
-          throw orderError;
-        } else {
-          logStep(`Order created: ${orderData.id}`);
-          
-          // Create order items
-          for (const item of items) {
-            const { data: product } = await supabase
-              .from('products')
-              .select('name, price_cents')
-              .eq('id', item.product_id)
-              .single();
-
-            let price_cents = product?.price_cents || 0;
-            let product_name = product?.name || 'Unknown Product';
-
-            if (item.variant_id) {
-              const { data: variant } = await supabase
-                .from('product_variants')
-                .select('name, price_cents')
-                .eq('id', item.variant_id)
-                .single();
-              
-              if (variant?.price_cents) {
-                price_cents = variant.price_cents;
-              }
-              if (variant?.name) {
-                product_name = `${product_name} - ${variant.name}`;
-              }
-            }
-
-            await supabase
-              .from('order_items')
-              .insert({
-                order_id: orderData.id,
-                product_id: item.product_id,
-                variant_id: item.variant_id,
-                quantity: item.quantity,
-                unit_price_cents: price_cents,
-                total_price_cents: price_cents * item.quantity,
-                product_name,
-              });
-          }
-        }
-      } catch (error) {
-        logStep('Error creating order record:', error);
-        // Don't fail the checkout if order creation fails
-      }
+    if (itemsError) {
+      logStep('Error creating order items', itemsError);
+      throw new Error(`Failed to create order items: ${itemsError.message}`);
     }
 
-    return new Response(
-      JSON.stringify({ 
-        url: session.url,
-        session_id: session.id 
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    );
+    logStep('Order items created successfully');
 
+    return new Response(JSON.stringify({ 
+      url: session.url,
+      order_id: order.id,
+      order_number: order.order_number,
+      session_id: session.id
+    }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders,
+      },
+    });
   } catch (error: any) {
-    logStep('Error creating checkout session:', error);
+    logStep("Error in create-checkout-session function", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
   }
-});
+};
+
+serve(handler);
