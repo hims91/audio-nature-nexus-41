@@ -167,6 +167,7 @@ const handler = async (req: Request): Promise<Response> => {
       discount_cents: 0,
       total_cents: subtotalCents, // Will be updated by webhook with final amount
       stripe_session_id: session.id,
+      // Don't set order_number manually - let the trigger handle it
       // Store shipping address if provided
       ...(shipping_address && {
         shipping_first_name: shipping_address.first_name,
