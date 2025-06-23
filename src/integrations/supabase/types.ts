@@ -338,6 +338,7 @@ export type Database = {
           stripe_session_id: string | null
           subtotal_cents: number
           tax_cents: number | null
+          total_amount_cents: number | null
           total_cents: number
           tracking_number: string | null
           tracking_url: string | null
@@ -383,6 +384,7 @@ export type Database = {
           stripe_session_id?: string | null
           subtotal_cents: number
           tax_cents?: number | null
+          total_amount_cents?: number | null
           total_cents: number
           tracking_number?: string | null
           tracking_url?: string | null
@@ -428,6 +430,7 @@ export type Database = {
           stripe_session_id?: string | null
           subtotal_cents?: number
           tax_cents?: number | null
+          total_amount_cents?: number | null
           total_cents?: number
           tracking_number?: string | null
           tracking_url?: string | null
@@ -440,6 +443,53 @@ export type Database = {
             columns: ["discount_code_id"]
             isOneToOne: false
             referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_retry_logs: {
+        Row: {
+          attempted_at: string
+          created_at: string
+          error_message: string | null
+          id: string
+          new_session_id: string | null
+          order_id: string | null
+          reason: string | null
+          retry_count: number
+          retry_url: string | null
+          success: boolean | null
+        }
+        Insert: {
+          attempted_at?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          new_session_id?: string | null
+          order_id?: string | null
+          reason?: string | null
+          retry_count: number
+          retry_url?: string | null
+          success?: boolean | null
+        }
+        Update: {
+          attempted_at?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          new_session_id?: string | null
+          order_id?: string | null
+          reason?: string | null
+          retry_count?: number
+          retry_url?: string | null
+          success?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_retry_logs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]

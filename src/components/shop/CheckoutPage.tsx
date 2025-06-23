@@ -38,7 +38,7 @@ interface TaxInfo {
 }
 
 const CheckoutPage: React.FC = () => {
-  const { cartItems, cartTotal, isLoading } = useCart();
+  const { cartItems, cartTotal, isLoading, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -59,10 +59,44 @@ const CheckoutPage: React.FC = () => {
     phone: ''
   });
 
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Validation function
+  const validateShippingInfo = (): boolean => {
+    const errors: Record<string, string> = {};
+    
+    if (!shippingInfo.first_name.trim()) {
+      errors.first_name = 'First name is required';
+    }
+    if (!shippingInfo.last_name.trim()) {
+      errors.last_name = 'Last name is required';
+    }
+    if (!shippingInfo.address_line1.trim()) {
+      errors.address_line1 = 'Address is required';
+    }
+    if (!shippingInfo.city.trim()) {
+      errors.city = 'City is required';
+    }
+    if (!shippingInfo.state.trim()) {
+      errors.state = 'State is required';
+    }
+    if (!shippingInfo.postal_code.trim()) {
+      errors.postal_code = 'ZIP code is required';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleCreateCheckout = async () => {
     if (!user) {
       toast.error('Please sign in to continue');
       navigate('/auth');
+      return;
+    }
+
+    if (!validateShippingInfo()) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -76,6 +110,7 @@ const CheckoutPage: React.FC = () => {
       }));
 
       console.log('Creating checkout with items:', checkoutItems);
+      console.log('Shipping info:', shippingInfo);
 
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {
@@ -92,6 +127,8 @@ const CheckoutPage: React.FC = () => {
       if (error) throw error;
 
       if (data?.url) {
+        // Clear cart before redirecting
+        await clearCart();
         // Redirect to Stripe Checkout
         window.location.href = data.url;
       } else {
@@ -106,14 +143,24 @@ const CheckoutPage: React.FC = () => {
   };
 
   const handleTaxCalculated = (taxBreakdown: any) => {
-    setTaxInfo({
-      rate: taxBreakdown.totalTax / taxBreakdown.subtotal,
-      amount: taxBreakdown.totalTax,
-      jurisdiction: taxBreakdown.jurisdiction
-    });
+    if (taxBreakdown && taxBreakdown.totalTax && taxBreakdown.subtotal) {
+      setTaxInfo({
+        rate: taxBreakdown.totalTax / taxBreakdown.subtotal,
+        amount: taxBreakdown.totalTax,
+        jurisdiction: taxBreakdown.jurisdiction || 'Local'
+      });
+    }
   };
 
   const totalAmount = cartTotal + shippingCost + (taxInfo?.amount || 0);
+
+  // Check for required authentication
+  useEffect(() => {
+    if (!isLoading && !user) {
+      toast.error('Please sign in to checkout');
+      navigate('/auth');
+    }
+  }, [user, isLoading, navigate]);
 
   if (isLoading) {
     return (
@@ -141,6 +188,30 @@ const CheckoutPage: React.FC = () => {
                 </p>
                 <Button asChild>
                   <Link to="/shop">Continue Shopping</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!user) {
+    return (
+      <>
+        <UnifiedNavbar />
+        <div className="min-h-screen bg-white dark:bg-gray-900 pt-20">
+          <div className="container mx-auto px-4 py-8">
+            <Card className="text-center py-12">
+              <CardContent>
+                <h2 className="text-2xl font-semibold mb-4">Sign in required</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Please sign in to complete your checkout.
+                </p>
+                <Button asChild>
+                  <Link to="/auth">Sign In</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -206,33 +277,45 @@ const CheckoutPage: React.FC = () => {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="first_name">First Name</Label>
+                        <Label htmlFor="first_name">First Name *</Label>
                         <Input
                           id="first_name"
                           value={shippingInfo.first_name}
                           onChange={(e) => setShippingInfo({ ...shippingInfo, first_name: e.target.value })}
+                          className={formErrors.first_name ? 'border-red-500' : ''}
                           required
                         />
+                        {formErrors.first_name && (
+                          <p className="text-sm text-red-500 mt-1">{formErrors.first_name}</p>
+                        )}
                       </div>
                       <div>
-                        <Label htmlFor="last_name">Last Name</Label>
+                        <Label htmlFor="last_name">Last Name *</Label>
                         <Input
                           id="last_name"
                           value={shippingInfo.last_name}
                           onChange={(e) => setShippingInfo({ ...shippingInfo, last_name: e.target.value })}
+                          className={formErrors.last_name ? 'border-red-500' : ''}
                           required
                         />
+                        {formErrors.last_name && (
+                          <p className="text-sm text-red-500 mt-1">{formErrors.last_name}</p>
+                        )}
                       </div>
                     </div>
                     
                     <div>
-                      <Label htmlFor="address_line1">Address</Label>
+                      <Label htmlFor="address_line1">Address *</Label>
                       <Input
                         id="address_line1"
                         value={shippingInfo.address_line1}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, address_line1: e.target.value })}
+                        className={formErrors.address_line1 ? 'border-red-500' : ''}
                         required
                       />
+                      {formErrors.address_line1 && (
+                        <p className="text-sm text-red-500 mt-1">{formErrors.address_line1}</p>
+                      )}
                     </div>
                     
                     <div>
@@ -246,37 +329,96 @@ const CheckoutPage: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor="city">City</Label>
+                        <Label htmlFor="city">City *</Label>
                         <Input
                           id="city"
                           value={shippingInfo.city}
                           onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
+                          className={formErrors.city ? 'border-red-500' : ''}
                           required
                         />
+                        {formErrors.city && (
+                          <p className="text-sm text-red-500 mt-1">{formErrors.city}</p>
+                        )}
                       </div>
                       <div>
-                        <Label htmlFor="state">State</Label>
-                        <Select value={shippingInfo.state} onValueChange={(value) => setShippingInfo({ ...shippingInfo, state: value })}>
-                          <SelectTrigger>
+                        <Label htmlFor="state">State *</Label>
+                        <Select 
+                          value={shippingInfo.state} 
+                          onValueChange={(value) => setShippingInfo({ ...shippingInfo, state: value })}
+                        >
+                          <SelectTrigger className={formErrors.state ? 'border-red-500' : ''}>
                             <SelectValue placeholder="Select state" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="AL">Alabama</SelectItem>
+                            <SelectItem value="AK">Alaska</SelectItem>
+                            <SelectItem value="AZ">Arizona</SelectItem>
+                            <SelectItem value="AR">Arkansas</SelectItem>
                             <SelectItem value="CA">California</SelectItem>
-                            <SelectItem value="NY">New York</SelectItem>
-                            <SelectItem value="TX">Texas</SelectItem>
+                            <SelectItem value="CO">Colorado</SelectItem>
+                            <SelectItem value="CT">Connecticut</SelectItem>
+                            <SelectItem value="DE">Delaware</SelectItem>
                             <SelectItem value="FL">Florida</SelectItem>
+                            <SelectItem value="GA">Georgia</SelectItem>
+                            <SelectItem value="HI">Hawaii</SelectItem>
+                            <SelectItem value="ID">Idaho</SelectItem>
+                            <SelectItem value="IL">Illinois</SelectItem>
+                            <SelectItem value="IN">Indiana</SelectItem>
+                            <SelectItem value="IA">Iowa</SelectItem>
+                            <SelectItem value="KS">Kansas</SelectItem>
+                            <SelectItem value="KY">Kentucky</SelectItem>
+                            <SelectItem value="LA">Louisiana</SelectItem>
+                            <SelectItem value="ME">Maine</SelectItem>
+                            <SelectItem value="MD">Maryland</SelectItem>
+                            <SelectItem value="MA">Massachusetts</SelectItem>
+                            <SelectItem value="MI">Michigan</SelectItem>
+                            <SelectItem value="MN">Minnesota</SelectItem>
+                            <SelectItem value="MS">Mississippi</SelectItem>
+                            <SelectItem value="MO">Missouri</SelectItem>
+                            <SelectItem value="MT">Montana</SelectItem>
+                            <SelectItem value="NE">Nebraska</SelectItem>
+                            <SelectItem value="NV">Nevada</SelectItem>
+                            <SelectItem value="NH">New Hampshire</SelectItem>
+                            <SelectItem value="NJ">New Jersey</SelectItem>
+                            <SelectItem value="NM">New Mexico</SelectItem>
+                            <SelectItem value="NY">New York</SelectItem>
+                            <SelectItem value="NC">North Carolina</SelectItem>
+                            <SelectItem value="ND">North Dakota</SelectItem>
+                            <SelectItem value="OH">Ohio</SelectItem>
+                            <SelectItem value="OK">Oklahoma</SelectItem>
+                            <SelectItem value="OR">Oregon</SelectItem>
+                            <SelectItem value="PA">Pennsylvania</SelectItem>
+                            <SelectItem value="RI">Rhode Island</SelectItem>
+                            <SelectItem value="SC">South Carolina</SelectItem>
+                            <SelectItem value="SD">South Dakota</SelectItem>
+                            <SelectItem value="TN">Tennessee</SelectItem>
+                            <SelectItem value="TX">Texas</SelectItem>
+                            <SelectItem value="UT">Utah</SelectItem>
+                            <SelectItem value="VT">Vermont</SelectItem>
+                            <SelectItem value="VA">Virginia</SelectItem>
                             <SelectItem value="WA">Washington</SelectItem>
+                            <SelectItem value="WV">West Virginia</SelectItem>
+                            <SelectItem value="WI">Wisconsin</SelectItem>
+                            <SelectItem value="WY">Wyoming</SelectItem>
                           </SelectContent>
                         </Select>
+                        {formErrors.state && (
+                          <p className="text-sm text-red-500 mt-1">{formErrors.state}</p>
+                        )}
                       </div>
                       <div>
-                        <Label htmlFor="postal_code">ZIP Code</Label>
+                        <Label htmlFor="postal_code">ZIP Code *</Label>
                         <Input
                           id="postal_code"
                           value={shippingInfo.postal_code}
                           onChange={(e) => setShippingInfo({ ...shippingInfo, postal_code: e.target.value })}
+                          className={formErrors.postal_code ? 'border-red-500' : ''}
                           required
                         />
+                        {formErrors.postal_code && (
+                          <p className="text-sm text-red-500 mt-1">{formErrors.postal_code}</p>
+                        )}
                       </div>
                     </div>
 
@@ -291,9 +433,12 @@ const CheckoutPage: React.FC = () => {
                     </div>
 
                     <Button 
-                      onClick={() => setStep('review')} 
+                      onClick={() => {
+                        if (validateShippingInfo()) {
+                          setStep('review');
+                        }
+                      }} 
                       className="w-full"
-                      disabled={!shippingInfo.first_name || !shippingInfo.last_name || !shippingInfo.address_line1 || !shippingInfo.city || !shippingInfo.state || !shippingInfo.postal_code}
                     >
                       Continue to Review
                     </Button>

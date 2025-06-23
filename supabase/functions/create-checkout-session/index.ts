@@ -34,37 +34,51 @@ interface CheckoutRequest {
   cancel_url: string;
 }
 
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Starting checkout session creation...');
+    logStep('Starting checkout session creation...');
     
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     });
 
-    console.log('Stripe initialized successfully');
+    logStep('Stripe initialized successfully');
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    console.log('Supabase client initialized');
+    logStep('Supabase client initialized');
 
     const { items, shipping_address, customer_email, success_url, cancel_url }: CheckoutRequest = await req.json();
 
-    console.log('Received checkout request:', { items: items.length, customer_email, has_shipping: !!shipping_address });
+    logStep('Received checkout request', { items: items.length, customer_email, has_shipping: !!shipping_address });
+
+    // Validate required fields
+    if (!items || items.length === 0) {
+      throw new Error('No items provided');
+    }
+
+    if (!customer_email) {
+      throw new Error('Customer email is required');
+    }
 
     // Fetch product and variant data from Supabase
     const line_items = [];
     let order_total = 0;
 
     for (const item of items) {
-      console.log(`Processing item: ${item.product_id}`);
+      logStep(`Processing item: ${item.product_id}`);
       
       // Get product data
       const { data: product, error: productError } = await supabase
@@ -74,11 +88,11 @@ serve(async (req) => {
         .single();
 
       if (productError || !product) {
-        console.error('Product fetch error:', productError);
+        logStep('Product fetch error:', productError);
         throw new Error(`Product not found: ${item.product_id}`);
       }
 
-      console.log(`Found product: ${product.name}`);
+      logStep(`Found product: ${product.name}`);
 
       let price_cents = product.price_cents;
       let name = product.name;
@@ -93,7 +107,7 @@ serve(async (req) => {
           .single();
 
         if (variantError || !variant) {
-          console.error('Variant fetch error:', variantError);
+          logStep('Variant fetch error:', variantError);
           throw new Error(`Variant not found: ${item.variant_id}`);
         }
 
@@ -101,7 +115,7 @@ serve(async (req) => {
           price_cents = variant.price_cents;
         }
         name = `${product.name} - ${variant.name}`;
-        console.log(`Using variant: ${variant.name}`);
+        logStep(`Using variant: ${variant.name}`);
       }
 
       // Check inventory
@@ -110,7 +124,7 @@ serve(async (req) => {
         : product.inventory_quantity;
 
       if (product.track_inventory && available_quantity < item.quantity && !product.allow_backorders) {
-        throw new Error(`Insufficient inventory for ${name}`);
+        throw new Error(`Insufficient inventory for ${name}. Available: ${available_quantity}, Requested: ${item.quantity}`);
       }
 
       // Get primary product image
@@ -141,10 +155,10 @@ serve(async (req) => {
       });
 
       order_total += price_cents * item.quantity;
-      console.log(`Added line item: ${name}, price: ${price_cents}, qty: ${item.quantity}`);
+      logStep(`Added line item: ${name}, price: ${price_cents}, qty: ${item.quantity}`);
     }
 
-    console.log(`Total order amount: ${order_total} cents`);
+    logStep(`Total order amount: ${order_total} cents`);
 
     // Check if a Stripe customer record exists for this user
     let customerId;
@@ -152,7 +166,7 @@ serve(async (req) => {
       const customers = await stripe.customers.list({ email: customer_email, limit: 1 });
       if (customers.data.length > 0) {
         customerId = customers.data[0].id;
-        console.log(`Found existing customer: ${customerId}`);
+        logStep(`Found existing customer: ${customerId}`);
       }
     }
 
@@ -209,31 +223,44 @@ serve(async (req) => {
       },
     ];
 
-    console.log('Creating Stripe checkout session...');
+    logStep('Creating Stripe checkout session...');
     const session = await stripe.checkout.sessions.create(session_config);
 
-    console.log(`Checkout session created: ${session.id}`);
+    logStep(`Checkout session created: ${session.id}`);
 
-    // Create order record in Supabase
+    // Create order record in Supabase with proper column names
     if (customer_email) {
       try {
         const { data: orderData, error: orderError } = await supabase
           .from('orders')
           .insert({
             email: customer_email,
-            total_amount_cents: order_total,
+            subtotal_cents: order_total,
+            shipping_cents: 0, // Will be updated after checkout completion
+            tax_cents: 0, // Will be updated after checkout completion
+            total_cents: order_total, // Will be updated after checkout completion
+            total_amount_cents: order_total, // For compatibility
             status: 'pending',
             payment_status: 'pending',
             stripe_session_id: session.id,
-            shipping_address: shipping_address,
+            shipping_first_name: shipping_address?.first_name,
+            shipping_last_name: shipping_address?.last_name,
+            shipping_address_line1: shipping_address?.address_line1,
+            shipping_address_line2: shipping_address?.address_line2,
+            shipping_city: shipping_address?.city,
+            shipping_state: shipping_address?.state,
+            shipping_postal_code: shipping_address?.postal_code,
+            shipping_country: shipping_address?.country || 'US',
+            shipping_phone: shipping_address?.phone,
           })
           .select()
           .single();
 
         if (orderError) {
-          console.error('Error creating order:', orderError);
+          logStep('Error creating order:', orderError);
+          throw orderError;
         } else {
-          console.log(`Order created: ${orderData.id}`);
+          logStep(`Order created: ${orderData.id}`);
           
           // Create order items
           for (const item of items) {
@@ -269,12 +296,14 @@ serve(async (req) => {
                 variant_id: item.variant_id,
                 quantity: item.quantity,
                 unit_price_cents: price_cents,
+                total_price_cents: price_cents * item.quantity,
                 product_name,
               });
           }
         }
       } catch (error) {
-        console.error('Error creating order record:', error);
+        logStep('Error creating order record:', error);
+        // Don't fail the checkout if order creation fails
       }
     }
 
@@ -290,7 +319,7 @@ serve(async (req) => {
     );
 
   } catch (error: any) {
-    console.error('Error creating checkout session:', error);
+    logStep('Error creating checkout session:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
