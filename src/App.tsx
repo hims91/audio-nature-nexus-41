@@ -9,13 +9,13 @@ import MaintenanceBanner from "@/components/MaintenanceBanner";
 import Index from "./pages/Index";
 import PortfolioPage from "./pages/PortfolioPage";
 import ContactPage from "./pages/ContactPage";
-import AuthPage from "./pages/AuthPage";
+import Auth from "./pages/Auth";
 import ManagePortfolio from "./pages/ManagePortfolio";
-import Admin from "./pages/Admin";
+import Admin from "./pages/admin/AdminDashboard";
 import Dashboard from "./pages/Dashboard";
-import Shop from "./pages/Shop";
-import ProductPage from "./pages/ProductPage";
-import Cart from "./pages/Cart";
+import ShopPage from "./pages/ShopPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
+import CartPage from "./pages/CartPage";
 import CheckoutPage from "./components/shop/CheckoutPage";
 import CheckoutOptimized from "./components/shop/CheckoutOptimized";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -37,13 +37,13 @@ function App() {
                 <Route path="/" element={<Index />} />
                 <Route path="/portfolio" element={<PortfolioPage />} />
                 <Route path="/contact" element={<ContactPage />} />
-                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/auth" element={<Auth />} />
                 <Route path="/manage-portfolio" element={<ManagePortfolio />} />
                 <Route path="/admin/*" element={<Admin />} />
                 <Route path="/dashboard/*" element={<Dashboard />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/product/:id" element={<ProductPage />} />
-                <Route path="/cart" element={<Cart />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/product/:id" element={<ProductDetailPage />} />
+                <Route path="/cart" element={<CartPage />} />
                 <Route path="/checkout" element={<CheckoutOptimized />} />
                 <Route path="/checkout-legacy" element={<CheckoutPage />} />
                 <Route path="/payment-success" element={<PaymentSuccess />} />
