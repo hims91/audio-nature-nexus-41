@@ -12,7 +12,7 @@ import ContactPage from "./pages/ContactPage";
 import Auth from "./pages/Auth";
 import ManagePortfolio from "./pages/ManagePortfolio";
 import Admin from "./pages/admin/AdminDashboard";
-import Dashboard from "./pages/Dashboard";
+import DashboardPage from "./pages/DashboardPage";
 import ShopPage from "./pages/ShopPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
@@ -40,7 +40,7 @@ function App() {
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/manage-portfolio" element={<ManagePortfolio />} />
                 <Route path="/admin/*" element={<Admin />} />
-                <Route path="/dashboard/*" element={<Dashboard />} />
+                <Route path="/dashboard/*" element={<DashboardPage />} />
                 <Route path="/shop" element={<ShopPage />} />
                 <Route path="/product/:id" element={<ProductDetailPage />} />
                 <Route path="/cart" element={<CartPage />} />

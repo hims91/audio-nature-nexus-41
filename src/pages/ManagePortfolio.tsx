@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import UnifiedNavbar from '@/components/UnifiedNavbar';
 import Footer from '@/components/Footer';
 import PortfolioLayout from './ManagePortfolio/components/PortfolioLayout';
+import PortfolioMainContent from './ManagePortfolio/components/PortfolioMainContent';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 
@@ -32,7 +33,9 @@ const ManagePortfolio: React.FC = () => {
       <UnifiedNavbar />
       
       <div className="min-h-screen bg-white dark:bg-gray-900 pt-20">
-        <PortfolioLayout />
+        <PortfolioLayout>
+          <PortfolioMainContent />
+        </PortfolioLayout>
       </div>
       
       <Footer />
