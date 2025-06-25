@@ -11,6 +11,7 @@ import { formatPrice } from '@/utils/currency';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
 import FadeInView from '@/components/animations/FadeInView';
 import OrderShippingManager from '@/components/admin/OrderShippingManager';
+import { Order } from '@/types/ecommerce';
 
 const AdminOrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +29,7 @@ const AdminOrderDetail: React.FC = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Order;
     },
     enabled: !!id,
   });
@@ -176,19 +177,19 @@ const AdminOrderDetail: React.FC = () => {
                   <span>Subtotal:</span>
                   <span>{formatPrice(order.subtotal_cents)}</span>
                 </div>
-                {order.shipping_cents > 0 && (
+                {order.shipping_cents && order.shipping_cents > 0 && (
                   <div className="flex justify-between">
                     <span>Shipping:</span>
                     <span>{formatPrice(order.shipping_cents)}</span>
                   </div>
                 )}
-                {order.tax_cents > 0 && (
+                {order.tax_cents && order.tax_cents > 0 && (
                   <div className="flex justify-between">
                     <span>Tax:</span>
                     <span>{formatPrice(order.tax_cents)}</span>
                   </div>
                 )}
-                {order.discount_cents > 0 && (
+                {order.discount_cents && order.discount_cents > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount:</span>
                     <span>-{formatPrice(order.discount_cents)}</span>
