@@ -86,13 +86,13 @@ export const BrandLogo: React.FC<{
       {showText && (
         <div className="flex flex-col">
           <span className={cn(
-            "font-bold text-nature-forest dark:text-white transition-colors duration-300",
+            "font-bold text-nature-forest dark:text-nature-cream transition-colors duration-300",
             textSizeClasses[size]
           )}>
             {BRAND_CONFIG.name}
           </span>
           {size !== "sm" && (
-            <span className="text-sm text-nature-stone dark:text-gray-400">
+            <span className="text-sm text-nature-stone dark:text-nature-stone">
               {BRAND_CONFIG.tagline}
             </span>
           )}
@@ -113,7 +113,7 @@ export const BrandBadge: React.FC<{
 }) => {
   const variantClasses = {
     default: "bg-nature-forest text-white hover:bg-nature-leaf dark:bg-nature-leaf dark:hover:bg-nature-forest",
-    secondary: "bg-nature-sage text-nature-forest hover:bg-nature-moss dark:bg-nature-moss dark:text-white",
+    secondary: "bg-nature-sage text-nature-bark hover:bg-nature-moss dark:bg-nature-moss dark:text-nature-cream",
     outline: "border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white dark:border-nature-leaf dark:text-nature-leaf"
   };
 
@@ -137,7 +137,7 @@ export const BrandHeading: React.FC<{
 }) => {
   const baseClass = gradient 
     ? "font-bold bg-gradient-to-r from-nature-forest to-nature-leaf bg-clip-text text-transparent dark:from-nature-leaf dark:to-nature-forest"
-    : "font-bold text-nature-forest dark:text-white";
+    : "font-bold text-nature-forest dark:text-nature-cream";
     
   const sizeClass = {
     1: "text-4xl md:text-5xl",
@@ -165,9 +165,9 @@ export const BrandText: React.FC<{
   className = ""
 }) => {
   const variantClass = {
-    primary: "text-nature-forest dark:text-white",
-    secondary: "text-nature-bark dark:text-gray-300",
-    muted: "text-nature-stone dark:text-gray-400",
+    primary: "text-nature-forest dark:text-nature-cream",
+    secondary: "text-nature-bark dark:text-nature-cream/80",
+    muted: "text-nature-stone dark:text-nature-stone",
     accent: "text-nature-leaf dark:text-nature-leaf"
   }[variant];
   
@@ -178,49 +178,10 @@ export const BrandText: React.FC<{
   );
 };
 
-export const BrandButton: React.FC<{
-  children: React.ReactNode;
-  variant?: "primary" | "secondary" | "outline" | "ghost";
-  size?: "sm" | "md" | "lg";
-  className?: string;
-  onClick?: () => void;
-  disabled?: boolean;
-}> = ({
-  children,
-  variant = "primary",
-  size = "md",
-  className = "",
-  onClick,
-  disabled = false
-}) => {
-  const variantClasses = {
-    primary: "bg-nature-forest text-white hover:bg-nature-leaf dark:bg-nature-leaf dark:hover:bg-nature-forest",
-    secondary: "bg-nature-sage text-nature-forest hover:bg-nature-moss dark:bg-nature-moss dark:text-white",
-    outline: "border-2 border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white dark:border-nature-leaf dark:text-nature-leaf dark:hover:bg-nature-leaf dark:hover:text-nature-forest",
-    ghost: "text-nature-forest hover:bg-nature-mist dark:text-nature-leaf dark:hover:bg-nature-forest/20"
-  };
-  
-  const sizeClasses = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-base",
-    lg: "px-6 py-3 text-lg"
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        "rounded-lg font-medium transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-nature-forest/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none",
-        variantClasses[variant],
-        sizeClasses[size],
-        className
-      )}
-    >
-      {children}
-    </button>
-  );
-};
+// Re-export brand components
+export { default as BrandButton } from './BrandButton';
+export { default as BrandCard, BrandCardHeader, BrandCardContent, BrandCardFooter } from './BrandCard';
+export { BrandInput, BrandTextarea } from './BrandForm';
 
 const BrandConsistencyManager: React.FC = () => {
   return null; // This is just a utility component for brand consistency
