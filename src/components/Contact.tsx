@@ -1,29 +1,30 @@
 
 import React from "react";
 import ContactFormEnhanced from "./enhanced/ContactFormEnhanced";
+import { BrandHeading, BrandText } from "@/components/enhanced/BrandConsistencyManager";
 
 const Contact = () => {
   return (
-    <section id="contact" className="py-20 bg-gradient-to-br from-nature-mist to-white">
+    <section id="contact" className="py-20 bg-gradient-to-br from-nature-mist to-white dark:from-nature-bark dark:to-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-nature-forest mb-4">
+          <BrandHeading level={2} gradient className="mb-4">
             Let's Create Something Amazing
-          </h2>
-          <p className="text-xl text-nature-bark max-w-3xl mx-auto">
+          </BrandHeading>
+          <BrandText variant="secondary" className="text-xl max-w-3xl mx-auto">
             Ready to bring your audio vision to life? Get in touch and let's discuss your project.
-          </p>
+          </BrandText>
         </div>
         
         <ContactFormEnhanced />
         
         <div className="mt-16 text-center">
-          <p className="text-nature-bark mb-4">
+          <BrandText variant="secondary" className="mb-4">
             Or reach out directly at:
-          </p>
+          </BrandText>
           <a 
             href="mailto:TerraEchoStudios@gmail.com"
-            className="text-nature-forest font-semibold hover:text-nature-leaf transition-colors"
+            className="text-nature-forest dark:text-nature-leaf font-semibold hover:text-nature-leaf dark:hover:text-nature-forest transition-colors duration-300"
           >
             TerraEchoStudios@gmail.com
           </a>

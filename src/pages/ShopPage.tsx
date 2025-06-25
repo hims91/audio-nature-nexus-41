@@ -11,6 +11,8 @@ import LoadingSpinner from '@/components/animations/LoadingSpinner';
 import UnifiedNavbar from '@/components/UnifiedNavbar';
 import Footer from '@/components/Footer';
 import { usePerformanceOptimization } from '@/hooks/usePerformanceOptimization';
+import { BrandHeading, BrandText } from '@/components/enhanced/BrandConsistencyManager';
+import BrandCard from '@/components/enhanced/BrandCard';
 
 const ShopPage: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -65,94 +67,98 @@ const ShopPage: React.FC = () => {
       <UnifiedNavbar />
       
       <div className="min-h-screen bg-white dark:bg-gray-900 pt-20">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-nature-forest to-nature-leaf text-white py-16">
+        {/* Hero Section - Updated with brand colors */}
+        <div className="bg-gradient-to-r from-nature-forest to-nature-leaf dark:from-nature-bark dark:to-nature-forest text-white py-16">
           <div className="container mx-auto px-4">
             <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold mb-4">
+              <BrandHeading level={1} className="text-white mb-4">
                 Terra Echo Shop
-              </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
+              </BrandHeading>
+              <BrandText className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto text-nature-cream">
                 Premium merchandise and exclusive audio gear from Terra Echo Studios
-              </p>
+              </BrandText>
             </div>
           </div>
         </div>
 
         <div className="container mx-auto px-4 py-8">
           {/* Filters and Search */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-6 mb-8">
-            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-              {/* Search */}
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search products..."
-                  onChange={(e) => debouncedSetSearch(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-
-              {/* Sort and View */}
-              <div className="flex items-center gap-4">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest</SelectItem>
-                    <SelectItem value="price-low">Price: Low to High</SelectItem>
-                    <SelectItem value="price-high">Price: High to Low</SelectItem>
-                    <SelectItem value="name">Name A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <div className="flex border rounded-md">
-                  <Button
-                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className="rounded-r-none"
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'list' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className="rounded-l-none"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
+          <BrandCard className="mb-8">
+            <div className="p-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+                {/* Search */}
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-nature-stone h-4 w-4" />
+                  <Input
+                    placeholder="Search products..."
+                    onChange={(e) => debouncedSetSearch(e.target.value)}
+                    className="pl-10 border-nature-mist dark:border-nature-forest bg-white dark:bg-nature-bark/50"
+                  />
                 </div>
-              </div>
-            </div>
 
-            {/* Category Filters */}
-            {categories.length > 0 && (
-              <div className="mt-4 pt-4 border-t">
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant={selectedCategory === '' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedCategory('')}
-                  >
-                    All Categories
-                  </Button>
-                  {categories.map((category) => (
+                {/* Sort and View */}
+                <div className="flex items-center gap-4">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-40 border-nature-mist dark:border-nature-forest">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest</SelectItem>
+                      <SelectItem value="price-low">Price: Low to High</SelectItem>
+                      <SelectItem value="price-high">Price: High to Low</SelectItem>
+                      <SelectItem value="name">Name A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <div className="flex border border-nature-mist dark:border-nature-forest rounded-md">
                     <Button
-                      key={category.id}
-                      variant={selectedCategory === category.id ? 'default' : 'outline'}
+                      variant={viewMode === 'grid' ? 'default' : 'ghost'}
                       size="sm"
-                      onClick={() => handleCategoryFilter(category.id)}
+                      onClick={() => setViewMode('grid')}
+                      className="rounded-r-none bg-nature-forest hover:bg-nature-leaf dark:bg-nature-leaf dark:hover:bg-nature-forest"
                     >
-                      {category.name}
+                      <Grid className="h-4 w-4" />
                     </Button>
-                  ))}
+                    <Button
+                      variant={viewMode === 'list' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                      className="rounded-l-none bg-nature-forest hover:bg-nature-leaf dark:bg-nature-leaf dark:hover:bg-nature-forest"
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
+
+              {/* Category Filters */}
+              {categories.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-nature-mist dark:border-nature-forest">
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant={selectedCategory === '' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedCategory('')}
+                      className="bg-nature-forest hover:bg-nature-leaf border-nature-forest dark:bg-nature-leaf dark:hover:bg-nature-forest dark:border-nature-leaf"
+                    >
+                      All Categories
+                    </Button>
+                    {categories.map((category) => (
+                      <Button
+                        key={category.id}
+                        variant={selectedCategory === category.id ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleCategoryFilter(category.id)}
+                        className="bg-nature-forest hover:bg-nature-leaf border-nature-forest dark:bg-nature-leaf dark:hover:bg-nature-forest dark:border-nature-leaf"
+                      >
+                        {category.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </BrandCard>
 
           {/* Products */}
           {isLoading ? (
@@ -162,21 +168,21 @@ const ShopPage: React.FC = () => {
           ) : (
             <>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <BrandHeading level={2}>
                   {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : 'All Products'}
-                </h2>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                </BrandHeading>
+                <BrandText variant="muted" className="text-sm">
                   {sortedProducts.length} {sortedProducts.length === 1 ? 'product' : 'products'}
-                </span>
+                </BrandText>
               </div>
 
               {sortedProducts.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">🛍️</div>
-                  <h3 className="text-xl font-semibold mb-2">No products found</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <BrandHeading level={3} className="mb-2">No products found</BrandHeading>
+                  <BrandText variant="muted">
                     {search ? 'Try adjusting your search terms' : 'Products will be available soon!'}
-                  </p>
+                  </BrandText>
                 </div>
               ) : (
                 <div className={
