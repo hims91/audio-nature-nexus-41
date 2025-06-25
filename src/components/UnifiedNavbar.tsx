@@ -7,6 +7,7 @@ import { BrandLogo } from '@/components/enhanced/BrandConsistencyManager';
 import { useAuth } from '@/contexts/AuthContext';
 import UserProfileDropdown from '@/components/auth/UserProfileDropdown';
 import CartIcon from '@/components/shop/CartIcon';
+import { cn } from '@/lib/utils';
 
 const UnifiedNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,18 +50,25 @@ const UnifiedNavbar = () => {
 
   // Always show navbar with background when not on home page or when scrolled
   const shouldShowBackground = location.pathname !== '/' || isScrolled;
+  const isHomePage = location.pathname === '/';
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${
+    <nav className={cn(
+      "fixed w-full z-50 transition-all duration-500",
       shouldShowBackground
-        ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg' 
-        : 'bg-white/10 dark:bg-gray-900/10 backdrop-blur-sm'
-    }`}>
+        ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-lg border-b border-nature-mist/20 dark:border-gray-700/30' 
+        : 'bg-gradient-to-r from-black/20 to-black/10 backdrop-blur-sm'
+    )}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <BrandLogo size="md" />
+            <BrandLogo 
+              size="md" 
+              adaptive
+              background={shouldShowBackground ? "transparent" : "light"}
+              className="transition-all duration-300 hover:scale-105"
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -70,13 +78,15 @@ const UnifiedNavbar = () => {
                 key={item.name}
                 to={item.href}
                 onClick={() => item.href.startsWith('/#') && scrollToSection(item.href)}
-                className={`transition-colors font-medium ${
+                className={cn(
+                  "transition-all duration-300 font-medium relative group",
                   shouldShowBackground
-                    ? 'text-gray-700 dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf'
-                    : 'text-white hover:text-nature-leaf'
-                }`}
+                    ? 'text-nature-bark dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf'
+                    : 'text-white/90 hover:text-white'
+                )}
               >
                 {item.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-nature-forest to-nature-leaf group-hover:w-full transition-all duration-300" />
               </Link>
             ))}
           </div>
@@ -90,11 +100,12 @@ const UnifiedNavbar = () => {
               <Button 
                 asChild 
                 variant="outline" 
-                className={`transition-colors ${
+                className={cn(
+                  "transition-all duration-300 hover:scale-105 rounded-full",
                   shouldShowBackground
-                    ? 'border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white'
-                    : 'border-white text-white hover:bg-white hover:text-nature-forest'
-                }`}
+                    ? 'border-nature-forest text-nature-forest hover:bg-nature-forest hover:text-white dark:border-nature-leaf dark:text-nature-leaf dark:hover:bg-nature-leaf dark:hover:text-nature-forest'
+                    : 'border-white/70 text-white hover:bg-white/20 backdrop-blur-sm'
+                )}
               >
                 <Link to="/auth">Sign In</Link>
               </Button>
@@ -109,7 +120,12 @@ const UnifiedNavbar = () => {
               size="sm"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle menu"
-              className={shouldShowBackground ? 'text-gray-700 dark:text-gray-300' : 'text-white'}
+              className={cn(
+                "rounded-full transition-all duration-300",
+                shouldShowBackground 
+                  ? 'text-nature-bark dark:text-gray-300 hover:bg-nature-mist/50 dark:hover:bg-gray-700/50' 
+                  : 'text-white hover:bg-white/20 backdrop-blur-sm'
+              )}
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -118,32 +134,34 @@ const UnifiedNavbar = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-lg shadow-lg">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  onClick={() => item.href.startsWith('/#') ? scrollToSection(item.href) : setIsOpen(false)}
-                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf transition-colors font-medium"
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                {user ? (
-                  <div className="px-3 py-2">
-                    <UserProfileDropdown />
-                  </div>
-                ) : (
+          <div className="lg:hidden absolute top-full left-0 right-0 mt-2 mx-4">
+            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-lg shadow-2xl border border-nature-mist/30 dark:border-gray-700/30 overflow-hidden">
+              <div className="px-2 pt-2 pb-3 space-y-1">
+                {navigation.map((item) => (
                   <Link
-                    to="/auth"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 text-nature-forest font-medium"
+                    key={item.name}
+                    to={item.href}
+                    onClick={() => item.href.startsWith('/#') ? scrollToSection(item.href) : setIsOpen(false)}
+                    className="block px-4 py-3 text-nature-bark dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf hover:bg-nature-mist/50 dark:hover:bg-gray-700/50 transition-all duration-300 font-medium rounded-lg mx-2"
                   >
-                    Sign In
+                    {item.name}
                   </Link>
-                )}
+                ))}
+                <div className="pt-3 mt-3 border-t border-nature-mist/30 dark:border-gray-700/30">
+                  {user ? (
+                    <div className="px-4 py-2">
+                      <UserProfileDropdown />
+                    </div>
+                  ) : (
+                    <Link
+                      to="/auth"
+                      onClick={() => setIsOpen(false)}
+                      className="block mx-2 px-4 py-3 text-center bg-nature-forest text-white hover:bg-nature-leaf transition-all duration-300 font-medium rounded-lg"
+                    >
+                      Sign In
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           </div>

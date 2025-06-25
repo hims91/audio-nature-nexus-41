@@ -25,25 +25,25 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className, variant = 'default
       variant={variant === 'floating' ? 'ghost' : 'ghost'}
       size="sm"
       className={cn(
-        'relative w-10 h-10 rounded-full transition-all duration-500 overflow-hidden',
+        'relative w-10 h-10 rounded-full transition-all duration-500 overflow-hidden group hover:scale-110 transform-gpu',
         variant === 'floating' && 'bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20',
-        'group hover:scale-110 transform-gpu',
+        variant === 'default' && 'hover:bg-nature-mist/50 dark:hover:bg-nature-forest/20',
         className
       )}
     >
       <div className="relative w-full h-full flex items-center justify-center">
         <Sun className={cn(
-          'w-5 h-5 transition-all duration-500 absolute',
+          'w-5 h-5 transition-all duration-500 absolute text-nature-forest dark:text-nature-leaf',
           isDark ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'
         )} />
         <Moon className={cn(
-          'w-5 h-5 transition-all duration-500 absolute',
+          'w-5 h-5 transition-all duration-500 absolute text-nature-forest dark:text-nature-leaf',
           isDark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'
         )} />
       </div>
       
-      {/* Ripple effect */}
-      <div className="absolute inset-0 rounded-full bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100" />
+      {/* Enhanced ripple effect with brand colors */}
+      <div className="absolute inset-0 rounded-full bg-nature-forest/20 dark:bg-nature-leaf/20 scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100" />
     </Button>
   );
 };
