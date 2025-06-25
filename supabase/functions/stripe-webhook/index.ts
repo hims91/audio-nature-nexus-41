@@ -19,6 +19,30 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
+const clearUserCart = async (userId: string | null, customerEmail: string) => {
+  try {
+    if (userId) {
+      // Clear authenticated user's cart
+      const { error } = await supabase
+        .from('shopping_cart')
+        .delete()
+        .eq('user_id', userId);
+      
+      if (error) {
+        logStep('Error clearing user cart:', error);
+      } else {
+        logStep('Successfully cleared authenticated user cart', { userId });
+      }
+    } else {
+      // For guest checkout, try to find and clear cart by session_id
+      // This is a backup - ideally cart should be cleared in frontend after successful payment
+      logStep('Guest checkout detected, cart clearing will be handled by frontend');
+    }
+  } catch (error) {
+    logStep('Error in clearUserCart:', error);
+  }
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -71,7 +95,7 @@ const handler = async (req: Request): Promise<Response> => {
         const total = session.amount_total || 0;
 
         // Update order status to paid with final amounts
-        const { error: orderError } = await supabase
+        const { data: updatedOrder, error: orderError } = await supabase
           .from('orders')
           .update({
             payment_status: 'paid',
@@ -90,14 +114,21 @@ const handler = async (req: Request): Promise<Response> => {
             shipping_postal_code: session.shipping_details?.address?.postal_code,
             shipping_country: session.shipping_details?.address?.country,
           })
-          .eq('stripe_session_id', session.id);
+          .eq('stripe_session_id', session.id)
+          .select()
+          .single();
 
         if (orderError) {
           logStep('Error updating order:', orderError);
           throw orderError;
         }
 
-        // Get the updated order with items for email
+        logStep('Order updated successfully', { orderId: updatedOrder?.id });
+
+        // Clear the user's cart
+        await clearUserCart(updatedOrder?.user_id, updatedOrder?.email || session.customer_email);
+
+        // Get the complete order with items for email
         const { data: order, error: fetchError } = await supabase
           .from('orders')
           .select(`
@@ -108,28 +139,31 @@ const handler = async (req: Request): Promise<Response> => {
           .single();
 
         if (fetchError) {
-          logStep('Error fetching order:', fetchError);
+          logStep('Error fetching order for email:', fetchError);
           throw fetchError;
         }
 
         // Send order confirmation email
         if (order) {
           try {
+            logStep('Sending order confirmation email...', { orderId: order.id, email: order.email });
+            
             const emailResponse = await supabase.functions.invoke('send-order-confirmation', {
               body: { order },
             });
 
             if (emailResponse.error) {
               logStep('Failed to send order confirmation email:', emailResponse.error);
+              // Don't throw here - order is still successful even if email fails
             } else {
-              logStep('Order confirmation email sent successfully');
+              logStep('Order confirmation email sent successfully', { orderId: order.id });
             }
           } catch (emailError) {
             logStep('Error sending order confirmation email:', emailError);
+            // Don't throw here - order is still successful even if email fails
           }
         }
 
-        logStep('Order updated successfully');
         break;
       }
 

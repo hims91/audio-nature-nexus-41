@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -40,8 +39,39 @@ const OrderSuccessPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [cartCleared, setCartCleared] = useState(false);
 
   const sessionId = searchParams.get('session_id');
+
+  const clearCart = async () => {
+    if (cartCleared) return;
+    
+    try {
+      console.log('Clearing cart after successful order...');
+      
+      if (user) {
+        await supabase
+          .from('shopping_cart')
+          .delete()
+          .eq('user_id', user.id);
+      } else {
+        // Clear guest cart
+        const guestSessionId = localStorage.getItem('cart_session_id');
+        if (guestSessionId) {
+          await supabase
+            .from('shopping_cart')
+            .delete()
+            .eq('session_id', guestSessionId);
+        }
+      }
+
+      setCartCleared(true);
+      console.log('Cart cleared successfully');
+    } catch (err) {
+      console.error('Error clearing cart:', err);
+      // Don't throw here - order is still successful even if cart clearing fails
+    }
+  };
 
   const fetchOrderDetails = async (retryAttempt = 0) => {
     if (!sessionId) {
@@ -85,23 +115,7 @@ const OrderSuccessPage: React.FC = () => {
       setOrder(orderData);
 
       // Clear the cart after successful order retrieval
-      if (user) {
-        await supabase
-          .from('shopping_cart')
-          .delete()
-          .eq('user_id', user.id);
-      } else {
-        // Clear guest cart
-        const guestSessionId = localStorage.getItem('cart_session_id');
-        if (guestSessionId) {
-          await supabase
-            .from('shopping_cart')
-            .delete()
-            .eq('session_id', guestSessionId);
-        }
-      }
-
-      console.log('Cart cleared successfully');
+      await clearCart();
 
     } catch (err: any) {
       console.error('Failed to fetch order details:', err);

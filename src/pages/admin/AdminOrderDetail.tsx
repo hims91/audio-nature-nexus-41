@@ -4,17 +4,18 @@ import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Package, User, CreditCard, Truck } from 'lucide-react';
+import { ArrowLeft, Package, User, CreditCard } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatPrice } from '@/utils/currency';
 import LoadingSpinner from '@/components/animations/LoadingSpinner';
 import FadeInView from '@/components/animations/FadeInView';
+import OrderShippingManager from '@/components/admin/OrderShippingManager';
 
 const AdminOrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
-  const { data: order, isLoading } = useQuery({
+  const { data: order, isLoading, refetch } = useQuery({
     queryKey: ['admin-order', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -90,7 +91,7 @@ const AdminOrderDetail: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Order Items */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <FadeInView direction="up" delay={0.1}>
             <Card>
               <CardHeader>
@@ -125,6 +126,11 @@ const AdminOrderDetail: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+          </FadeInView>
+
+          {/* Shipping Manager */}
+          <FadeInView direction="up" delay={0.2}>
+            <OrderShippingManager order={order} onOrderUpdate={refetch} />
           </FadeInView>
         </div>
 
@@ -198,31 +204,6 @@ const AdminOrderDetail: React.FC = () => {
               </CardContent>
             </Card>
           </FadeInView>
-
-          {/* Shipping Information */}
-          {order.tracking_number && (
-            <FadeInView direction="up" delay={0.4}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Truck className="h-5 w-5" />
-                    Shipping
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">Tracking Number:</p>
-                  <p className="font-medium">{order.tracking_number}</p>
-                  {order.tracking_url && (
-                    <Button variant="outline" size="sm" className="mt-2" asChild>
-                      <a href={order.tracking_url} target="_blank" rel="noopener noreferrer">
-                        Track Package
-                      </a>
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            </FadeInView>
-          )}
         </div>
       </div>
     </div>
