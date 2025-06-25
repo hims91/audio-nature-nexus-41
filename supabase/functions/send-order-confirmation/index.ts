@@ -195,8 +195,8 @@ const handler = async (req: Request): Promise<Response> => {
       email: order.email 
     });
 
-    // Use a verified domain or the default Resend domain
-    const fromEmail = "Terra Echo Studios <onboarding@resend.dev>";
+    // Use your verified domain - same as contact form
+    const fromEmail = "Terra Echo Studios <noreply@terraechostudio.com>";
     
     const emailResponse = await resend.emails.send({
       from: fromEmail,
