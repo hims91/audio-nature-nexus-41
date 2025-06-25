@@ -49,24 +49,40 @@ const OrderSuccessPage: React.FC = () => {
     try {
       console.log('Clearing cart after successful order...');
       
+      // Clear cart for both authenticated and guest users
       if (user) {
-        await supabase
+        const { error } = await supabase
           .from('shopping_cart')
           .delete()
           .eq('user_id', user.id);
-      } else {
-        // Clear guest cart
-        const guestSessionId = localStorage.getItem('cart_session_id');
-        if (guestSessionId) {
-          await supabase
-            .from('shopping_cart')
-            .delete()
-            .eq('session_id', guestSessionId);
+        
+        if (error) {
+          console.error('Error clearing authenticated user cart:', error);
+        } else {
+          console.log('Authenticated user cart cleared successfully');
+        }
+      }
+      
+      // Also clear guest cart by session_id
+      const guestSessionId = localStorage.getItem('cart_session_id');
+      if (guestSessionId) {
+        const { error } = await supabase
+          .from('shopping_cart')
+          .delete()
+          .eq('session_id', guestSessionId);
+        
+        if (error) {
+          console.error('Error clearing guest cart:', error);
+        } else {
+          console.log('Guest cart cleared successfully');
         }
       }
 
+      // Clear the session ID from localStorage
+      localStorage.removeItem('cart_session_id');
+      
       setCartCleared(true);
-      console.log('Cart cleared successfully');
+      console.log('Cart clearing completed');
     } catch (err) {
       console.error('Error clearing cart:', err);
       // Don't throw here - order is still successful even if cart clearing fails
@@ -83,7 +99,7 @@ const OrderSuccessPage: React.FC = () => {
     try {
       console.log(`Fetching order details for session: ${sessionId} (attempt ${retryAttempt + 1})`);
       
-      // First, try to get order by session ID
+      // Try to get order by session ID with retry logic
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .select(`
@@ -99,23 +115,35 @@ const OrderSuccessPage: React.FC = () => {
 
       if (!orderData) {
         // If no order found and we haven't retried too many times, wait and retry
-        if (retryAttempt < 5) {
-          console.log(`Order not found, retrying in ${(retryAttempt + 1) * 2} seconds...`);
+        if (retryAttempt < 8) {
+          const waitTime = Math.min(2000 * Math.pow(1.5, retryAttempt), 10000); // Max 10 seconds
+          console.log(`Order not found, retrying in ${waitTime}ms...`);
           setTimeout(() => {
             setRetryCount(prev => prev + 1);
             fetchOrderDetails(retryAttempt + 1);
-          }, (retryAttempt + 1) * 2000); // Exponential backoff
+          }, waitTime);
           return;
         } else {
           throw new Error('Order not found after multiple attempts. The payment may still be processing.');
         }
       }
 
-      console.log('Order found:', orderData);
+      console.log('Order found:', { 
+        id: orderData.id, 
+        orderNumber: orderData.order_number, 
+        status: orderData.status, 
+        paymentStatus: orderData.payment_status 
+      });
+      
       setOrder(orderData);
 
       // Clear the cart after successful order retrieval
       await clearCart();
+
+      // Show success message
+      toast.success('Order placed successfully!', {
+        description: `Your order ${orderData.order_number} has been confirmed.`
+      });
 
     } catch (err: any) {
       console.error('Failed to fetch order details:', err);
@@ -146,7 +174,7 @@ const OrderSuccessPage: React.FC = () => {
             <p className="mt-4 text-gray-600 dark:text-gray-400">
               {retryCount > 0 ? `Loading order details... (attempt ${retryCount + 1})` : 'Loading order details...'}
             </p>
-            {retryCount > 2 && (
+            {retryCount > 3 && (
               <p className="mt-2 text-sm text-gray-500">
                 Your payment is being processed. This may take a few moments.
               </p>
@@ -224,6 +252,15 @@ const OrderSuccessPage: React.FC = () => {
                         <span className="font-medium">Order #</span>
                         <Badge variant="outline" className="ml-2 border-green-300 text-green-700">
                           {order.order_number}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="font-medium">Status:</span>
+                        <Badge 
+                          variant={order.payment_status === 'paid' ? 'default' : 'secondary'}
+                          className={`ml-2 ${order.payment_status === 'paid' ? 'bg-green-100 text-green-800' : ''}`}
+                        >
+                          {order.payment_status === 'paid' ? 'Paid' : order.payment_status}
                         </Badge>
                       </div>
                     </div>

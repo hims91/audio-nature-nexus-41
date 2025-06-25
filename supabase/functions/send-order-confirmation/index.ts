@@ -31,6 +31,7 @@ interface OrderConfirmationRequest {
     shipping_state?: string;
     shipping_postal_code?: string;
     shipping_country?: string;
+    created_at: string;
     items: Array<{
       product_name: string;
       variant_name?: string;
@@ -66,6 +67,12 @@ const generateOrderEmailHtml = (order: OrderConfirmationRequest['order']) => {
     </tr>
   `).join('');
 
+  const orderDate = new Date(order.created_at).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
   return `
     <!DOCTYPE html>
     <html>
@@ -76,17 +83,18 @@ const generateOrderEmailHtml = (order: OrderConfirmationRequest['order']) => {
     </head>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #10b981;">Terra Echo Studios</h1>
-        <h2 style="color: #6b7280;">Order Confirmation</h2>
+        <h1 style="color: #10b981; margin-bottom: 10px;">Terra Echo Studios</h1>
+        <h2 style="color: #6b7280; margin-top: 0;">Order Confirmation</h2>
       </div>
       
       <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-        <h3 style="margin-top: 0;">Thank you for your order!</h3>
+        <h3 style="margin-top: 0; color: #10b981;">Thank you for your order!</h3>
         <p>Hi ${order.shipping_first_name || 'Customer'},</p>
         <p>We've received your order and will process it soon. Here are the details:</p>
         
         <div style="margin: 20px 0;">
           <strong>Order Number:</strong> ${order.order_number}<br>
+          <strong>Order Date:</strong> ${orderDate}<br>
           <strong>Order Status:</strong> ${order.status}<br>
           <strong>Payment Status:</strong> ${order.payment_status}
         </div>
@@ -116,19 +124,19 @@ const generateOrderEmailHtml = (order: OrderConfirmationRequest['order']) => {
             <span>Subtotal:</span>
             <span>${formatPrice(order.subtotal_cents)}</span>
           </div>
-          ${order.shipping_cents ? `
+          ${order.shipping_cents && order.shipping_cents > 0 ? `
           <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
             <span>Shipping:</span>
             <span>${formatPrice(order.shipping_cents)}</span>
           </div>
           ` : ''}
-          ${order.tax_cents ? `
+          ${order.tax_cents && order.tax_cents > 0 ? `
           <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
             <span>Tax:</span>
             <span>${formatPrice(order.tax_cents)}</span>
           </div>
           ` : ''}
-          ${order.discount_cents ? `
+          ${order.discount_cents && order.discount_cents > 0 ? `
           <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #10b981;">
             <span>Discount${order.discount_code ? ` (${order.discount_code})` : ''}:</span>
             <span>-${formatPrice(order.discount_cents)}</span>
@@ -150,14 +158,23 @@ const generateOrderEmailHtml = (order: OrderConfirmationRequest['order']) => {
           ${order.shipping_address_line1}<br>
           ${order.shipping_address_line2 ? `${order.shipping_address_line2}<br>` : ''}
           ${order.shipping_city}, ${order.shipping_state} ${order.shipping_postal_code}<br>
-          ${order.shipping_country}
+          ${order.shipping_country || 'US'}
         </div>
       </div>
       ` : ''}
 
+      <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; color: #92400e;">What's Next?</h3>
+        <ul style="margin: 0; padding-left: 20px;">
+          <li>We'll prepare your items for shipment</li>
+          <li>You'll receive a shipping notification with tracking details</li>
+          <li>Your order will be delivered within 5-7 business days</li>
+        </ul>
+      </div>
+
       <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280;">
         <p>Thank you for choosing Terra Echo Studios!</p>
-        <p>If you have any questions, please contact us at TerraEchoStudios@gmail.com</p>
+        <p>Questions? Contact us at <a href="mailto:TerraEchoStudios@gmail.com" style="color: #10b981;">TerraEchoStudios@gmail.com</a></p>
       </div>
     </body>
     </html>
@@ -172,8 +189,17 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { order }: OrderConfirmationRequest = await req.json();
 
+    console.log("Sending order confirmation email...", { 
+      orderId: order.id, 
+      orderNumber: order.order_number, 
+      email: order.email 
+    });
+
+    // Use a verified domain or the default Resend domain
+    const fromEmail = "Terra Echo Studios <onboarding@resend.dev>";
+    
     const emailResponse = await resend.emails.send({
-      from: "Terra Echo Studios <orders@terraechostudios.com>",
+      from: fromEmail,
       to: [order.email],
       subject: `Order Confirmation - ${order.order_number}`,
       html: generateOrderEmailHtml(order),
@@ -191,7 +217,10 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-order-confirmation function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.response?.data || error.stack
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

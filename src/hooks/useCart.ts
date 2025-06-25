@@ -43,7 +43,10 @@ export const useCart = () => {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching cart:', error);
+        throw error;
+      }
       return data || [];
     },
     enabled: !!(user || sessionId),
@@ -60,6 +63,8 @@ export const useCart = () => {
       variantId?: string; 
       quantity?: number; 
     }) => {
+      console.log('Adding to cart:', { productId, variantId, quantity, userId: user?.id, sessionId });
+
       const cartData = {
         product_id: productId,
         variant_id: variantId,
@@ -91,17 +96,30 @@ export const useCart = () => {
         // Update existing item
         const { error } = await supabase
           .from('shopping_cart')
-          .update({ quantity: existing.quantity + quantity })
+          .update({ 
+            quantity: existing.quantity + quantity,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', existing.id);
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating cart item:', error);
+          throw error;
+        }
       } else {
         // Insert new item
         const { error } = await supabase
           .from('shopping_cart')
-          .insert(cartData);
+          .insert({
+            ...cartData,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error inserting cart item:', error);
+          throw error;
+        }
       }
     },
     onSuccess: () => {
@@ -126,7 +144,10 @@ export const useCart = () => {
       } else {
         const { error } = await supabase
           .from('shopping_cart')
-          .update({ quantity })
+          .update({ 
+            quantity,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', itemId);
         if (error) throw error;
       }
@@ -162,19 +183,42 @@ export const useCart = () => {
   // Clear cart
   const clearCartMutation = useMutation({
     mutationFn: async () => {
-      let query = supabase.from('shopping_cart').delete();
+      console.log('Clearing cart for:', { userId: user?.id, sessionId });
+      
+      // Clear both user and session carts to be thorough
+      const promises = [];
       
       if (user) {
-        query = query.eq('user_id', user.id);
-      } else {
-        query = query.eq('session_id', sessionId);
+        promises.push(
+          supabase.from('shopping_cart').delete().eq('user_id', user.id)
+        );
       }
-
-      const { error } = await query;
-      if (error) throw error;
+      
+      if (sessionId) {
+        promises.push(
+          supabase.from('shopping_cart').delete().eq('session_id', sessionId)
+        );
+      }
+      
+      const results = await Promise.allSettled(promises);
+      
+      // Log any errors but don't throw
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error(`Error clearing cart ${index}:`, result.reason);
+        }
+      });
+      
+      // Clear session ID from localStorage
+      localStorage.removeItem('cart_session_id');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
+      console.log('Cart cleared successfully');
+    },
+    onError: (error) => {
+      console.error('Error clearing cart:', error);
+      // Don't show toast error for cart clearing as it's usually called during checkout
     },
   });
 
