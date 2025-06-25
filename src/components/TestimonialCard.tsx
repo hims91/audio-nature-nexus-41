@@ -1,8 +1,7 @@
 
 import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Testimonial } from "@/data/testimonials";
-import BrandCard, { BrandCardContent } from "@/components/enhanced/BrandCard";
-import { BrandText } from "@/components/enhanced/BrandConsistencyManager";
 
 interface TestimonialCardProps {
   testimonial: Testimonial;
@@ -10,11 +9,11 @@ interface TestimonialCardProps {
 
 const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial }) => {
   return (
-    <BrandCard variant="elevated" className="h-full">
-      <BrandCardContent className="p-6 h-full flex flex-col">
+    <Card className="bg-white border-nature-moss/30 shadow-md h-full">
+      <CardContent className="p-6 h-full flex flex-col">
         <div className="mb-4">
           <svg 
-            className="h-10 w-10 text-nature-moss dark:text-nature-sage opacity-30" 
+            className="h-10 w-10 text-nature-moss opacity-30" 
             fill="currentColor" 
             viewBox="0 0 24 24"
           >
@@ -22,16 +21,16 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial }) => {
           </svg>
         </div>
         
-        <BrandText variant="secondary" className="mb-6 flex-grow italic">
+        <p className="text-nature-bark mb-6 flex-grow italic">
           "{testimonial.content}"
-        </BrandText>
+        </p>
         
         <div className="mt-auto">
-          <BrandText variant="primary" className="font-semibold">{testimonial.name}</BrandText>
-          <BrandText variant="muted" className="text-sm">{testimonial.role}</BrandText>
+          <p className="font-semibold text-nature-forest">{testimonial.name}</p>
+          <p className="text-sm text-nature-stone">{testimonial.role}</p>
         </div>
-      </BrandCardContent>
-    </BrandCard>
+      </CardContent>
+    </Card>
   );
 };
 

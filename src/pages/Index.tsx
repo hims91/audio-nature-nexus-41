@@ -6,7 +6,7 @@ import AboutEnhanced from '@/components/enhanced/AboutEnhanced';
 import ServicesEnhanced from '@/components/enhanced/ServicesEnhanced';
 import Portfolio from '@/components/Portfolio';
 import Testimonials from '@/components/Testimonials';
-import Contact from '@/components/Contact';
+import ContactFormEnhanced from '@/components/enhanced/ContactFormEnhanced';
 import Footer from '@/components/Footer';
 import SEOManager from '@/components/SEO/SEOManager';
 import PWAInstallerEnhanced from '@/components/performance/PWAInstallerEnhanced';
@@ -62,7 +62,7 @@ const Index = () => {
             <Testimonials />
           </div>
           <div id="contact">
-            <Contact />
+            <ContactFormEnhanced />
           </div>
         </main>
         

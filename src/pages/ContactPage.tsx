@@ -5,7 +5,6 @@ import ContactFormEnhanced from '@/components/enhanced/ContactFormEnhanced';
 import Footer from '@/components/Footer';
 import SEOManager from '@/components/SEO/SEOManager';
 import FadeInView from '@/components/animations/FadeInView';
-import { BrandHeading, BrandText } from '@/components/enhanced/BrandConsistencyManager';
 
 const ContactPage = () => {
   return (
@@ -36,13 +35,13 @@ const ContactPage = () => {
           <div className="container mx-auto px-4 py-12">
             <FadeInView direction="up">
               <div className="text-center mb-12">
-                <BrandHeading level={1} gradient className="mb-4">
+                <h1 className="text-4xl md:text-5xl font-bold text-nature-forest dark:text-white mb-4">
                   Get In Touch
-                </BrandHeading>
-                <BrandText variant="secondary" className="text-xl max-w-3xl mx-auto">
+                </h1>
+                <p className="text-xl text-nature-bark dark:text-gray-300 max-w-3xl mx-auto">
                   Ready to transform your sound? Contact us today to discuss your project 
                   and discover how our professional audio engineering services can elevate your work.
-                </BrandText>
+                </p>
               </div>
             </FadeInView>
 
