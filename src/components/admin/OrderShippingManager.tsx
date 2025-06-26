@@ -75,7 +75,8 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
       await updateOrder.mutateAsync({ 
         id: order.id, 
         updates,
-        sendEmail: sendEmailOnUpdate 
+        sendEmail: sendEmailOnUpdate,
+        carrierInfo: carrier ? carriers.find(c => c.value === carrier)?.label : undefined
       });
       
       onOrderUpdate?.();
@@ -102,6 +103,11 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
       case 'cancelled': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
+  };
+
+  const handleEmailCheckboxChange = (checked: boolean | "indeterminate") => {
+    // Convert CheckedState to boolean, treating "indeterminate" as false
+    setSendEmailOnUpdate(checked === true);
   };
 
   return (
@@ -184,7 +190,7 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
           <Checkbox 
             id="send-email" 
             checked={sendEmailOnUpdate}
-            onCheckedChange={setSendEmailOnUpdate}
+            onCheckedChange={handleEmailCheckboxChange}
           />
           <Label htmlFor="send-email" className="text-sm">
             Automatically send email notification to customer when updating tracking info

@@ -143,7 +143,17 @@ export const useOrderMutations = () => {
   const queryClient = useQueryClient();
 
   const updateOrder = useMutation({
-    mutationFn: async ({ id, updates, sendEmail = false }: { id: string; updates: Partial<Order>; sendEmail?: boolean }) => {
+    mutationFn: async ({ 
+      id, 
+      updates, 
+      sendEmail = false, 
+      carrierInfo 
+    }: { 
+      id: string; 
+      updates: Partial<Order>; 
+      sendEmail?: boolean; 
+      carrierInfo?: string;
+    }) => {
       const { data, error } = await supabase
         .from('orders')
         .update(updates)
@@ -165,7 +175,7 @@ export const useOrderMutations = () => {
             customerName: `${data.shipping_first_name || data.billing_first_name} ${data.shipping_last_name || data.billing_last_name}`,
             trackingNumber: data.tracking_number,
             trackingUrl: data.tracking_url,
-            carrier: updates.carrier || '', // Include carrier info if provided
+            carrier: carrierInfo || '', // Use the passed carrier info
             status: data.status,
           };
 
