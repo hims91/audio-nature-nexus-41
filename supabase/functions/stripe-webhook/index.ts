@@ -15,8 +15,9 @@ const corsHeaders = {
 };
 
 const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
-  console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
+  const timestamp = new Date().toISOString();
+  const detailsStr = details ? ` - ${JSON.stringify(details, null, 2)}` : '';
+  console.log(`[${timestamp}] [STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
 const clearUserCart = async (userId: string | null, customerEmail: string) => {
@@ -52,13 +53,13 @@ const sendOrderConfirmationWithRetry = async (order: any, maxRetries = 3) => {
       });
 
       if (emailResponse.error) {
-        throw new Error(`Email service error: ${emailResponse.error.message}`);
+        throw new Error(`Email service error: ${JSON.stringify(emailResponse.error)}`);
       }
 
-      logStep('Order confirmation email sent successfully', { orderId: order.id, attempt });
+      logStep('Order confirmation email sent successfully', { orderId: order.id, attempt, response: emailResponse.data });
       return true;
     } catch (emailError) {
-      logStep(`Email attempt ${attempt} failed:`, emailError);
+      logStep(`Email attempt ${attempt} failed:`, { error: emailError.message, orderId: order.id });
       
       if (attempt === maxRetries) {
         logStep('All email attempts failed, giving up', { orderId: order.id });
@@ -99,9 +100,9 @@ const handler = async (req: Request): Promise<Response> => {
     if (webhookSecret) {
       try {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-        logStep('Webhook signature verified successfully');
+        logStep('Webhook signature verified successfully', { eventType: event.type });
       } catch (err: any) {
-        logStep('ERROR: Webhook signature verification failed:', err.message);
+        logStep('ERROR: Webhook signature verification failed:', { error: err.message, signature });
         return new Response(`Webhook signature verification failed: ${err.message}`, { status: 400 });
       }
     } else {
@@ -109,12 +110,17 @@ const handler = async (req: Request): Promise<Response> => {
       event = JSON.parse(body);
     }
     
-    logStep('Processing webhook event:', event.type);
+    logStep('Processing webhook event:', { type: event.type, id: event.id });
 
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        logStep('Checkout session completed:', { sessionId: session.id, paymentStatus: session.payment_status });
+        logStep('Checkout session completed:', { 
+          sessionId: session.id, 
+          paymentStatus: session.payment_status,
+          customerEmail: session.customer_email || session.customer_details?.email,
+          amountTotal: session.amount_total
+        });
 
         // Find the order by session ID
         const { data: existingOrder, error: findError } = await supabase
@@ -123,10 +129,22 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('stripe_session_id', session.id)
           .single();
 
-        if (findError || !existingOrder) {
-          logStep('Order not found for session:', session.id);
+        if (findError) {
+          logStep('Database error finding order:', { error: findError, sessionId: session.id });
+          return new Response(`Database error: ${findError.message}`, { status: 500 });
+        }
+
+        if (!existingOrder) {
+          logStep('Order not found for session:', { sessionId: session.id });
           return new Response('Order not found', { status: 404 });
         }
+
+        logStep('Found existing order:', { 
+          orderId: existingOrder.id, 
+          orderNumber: existingOrder.order_number,
+          currentStatus: existingOrder.status,
+          currentPaymentStatus: existingOrder.payment_status
+        });
 
         // Calculate final amounts including shipping and tax
         const shippingCost = session.shipping_cost?.amount_total || 0;
@@ -160,20 +178,21 @@ const handler = async (req: Request): Promise<Response> => {
           .single();
 
         if (orderError) {
-          logStep('Error updating order:', orderError);
-          throw orderError;
+          logStep('Error updating order:', { error: orderError, orderId: existingOrder.id });
+          return new Response(`Order update failed: ${orderError.message}`, { status: 500 });
         }
 
         if (!updatedOrder) {
           logStep('No order returned after update:', existingOrder.id);
-          throw new Error('Order update failed');
+          return new Response('Order update failed - no data returned', { status: 500 });
         }
 
         logStep('Order updated successfully', { 
           orderId: updatedOrder.id, 
           orderNumber: updatedOrder.order_number,
-          paymentStatus: updatedOrder.payment_status,
-          status: updatedOrder.status 
+          newPaymentStatus: updatedOrder.payment_status,
+          newStatus: updatedOrder.status,
+          totalCents: updatedOrder.total_cents
         });
 
         // Clear the user's cart
@@ -191,11 +210,11 @@ const handler = async (req: Request): Promise<Response> => {
 
         if (fetchError) {
           logStep('Error fetching order for email:', fetchError);
-          throw fetchError;
-        }
-
-        // Send order confirmation email with retry logic
-        if (orderWithItems) {
+          // Don't fail the webhook for email fetch error
+        } else if (orderWithItems) {
+          logStep('Sending order confirmation email', { orderId: orderWithItems.id, itemCount: orderWithItems.items?.length });
+          
+          // Send order confirmation email with retry logic
           const emailSent = await sendOrderConfirmationWithRetry(orderWithItems);
           if (!emailSent) {
             logStep('Failed to send order confirmation email after all retries', { orderId: orderWithItems.id });
@@ -241,7 +260,7 @@ const handler = async (req: Request): Promise<Response> => {
         logStep(`Unhandled event type: ${event.type}`);
     }
 
-    return new Response(JSON.stringify({ received: true }), {
+    return new Response(JSON.stringify({ received: true, processed: true }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -249,7 +268,11 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    logStep("Critical error in stripe-webhook function:", error);
+    logStep("Critical error in stripe-webhook function:", { 
+      error: error.message, 
+      stack: error.stack,
+      name: error.name
+    });
     return new Response(
       JSON.stringify({ 
         error: error.message,
