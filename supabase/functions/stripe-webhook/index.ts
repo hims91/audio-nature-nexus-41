@@ -116,6 +116,18 @@ const handler = async (req: Request): Promise<Response> => {
         const session = event.data.object;
         logStep('Checkout session completed:', { sessionId: session.id, paymentStatus: session.payment_status });
 
+        // Find the order by session ID
+        const { data: existingOrder, error: findError } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('stripe_session_id', session.id)
+          .single();
+
+        if (findError || !existingOrder) {
+          logStep('Order not found for session:', session.id);
+          return new Response('Order not found', { status: 404 });
+        }
+
         // Calculate final amounts including shipping and tax
         const shippingCost = session.shipping_cost?.amount_total || 0;
         const taxAmount = session.total_details?.amount_tax || 0;
@@ -143,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
             shipping_country: session.shipping_details?.address?.country || session.customer_details?.address?.country,
             updated_at: new Date().toISOString(),
           })
-          .eq('stripe_session_id', session.id)
+          .eq('id', existingOrder.id)
           .select()
           .single();
 
@@ -153,8 +165,8 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         if (!updatedOrder) {
-          logStep('No order found for session:', session.id);
-          throw new Error('Order not found');
+          logStep('No order returned after update:', existingOrder.id);
+          throw new Error('Order update failed');
         }
 
         logStep('Order updated successfully', { 
@@ -225,18 +237,6 @@ const handler = async (req: Request): Promise<Response> => {
         break;
       }
 
-      case 'invoice.payment_succeeded': {
-        // Handle subscription payments if needed in the future
-        logStep('Invoice payment succeeded - handling for future subscription features');
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        // Handle subscription cancellations if needed in the future
-        logStep('Subscription deleted - handling for future subscription features');
-        break;
-      }
-
       default:
         logStep(`Unhandled event type: ${event.type}`);
     }
@@ -251,7 +251,10 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     logStep("Critical error in stripe-webhook function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.response?.data || error.stack
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
