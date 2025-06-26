@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -15,9 +16,12 @@ import { Eye, EyeOff } from 'lucide-react';
 
 const AuthEnhanced: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -26,10 +30,11 @@ const AuthEnhanced: React.FC = () => {
     signIn, 
     signUp, 
     signInWithGoogle, 
-    signInWithTwitter, 
     socialLoading, 
     user,
-    trackLoginSession 
+    trackLoginSession,
+    forgotPassword,
+    forgotPasswordLoading
   } = useEnhancedAuth();
   
   const { toast } = useToast();
@@ -44,22 +49,46 @@ const AuthEnhanced: React.FC = () => {
   }, [user, navigate]);
 
   const validateForm = () => {
-    if (!email || !password) {
+    if (!email) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields.",
+        description: "Please enter your email address.",
         variant: "destructive",
       });
       return false;
     }
 
-    if (!isLogin && password !== confirmPassword) {
+    if (showForgotPassword) {
+      return true; // Only email required for forgot password
+    }
+
+    if (!password) {
       toast({
         title: "Validation Error",
-        description: "Passwords do not match.",
+        description: "Please enter your password.",
         variant: "destructive",
       });
       return false;
+    }
+
+    if (!isLogin) {
+      if (!firstName.trim() || !lastName.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Please enter your first and last name.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (password !== confirmPassword) {
+        toast({
+          title: "Validation Error",
+          description: "Passwords do not match.",
+          variant: "destructive",
+        });
+        return false;
+      }
     }
 
     return true;
@@ -69,6 +98,12 @@ const AuthEnhanced: React.FC = () => {
     e.preventDefault();
     
     if (!validateForm()) return;
+
+    if (showForgotPassword) {
+      console.log('Attempting forgot password for:', email);
+      await forgotPassword(email);
+      return;
+    }
     
     setFormLoading(true);
 
@@ -88,7 +123,7 @@ const AuthEnhanced: React.FC = () => {
         }
       } else {
         console.log('Attempting sign up for:', email);
-        result = await signUp(email, password);
+        result = await signUp(email, password, firstName.trim(), lastName.trim());
         if (!result.error) {
           toast({
             title: "Account created!",
@@ -118,26 +153,42 @@ const AuthEnhanced: React.FC = () => {
     }
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'twitter') => {
+  const handleSocialLogin = async (provider: 'google') => {
     try {
       console.log(`Attempting ${provider} login`);
-      let result;
-      if (provider === 'google') {
-        result = await signInWithGoogle();
-      } else {
-        result = await signInWithTwitter();
-      }
+      const result = await signInWithGoogle();
 
       if (!result.error) {
         // Note: Session tracking will happen after OAuth redirect
         toast({
           title: "Redirecting...",
-          description: `Redirecting to ${provider === 'google' ? 'Google' : 'X'} for authentication.`,
+          description: "Redirecting to Google for authentication.",
         });
       }
     } catch (error) {
       console.error(`${provider} login error:`, error);
     }
+  };
+
+  const resetForm = () => {
+    setShowForgotPassword(false);
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setFirstName('');
+    setLastName('');
+  };
+
+  const getFormTitle = () => {
+    if (showForgotPassword) return 'Reset Password';
+    return isLogin ? 'Welcome Back' : 'Create Account';
+  };
+
+  const getFormDescription = () => {
+    if (showForgotPassword) return 'Enter your email address to receive password reset instructions';
+    return isLogin 
+      ? 'Sign in to access your portfolio and manage your content' 
+      : 'Join us to showcase your work and connect with others';
   };
 
   return (
@@ -147,28 +198,23 @@ const AuthEnhanced: React.FC = () => {
       <main className="flex-grow py-16 flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <AuthCard
-            title={isLogin ? 'Welcome Back' : 'Create Account'}
-            description={
-              isLogin 
-                ? 'Sign in to access your portfolio and manage your content' 
-                : 'Join us to showcase your work and connect with others'
-            }
+            title={getFormTitle()}
+            description={getFormDescription()}
           >
-            {/* Social Login Buttons */}
-            <div className="space-y-3">
-              <SocialButton
-                provider="google"
-                onClick={() => handleSocialLogin('google')}
-                loading={socialLoading === 'google'}
-              />
-              <SocialButton
-                provider="twitter"
-                onClick={() => handleSocialLogin('twitter')}
-                loading={socialLoading === 'twitter'}
-              />
-            </div>
+            {!showForgotPassword && (
+              <>
+                {/* Social Login Buttons */}
+                <div className="space-y-3">
+                  <SocialButton
+                    provider="google"
+                    onClick={() => handleSocialLogin('google')}
+                    loading={socialLoading === 'google'}
+                  />
+                </div>
 
-            <FormDivider />
+                <FormDivider />
+              </>
+            )}
 
             {/* Email/Password Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -186,32 +232,69 @@ const AuthEnhanced: React.FC = () => {
                   className="mt-1 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:border-nature-forest dark:focus:border-nature-leaf"
                 />
               </div>
-              
-              <div>
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Password
-                </Label>
-                <div className="relative mt-1">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="Enter your password"
-                    className="pr-10 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:border-nature-forest dark:focus:border-nature-leaf"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
 
-              {!isLogin && (
+              {!showForgotPassword && !isLogin && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        First Name
+                      </Label>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                        placeholder="First name"
+                        className="mt-1 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:border-nature-forest dark:focus:border-nature-leaf"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Last Name
+                      </Label>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                        placeholder="Last name"
+                        className="mt-1 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:border-nature-forest dark:focus:border-nature-leaf"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+              
+              {!showForgotPassword && (
+                <div>
+                  <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Password
+                  </Label>
+                  <div className="relative mt-1">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      placeholder="Enter your password"
+                      className="pr-10 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:border-nature-forest dark:focus:border-nature-leaf"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!showForgotPassword && !isLogin && (
                 <div>
                   <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Confirm Password
@@ -240,31 +323,60 @@ const AuthEnhanced: React.FC = () => {
               <InteractiveButton
                 type="submit"
                 className="w-full bg-gradient-to-r from-nature-forest to-nature-leaf hover:from-nature-leaf hover:to-nature-forest text-white font-medium py-3"
-                disabled={formLoading}
+                disabled={formLoading || forgotPasswordLoading}
                 hapticType="medium"
               >
-                {formLoading ? (
+                {(formLoading || forgotPasswordLoading) ? (
                   <div className="flex items-center space-x-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                    <span>{isLogin ? 'Signing In...' : 'Creating Account...'}</span>
+                    <span>
+                      {showForgotPassword ? 'Sending Reset Email...' : 
+                       isLogin ? 'Signing In...' : 'Creating Account...'}
+                    </span>
                   </div>
                 ) : (
-                  <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                  <span>
+                    {showForgotPassword ? 'Send Reset Email' :
+                     isLogin ? 'Sign In' : 'Create Account'}
+                  </span>
                 )}
               </InteractiveButton>
             </form>
             
-            <div className="text-center pt-4">
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-nature-forest dark:text-nature-leaf hover:text-nature-leaf dark:hover:text-nature-forest font-medium underline transition-colors"
-              >
-                {isLogin 
-                  ? "Don't have an account? Sign up" 
-                  : "Already have an account? Sign in"
-                }
-              </button>
+            <div className="text-center pt-4 space-y-2">
+              {!showForgotPassword && isLogin && (
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-nature-forest dark:text-nature-leaf hover:text-nature-leaf dark:hover:text-nature-forest underline transition-colors text-sm"
+                >
+                  Forgot your password?
+                </button>
+              )}
+              
+              {showForgotPassword ? (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="text-nature-forest dark:text-nature-leaf hover:text-nature-leaf dark:hover:text-nature-forest underline transition-colors font-medium"
+                >
+                  Back to Sign In
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLogin(!isLogin);
+                    resetForm();
+                  }}
+                  className="text-nature-forest dark:text-nature-leaf hover:text-nature-leaf dark:hover:text-nature-forest underline transition-colors font-medium"
+                >
+                  {isLogin 
+                    ? "Don't have an account? Sign up" 
+                    : "Already have an account? Sign in"
+                  }
+                </button>
+              )}
             </div>
           </AuthCard>
         </div>

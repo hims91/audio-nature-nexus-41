@@ -25,6 +25,7 @@ export const useEnhancedAuth = () => {
   const { signIn, signUp, signOut, user, session, loading } = useAuth();
   const { toast } = useToast();
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
 
   // Rate limiting for auth attempts
   const authRateLimit = useRateLimiting({
@@ -83,49 +84,6 @@ export const useEnhancedAuth = () => {
     }
   };
 
-  const signInWithTwitter = async () => {
-    if (!authRateLimit.checkRateLimit()) return { error: new Error('Rate limit exceeded') };
-    
-    setSocialLoading('twitter');
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      // Generate CSRF token for OAuth flow
-      const csrfToken = generateCSRFToken();
-      setCSRFToken(csrfToken);
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'twitter',
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            state: csrfToken
-          }
-        },
-      });
-
-      if (error) {
-        toast({
-          title: "X Sign In Error",
-          description: error.message,
-          variant: "destructive",
-        });
-        return { error };
-      }
-
-      return { error: null };
-    } catch (error: any) {
-      toast({
-        title: "X Sign In Error",
-        description: error.message || "An unexpected error occurred during X sign in.",
-        variant: "destructive",
-      });
-      return { error };
-    } finally {
-      setSocialLoading(null);
-    }
-  };
-
   // Enhanced sign in with validation and rate limiting
   const enhancedSignIn = async (email: string, password: string) => {
     return authRateLimit.attemptAction(async () => {
@@ -144,8 +102,8 @@ export const useEnhancedAuth = () => {
     });
   };
 
-  // Enhanced sign up with validation
-  const enhancedSignUp = async (email: string, password: string) => {
+  // Enhanced sign up with validation and first/last name
+  const enhancedSignUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     return authRateLimit.attemptAction(async () => {
       // Validate inputs
       const sanitizedEmail = sanitizeText(email);
@@ -158,8 +116,71 @@ export const useEnhancedAuth = () => {
         throw new Error(errors.join(', '));
       }
 
-      return await signUp(sanitizedEmail, password);
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email: sanitizedEmail,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: firstName || '',
+            last_name: lastName || ''
+          }
+        }
+      });
+
+      return { error };
     });
+  };
+
+  // Forgot password functionality
+  const forgotPassword = async (email: string) => {
+    if (!authRateLimit.checkRateLimit()) {
+      toast({
+        title: "Rate Limit Exceeded",
+        description: "Too many requests. Please try again later.",
+        variant: "destructive",
+      });
+      return { error: new Error('Rate limit exceeded') };
+    }
+
+    setForgotPasswordLoading(true);
+    try {
+      const sanitizedEmail = sanitizeText(email);
+      if (!validateEmail(sanitizedEmail)) {
+        throw new Error('Invalid email format');
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(sanitizedEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        toast({
+          title: "Password Reset Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      toast({
+        title: "Password Reset Email Sent",
+        description: "Check your email for password reset instructions.",
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Password Reset Error",
+        description: error.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+      return { error };
+    } finally {
+      setForgotPasswordLoading(false);
+    }
   };
 
   const trackLoginSession = async (loginMethod: string) => {
@@ -275,10 +296,13 @@ export const useEnhancedAuth = () => {
     session,
     loading,
     
-    // Enhanced social auth methods
+    // Enhanced social auth methods (only Google now)
     signInWithGoogle,
-    signInWithTwitter,
     socialLoading,
+    
+    // Forgot password functionality
+    forgotPassword,
+    forgotPasswordLoading,
     
     // Session management
     trackLoginSession,
