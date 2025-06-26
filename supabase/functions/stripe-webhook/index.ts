@@ -93,13 +93,14 @@ const handler = async (req: Request): Promise<Response> => {
       apiVersion: '2023-10-16',
     });
 
-    // Verify webhook signature
+    // Verify webhook signature using async method
     let event;
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
     
     if (webhookSecret) {
       try {
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+        // Use the async version for Deno environment
+        event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
         logStep('Webhook signature verified successfully', { eventType: event.type });
       } catch (err: any) {
         logStep('ERROR: Webhook signature verification failed:', { error: err.message, signature });
