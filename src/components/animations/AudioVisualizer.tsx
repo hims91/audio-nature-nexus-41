@@ -1,6 +1,5 @@
 
 import React, { useEffect, useRef, useState } from "react";
-import { useTheme } from "@/components/theme-provider";
 
 interface AudioVisualizerProps {
   isPlaying?: boolean;
@@ -15,8 +14,6 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 }) => {
   const [bars, setBars] = useState<number[]>([]);
   const intervalRef = useRef<NodeJS.Timeout>();
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
 
   useEffect(() => {
     // Initialize bars with random heights
@@ -47,11 +44,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       {bars.map((height, index) => (
         <div
           key={index}
-          className={`rounded-t-sm transition-all duration-150 ease-out ${
-            isDark 
-              ? 'bg-gradient-to-t from-blue-600 to-purple-400' 
-              : 'bg-gradient-to-t from-nature-forest to-nature-leaf'
-          }`}
+          className="rounded-t-sm transition-all duration-150 ease-out bg-gradient-to-t from-nature-forest to-nature-leaf"
           style={{
             height: `${height}%`,
             width: `${100 / barCount * 0.8}%`,

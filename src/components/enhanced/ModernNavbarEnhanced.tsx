@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
-import ThemeToggle from "@/components/ui/theme-toggle";
 import MagneticButton from "@/components/animations/MagneticButton";
 import FeedbackSettings from "@/components/interactive/FeedbackSettings";
 import { LazyUserProfileDropdown } from "@/components/auth/LazyProfileComponents";
@@ -71,9 +70,9 @@ const ModernNavbarEnhanced: React.FC = () => {
           <GlassCard className={cn(
             "transition-all duration-500 transform",
             isScrolled 
-              ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl" 
-              : "bg-white/60 dark:bg-gray-900/60 backdrop-blur-lg",
-            "border border-white/20 dark:border-gray-700/30"
+              ? "bg-white/80 backdrop-blur-xl shadow-2xl" 
+              : "bg-white/60 backdrop-blur-lg",
+            "border border-white/20"
           )}>
             <div className="flex items-center justify-between px-6 py-4">
               {/* Logo */}
@@ -88,7 +87,7 @@ const ModernNavbarEnhanced: React.FC = () => {
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-r from-nature-forest to-nature-leaf rounded-xl opacity-0 group-hover:opacity-20 animate-pulse" />
                   </div>
-                  <span className="text-xl font-bold bg-gradient-to-r from-nature-forest to-nature-leaf bg-clip-text text-transparent dark:from-white dark:to-gray-300">
+                  <span className="text-xl font-bold bg-gradient-to-r from-nature-forest to-nature-leaf bg-clip-text text-transparent">
                     Terra Echo
                   </span>
                 </div>
@@ -105,14 +104,14 @@ const ModernNavbarEnhanced: React.FC = () => {
                     <div className={cn(
                       "px-4 py-2 rounded-full transition-all duration-300",
                       activeSection === item.id
-                        ? "bg-nature-forest/20 dark:bg-white/20 text-nature-forest dark:text-white"
-                        : "text-nature-bark dark:text-gray-300 hover:text-nature-forest dark:hover:text-white hover:bg-nature-forest/10 dark:hover:bg-white/10"
+                        ? "bg-nature-forest/20 text-nature-forest"
+                        : "text-nature-bark hover:text-nature-forest hover:bg-nature-forest/10"
                     )}>
                       {item.name}
                       
                       {/* Active indicator */}
                       {activeSection === item.id && (
-                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-nature-forest dark:bg-white rounded-full animate-pulse" />
+                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-nature-forest rounded-full animate-pulse" />
                       )}
                     </div>
                   </MagneticButton>
@@ -121,7 +120,6 @@ const ModernNavbarEnhanced: React.FC = () => {
 
               {/* Right section */}
               <div className="flex items-center space-x-3">
-                <ThemeToggle variant="floating" />
                 <FeedbackSettings />
                 
                 {/* User Profile or CTA Button */}
@@ -143,7 +141,7 @@ const ModernNavbarEnhanced: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 dark:bg-gray-800/50 dark:hover:bg-gray-700/50"
+                      className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20"
                     >
                       {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </Button>
@@ -160,7 +158,7 @@ const ModernNavbarEnhanced: React.FC = () => {
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
           <div className="absolute top-24 left-4 right-4">
-            <GlassCard className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-white/20 dark:border-gray-700/30">
+            <GlassCard className="bg-white/90 backdrop-blur-xl border border-white/20">
               <div className="p-6 space-y-4">
                 {navItems.map((item) => (
                   <MagneticButton
@@ -171,15 +169,15 @@ const ModernNavbarEnhanced: React.FC = () => {
                     <div className={cn(
                       "w-full p-3 rounded-xl transition-all duration-300 text-lg",
                       activeSection === item.id
-                        ? "bg-nature-forest/20 dark:bg-white/20 text-nature-forest dark:text-white"
-                        : "text-nature-bark dark:text-gray-300 hover:bg-nature-forest/10 dark:hover:bg-white/10"
+                        ? "bg-nature-forest/20 text-nature-forest"
+                        : "text-nature-bark hover:bg-nature-forest/10"
                     )}>
                       {item.name}
                     </div>
                   </MagneticButton>
                 ))}
                 
-                <div className="pt-4 border-t border-nature-moss/20 dark:border-gray-700">
+                <div className="pt-4 border-t border-nature-moss/20">
                   {user ? (
                     <LazyUserProfileDropdown />
                   ) : (

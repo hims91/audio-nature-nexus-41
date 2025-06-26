@@ -1,14 +1,13 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Moon, Sun, Menu, X, Settings } from 'lucide-react';
-import { useTheme } from "@/components/theme-provider";
+import { Menu, X, Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { LazyUserProfileDropdown } from "./auth/LazyProfileComponents";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   
   // Check if user is admin (in production, this should check user_profiles.role)
@@ -17,10 +16,6 @@ const Navbar = () => {
   const handleSignOut = async () => {
     await signOut();
     setIsOpen(false);
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const navItems = [
@@ -32,7 +27,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -41,7 +36,7 @@ const Navbar = () => {
               <div className="w-10 h-10 bg-nature-forest rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">TE</span>
               </div>
-              <span className="ml-2 text-xl font-bold text-nature-forest dark:text-white">
+              <span className="ml-2 text-xl font-bold text-nature-forest">
                 Terra Echo
               </span>
             </Link>
@@ -54,7 +49,7 @@ const Navbar = () => {
                 <a
                   key={item.name}
                   href={item.href}
-                  className="text-gray-700 dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf transition-colors duration-200 px-3 py-2 text-sm font-medium"
+                  className="text-gray-700 hover:text-nature-forest transition-colors duration-200 px-3 py-2 text-sm font-medium"
                 >
                   {item.name}
                 </a>
@@ -64,13 +59,6 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf transition-colors"
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
-
             {user ? (
               <div className="flex items-center space-x-3">
                 {isAdmin && (
@@ -96,14 +84,8 @@ const Navbar = () => {
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
             <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
-            >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
-            <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+              className="p-2 rounded-lg bg-gray-100 text-gray-600"
             >
               {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -113,13 +95,13 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navItems.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
-                className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-nature-forest dark:hover:text-nature-leaf"
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-nature-forest"
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}
@@ -127,11 +109,11 @@ const Navbar = () => {
             ))}
             
             {user ? (
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+              <div className="border-t border-gray-200 pt-3 mt-3">
                 {isAdmin && (
                   <Link
                     to="/admin/dashboard"
-                    className="flex items-center px-3 py-2 text-base font-medium text-nature-forest dark:text-nature-leaf"
+                    className="flex items-center px-3 py-2 text-base font-medium text-nature-forest"
                     onClick={() => setIsOpen(false)}
                   >
                     <Settings className="h-4 w-4 mr-2" />
@@ -140,16 +122,16 @@ const Navbar = () => {
                 )}
                 <button
                   onClick={handleSignOut}
-                  className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600"
+                  className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-red-600"
                 >
                   Sign Out
                 </button>
               </div>
             ) : (
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+              <div className="border-t border-gray-200 pt-3 mt-3">
                 <Link
                   to="/auth"
-                  className="block px-3 py-2 text-base font-medium text-nature-forest dark:text-nature-leaf"
+                  className="block px-3 py-2 text-base font-medium text-nature-forest"
                   onClick={() => setIsOpen(false)}
                 >
                   Sign In

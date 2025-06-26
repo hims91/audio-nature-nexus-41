@@ -1,5 +1,5 @@
+
 import React, { useRef, useEffect } from 'react';
-import { useTheme } from '@/components/theme-provider';
 
 interface Particle {
   x: number;
@@ -26,8 +26,6 @@ const ParticleField: React.FC<ParticleFieldProps> = ({
   const animationRef = useRef<number>();
   const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: 0, y: 0 });
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -92,13 +90,11 @@ const ParticleField: React.FC<ParticleFieldProps> = ({
       particlesRef.current.forEach(particle => {
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = isDark 
-          ? `rgba(255, 255, 255, ${particle.opacity})` 
-          : `rgba(45, 94, 64, ${particle.opacity})`;
+        ctx.fillStyle = `rgba(45, 94, 64, ${particle.opacity})`;
         ctx.fill();
 
         // Glow effect
-        ctx.shadowColor = isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(45, 94, 64, 0.5)';
+        ctx.shadowColor = 'rgba(45, 94, 64, 0.5)';
         ctx.shadowBlur = 10;
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -115,9 +111,7 @@ const ParticleField: React.FC<ParticleFieldProps> = ({
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.strokeStyle = isDark 
-              ? `rgba(255, 255, 255, ${(80 - distance) / 80 * 0.2})` 
-              : `rgba(45, 94, 64, ${(80 - distance) / 80 * 0.2})`;
+            ctx.strokeStyle = `rgba(45, 94, 64, ${(80 - distance) / 80 * 0.2})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
@@ -162,7 +156,7 @@ const ParticleField: React.FC<ParticleFieldProps> = ({
       }
       window.removeEventListener('resize', handleResize);
     };
-  }, [particleCount, interactive, isDark]);
+  }, [particleCount, interactive]);
 
   return (
     <canvas
