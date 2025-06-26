@@ -106,7 +106,7 @@ export const PaginationAdvanced: React.FC<PaginationAdvancedProps> = ({
 
         <div className="flex items-center space-x-1">
           {getVisiblePageNumbers().map((pageNumber, index) => (
-            <React.Fragment key={index}>
+            <div key={`page-${index}-${pageNumber}`}>
               {pageNumber === '...' ? (
                 <span className="px-3 py-2 text-sm text-gray-500">...</span>
               ) : (
@@ -119,7 +119,7 @@ export const PaginationAdvanced: React.FC<PaginationAdvancedProps> = ({
                   {pageNumber}
                 </Button>
               )}
-            </React.Fragment>
+            </div>
           ))}
         </div>
 

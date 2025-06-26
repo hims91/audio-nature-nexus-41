@@ -139,7 +139,7 @@ const handler = async (req: Request): Promise<Response> => {
       : `Your Order ${data.orderNumber} Has Shipped!`;
 
     const emailResponse = await resend.emails.send({
-      from: "Terra Echo Studios <onboarding@resend.dev>",
+      from: "Terra Echo Studios <noreply@terraechostudio.com>",
       to: [data.customerEmail],
       subject: subject,
       html: generateShippingEmailHtml(data),

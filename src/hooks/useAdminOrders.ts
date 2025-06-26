@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Order, OrderItem } from '@/types/ecommerce';
@@ -155,20 +156,32 @@ export const useOrderMutations = () => {
       // Send automatic email if tracking number is updated and sendEmail is true
       if (sendEmail && (updates.tracking_number || updates.status === 'delivered')) {
         try {
-          await supabase.functions.invoke('send-shipping-notification', {
-            body: {
-              orderId: id,
-              orderNumber: data.order_number,
-              customerEmail: data.email,
-              customerName: `${data.shipping_first_name || data.billing_first_name} ${data.shipping_last_name || data.billing_last_name}`,
-              trackingNumber: data.tracking_number,
-              trackingUrl: data.tracking_url,
-              status: data.status,
-            },
+          console.log('Sending shipping notification email for order:', data.order_number);
+          
+          const emailData = {
+            orderId: id,
+            orderNumber: data.order_number,
+            customerEmail: data.email,
+            customerName: `${data.shipping_first_name || data.billing_first_name} ${data.shipping_last_name || data.billing_last_name}`,
+            trackingNumber: data.tracking_number,
+            trackingUrl: data.tracking_url,
+            carrier: updates.carrier || '', // Include carrier info if provided
+            status: data.status,
+          };
+
+          const { error: emailError } = await supabase.functions.invoke('send-shipping-notification', {
+            body: emailData,
           });
+
+          if (emailError) {
+            console.error('Email service error:', emailError);
+            toast.warning('Order updated successfully, but email notification failed to send');
+          } else {
+            console.log('Shipping notification email sent successfully');
+          }
         } catch (emailError) {
           console.error('Failed to send email:', emailError);
-          // Don't fail the update if email fails
+          toast.warning('Order updated successfully, but email notification failed to send');
         }
       }
       
@@ -210,17 +223,27 @@ export const useOrderMutations = () => {
       // Send automatic email for delivered status
       if (sendEmail && status === 'delivered') {
         try {
-          await supabase.functions.invoke('send-shipping-notification', {
-            body: {
-              orderId: id,
-              orderNumber: data.order_number,
-              customerEmail: data.email,
-              customerName: `${data.shipping_first_name || data.billing_first_name} ${data.shipping_last_name || data.billing_last_name}`,
-              trackingNumber: data.tracking_number,
-              trackingUrl: data.tracking_url,
-              status: 'delivered',
-            },
+          console.log('Sending delivery notification email for order:', data.order_number);
+          
+          const emailData = {
+            orderId: id,
+            orderNumber: data.order_number,
+            customerEmail: data.email,
+            customerName: `${data.shipping_first_name || data.billing_first_name} ${data.shipping_last_name || data.billing_last_name}`,
+            trackingNumber: data.tracking_number,
+            trackingUrl: data.tracking_url,
+            status: 'delivered',
+          };
+
+          const { error: emailError } = await supabase.functions.invoke('send-shipping-notification', {
+            body: emailData,
           });
+
+          if (emailError) {
+            console.error('Delivery email error:', emailError);
+          } else {
+            console.log('Delivery notification email sent successfully');
+          }
         } catch (emailError) {
           console.error('Failed to send delivery email:', emailError);
         }

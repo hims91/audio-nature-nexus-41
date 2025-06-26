@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,11 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Truck, Package, Send, ExternalLink, Mail } from 'lucide-react';
+import { Truck, Package, ExternalLink, Mail } from 'lucide-react';
 import { useOrderMutations } from '@/hooks/useAdminOrders';
 import { Order } from '@/types/ecommerce';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 interface OrderShippingManagerProps {
   order: Order;
@@ -22,7 +22,6 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
   const [trackingUrl, setTrackingUrl] = useState(order.tracking_url || '');
   const [carrier, setCarrier] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isSendingNotification, setIsSendingNotification] = useState(false);
   const [sendEmailOnUpdate, setSendEmailOnUpdate] = useState(true);
 
   const { updateOrder } = useOrderMutations();
@@ -82,7 +81,7 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
       onOrderUpdate?.();
       
       if (sendEmailOnUpdate) {
-        toast.success('Shipping information updated and customer notified');
+        toast.success('Shipping information updated and customer notified automatically');
       } else {
         toast.success('Shipping information updated successfully');
       }
@@ -91,38 +90,6 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
       toast.error('Failed to update shipping information');
     } finally {
       setIsUpdating(false);
-    }
-  };
-
-  const sendShippingNotification = async () => {
-    if (!trackingNumber) {
-      toast.error('Please add tracking information first');
-      return;
-    }
-
-    setIsSendingNotification(true);
-    try {
-      const { error } = await supabase.functions.invoke('send-shipping-notification', {
-        body: {
-          orderId: order.id,
-          orderNumber: order.order_number,
-          customerEmail: order.email,
-          customerName: `${order.shipping_first_name} ${order.shipping_last_name}`,
-          trackingNumber: trackingNumber,
-          trackingUrl: trackingUrl,
-          carrier: carrier,
-          status: order.status,
-        },
-      });
-
-      if (error) throw error;
-      
-      toast.success('Shipping notification sent to customer');
-    } catch (error) {
-      console.error('Error sending notification:', error);
-      toast.error('Failed to send shipping notification');
-    } finally {
-      setIsSendingNotification(false);
     }
   };
 
@@ -220,40 +187,31 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
             onCheckedChange={setSendEmailOnUpdate}
           />
           <Label htmlFor="send-email" className="text-sm">
-            Send email notification to customer when updating tracking info
+            Automatically send email notification to customer when updating tracking info
           </Label>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-4">
+        {/* Action Button */}
+        <div className="pt-4">
           <Button 
             onClick={handleUpdateShipping}
             disabled={isUpdating || !trackingNumber.trim()}
-            className="flex-1"
+            className="w-full"
           >
             <Package className="h-4 w-4 mr-2" />
-            {isUpdating ? 'Updating...' : 'Update Shipping Info'}
+            {isUpdating ? 'Updating...' : 'Update Shipping Info & Mark as Shipped'}
             {sendEmailOnUpdate && <Mail className="h-4 w-4 ml-2" />}
           </Button>
-          
-          {order.status === 'shipped' && trackingNumber && (
-            <Button 
-              variant="outline"
-              onClick={sendShippingNotification}
-              disabled={isSendingNotification || !trackingNumber}
-              className="flex-1"
-            >
-              <Send className="h-4 w-4 mr-2" />
-              {isSendingNotification ? 'Sending...' : 'Send Notification'}
-            </Button>
-          )}
         </div>
 
         {/* Helper Text */}
-        <p className="text-xs text-gray-500 mt-2">
-          When you update shipping info with email enabled, the order status will automatically change to "shipped", 
-          a timestamp will be recorded, and the customer will receive an email notification.
-        </p>
+        <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
+          <p className="text-xs text-blue-800 dark:text-blue-300">
+            <strong>Automatic Email Notifications:</strong><br />
+            When you update shipping info with email enabled, the order status will automatically change to "shipped", 
+            a timestamp will be recorded, and the customer will receive a professional email notification with tracking details.
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
