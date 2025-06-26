@@ -3,18 +3,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { Product, ProductCategory, ProductVariant, ProductImage } from '@/types/ecommerce';
 import { toast } from 'sonner';
 
-// Hook for admin product queries with advanced filtering
+// Hook for admin product queries with advanced filtering and pagination
 export const useAdminProducts = (filters?: {
   categoryId?: string;
   isActive?: boolean;
   search?: string;
   isOutOfStock?: boolean;
-  limit?: number;
-  offset?: number;
+  page?: number;
+  pageSize?: number;
 }) => {
+  const page = filters?.page || 1;
+  const pageSize = filters?.pageSize || 20;
+  const offset = (page - 1) * pageSize;
+
   return useQuery({
     queryKey: ['admin-products', filters],
-    queryFn: async (): Promise<{ products: Product[]; total: number }> => {
+    queryFn: async (): Promise<{ products: Product[]; total: number; totalPages: number }> => {
       let query = supabase
         .from('products')
         .select(`
@@ -40,22 +44,19 @@ export const useAdminProducts = (filters?: {
         query = query.eq('track_inventory', true).lte('inventory_quantity', 0);
       }
 
-      if (filters?.limit) {
-        query = query.limit(filters.limit);
-      }
-
-      if (filters?.offset) {
-        query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
-      }
-
-      query = query.order('created_at', { ascending: false });
+      query = query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + pageSize - 1);
 
       const { data, error, count } = await query;
       if (error) throw error;
       
+      const totalPages = Math.ceil((count || 0) / pageSize);
+      
       return { 
         products: data || [], 
-        total: count || 0 
+        total: count || 0,
+        totalPages
       };
     },
   });

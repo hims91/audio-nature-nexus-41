@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Package, Send, ExternalLink } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Truck, Package, Send, ExternalLink, Mail } from 'lucide-react';
 import { useOrderMutations } from '@/hooks/useAdminOrders';
 import { Order } from '@/types/ecommerce';
 import { toast } from 'sonner';
@@ -23,6 +23,7 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
   const [carrier, setCarrier] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isSendingNotification, setIsSendingNotification] = useState(false);
+  const [sendEmailOnUpdate, setSendEmailOnUpdate] = useState(true);
 
   const { updateOrder } = useOrderMutations();
 
@@ -72,9 +73,19 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
         shipped_at: new Date().toISOString(),
       };
 
-      await updateOrder.mutateAsync({ id: order.id, updates });
+      await updateOrder.mutateAsync({ 
+        id: order.id, 
+        updates,
+        sendEmail: sendEmailOnUpdate 
+      });
+      
       onOrderUpdate?.();
-      toast.success('Shipping information updated successfully');
+      
+      if (sendEmailOnUpdate) {
+        toast.success('Shipping information updated and customer notified');
+      } else {
+        toast.success('Shipping information updated successfully');
+      }
     } catch (error) {
       console.error('Error updating shipping:', error);
       toast.error('Failed to update shipping information');
@@ -100,6 +111,7 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
           trackingNumber: trackingNumber,
           trackingUrl: trackingUrl,
           carrier: carrier,
+          status: order.status,
         },
       });
 
@@ -200,6 +212,18 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
           </div>
         )}
 
+        {/* Email Notification Setting */}
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="send-email" 
+            checked={sendEmailOnUpdate}
+            onCheckedChange={setSendEmailOnUpdate}
+          />
+          <Label htmlFor="send-email" className="text-sm">
+            Send email notification to customer when updating tracking info
+          </Label>
+        </div>
+
         {/* Action Buttons */}
         <div className="flex gap-2 pt-4">
           <Button 
@@ -209,13 +233,14 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
           >
             <Package className="h-4 w-4 mr-2" />
             {isUpdating ? 'Updating...' : 'Update Shipping Info'}
+            {sendEmailOnUpdate && <Mail className="h-4 w-4 ml-2" />}
           </Button>
           
           {order.status === 'shipped' && trackingNumber && (
             <Button 
               variant="outline"
               onClick={sendShippingNotification}
-              disabled={isSendingNotification}
+              disabled={isSendingNotification || !trackingNumber}
               className="flex-1"
             >
               <Send className="h-4 w-4 mr-2" />
@@ -226,7 +251,8 @@ const OrderShippingManager: React.FC<OrderShippingManagerProps> = ({ order, onOr
 
         {/* Helper Text */}
         <p className="text-xs text-gray-500 mt-2">
-          When you update shipping info, the order status will automatically change to "shipped" and a timestamp will be recorded.
+          When you update shipping info with email enabled, the order status will automatically change to "shipped", 
+          a timestamp will be recorded, and the customer will receive an email notification.
         </p>
       </CardContent>
     </Card>

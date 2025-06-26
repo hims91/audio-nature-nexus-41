@@ -3,19 +3,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { Order, OrderItem } from '@/types/ecommerce';
 import { toast } from 'sonner';
 
-// Hook for admin order queries with advanced filtering
+// Hook for admin order queries with advanced filtering and pagination
 export const useAdminOrders = (filters?: {
   status?: string;
   paymentStatus?: string;
   search?: string;
   dateFrom?: string;
   dateTo?: string;
-  limit?: number;
-  offset?: number;
+  page?: number;
+  pageSize?: number;
 }) => {
+  const page = filters?.page || 1;
+  const pageSize = filters?.pageSize || 15;
+  const offset = (page - 1) * pageSize;
+
   return useQuery({
     queryKey: ['admin-orders', filters],
-    queryFn: async (): Promise<{ orders: Order[]; total: number }> => {
+    queryFn: async (): Promise<{ orders: Order[]; total: number; totalPages: number }> => {
       let query = supabase
         .from('orders')
         .select(`
@@ -43,22 +47,19 @@ export const useAdminOrders = (filters?: {
         query = query.lte('created_at', filters.dateTo);
       }
 
-      if (filters?.limit) {
-        query = query.limit(filters.limit);
-      }
-
-      if (filters?.offset) {
-        query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
-      }
-
-      query = query.order('created_at', { ascending: false });
+      query = query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + pageSize - 1);
 
       const { data, error, count } = await query;
       if (error) throw error;
       
+      const totalPages = Math.ceil((count || 0) / pageSize);
+      
       return { 
         orders: (data || []) as Order[], 
-        total: count || 0 
+        total: count || 0,
+        totalPages
       };
     },
   });
@@ -136,12 +137,12 @@ export const useRecentOrders = (limit: number = 5) => {
   });
 };
 
-// Hook for order mutations
+// Enhanced order mutations with automatic email triggers
 export const useOrderMutations = () => {
   const queryClient = useQueryClient();
 
   const updateOrder = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Order> }) => {
+    mutationFn: async ({ id, updates, sendEmail = false }: { id: string; updates: Partial<Order>; sendEmail?: boolean }) => {
       const { data, error } = await supabase
         .from('orders')
         .update(updates)
@@ -150,6 +151,27 @@ export const useOrderMutations = () => {
         .single();
       
       if (error) throw error;
+
+      // Send automatic email if tracking number is updated and sendEmail is true
+      if (sendEmail && (updates.tracking_number || updates.status === 'delivered')) {
+        try {
+          await supabase.functions.invoke('send-shipping-notification', {
+            body: {
+              orderId: id,
+              orderNumber: data.order_number,
+              customerEmail: data.email,
+              customerName: `${data.shipping_first_name || data.billing_first_name} ${data.shipping_last_name || data.billing_last_name}`,
+              trackingNumber: data.tracking_number,
+              trackingUrl: data.tracking_url,
+              status: data.status,
+            },
+          });
+        } catch (emailError) {
+          console.error('Failed to send email:', emailError);
+          // Don't fail the update if email fails
+        }
+      }
+      
       return data;
     },
     onSuccess: () => {
@@ -166,7 +188,7 @@ export const useOrderMutations = () => {
   });
 
   const updateOrderStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status, sendEmail = true }: { id: string; status: string; sendEmail?: boolean }) => {
       const updates: any = { status };
       
       // Auto-update timestamps based on status
@@ -184,6 +206,26 @@ export const useOrderMutations = () => {
         .single();
       
       if (error) throw error;
+
+      // Send automatic email for delivered status
+      if (sendEmail && status === 'delivered') {
+        try {
+          await supabase.functions.invoke('send-shipping-notification', {
+            body: {
+              orderId: id,
+              orderNumber: data.order_number,
+              customerEmail: data.email,
+              customerName: `${data.shipping_first_name || data.billing_first_name} ${data.shipping_last_name || data.billing_last_name}`,
+              trackingNumber: data.tracking_number,
+              trackingUrl: data.tracking_url,
+              status: 'delivered',
+            },
+          });
+        } catch (emailError) {
+          console.error('Failed to send delivery email:', emailError);
+        }
+      }
+      
       return data;
     },
     onSuccess: () => {

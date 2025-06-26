@@ -14,6 +14,8 @@ const AdminProducts: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [stockFilter, setStockFilter] = useState<string>('all');
   const [currentTab, setCurrentTab] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   // Enable real-time updates
   useAdminProductsRealtime();
@@ -26,6 +28,8 @@ const AdminProducts: React.FC = () => {
     categoryId: categoryFilter !== 'all' ? categoryFilter : undefined,
     isActive: statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined,
     isOutOfStock: stockFilter === 'out-of-stock' ? true : undefined,
+    page: currentPage,
+    pageSize,
   };
 
   const { data: productsData, isLoading: isLoadingProducts } = useAdminProducts(filters);
@@ -33,6 +37,7 @@ const AdminProducts: React.FC = () => {
 
   const products = productsData?.products || [];
   const totalProducts = productsData?.total || 0;
+  const totalPages = productsData?.totalPages || 1;
 
   const handleStatusToggle = (productId: string, currentStatus: boolean) => {
     updateProduct.mutate({
@@ -45,6 +50,15 @@ const AdminProducts: React.FC = () => {
     if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
       deleteProduct.mutate(productId);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1); // Reset to first page when changing page size
   };
 
   const filteredProducts = products.filter(product => {
@@ -70,22 +84,42 @@ const AdminProducts: React.FC = () => {
 
       <AdminProductsFilters
         search={search}
-        setSearch={setSearch}
+        setSearch={(value) => {
+          setSearch(value);
+          setCurrentPage(1);
+        }}
         categoryFilter={categoryFilter}
-        setCategoryFilter={setCategoryFilter}
+        setCategoryFilter={(value) => {
+          setCategoryFilter(value);
+          setCurrentPage(1);
+        }}
         statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
+        setStatusFilter={(value) => {
+          setStatusFilter(value);
+          setCurrentPage(1);
+        }}
         stockFilter={stockFilter}
-        setStockFilter={setStockFilter}
+        setStockFilter={(value) => {
+          setStockFilter(value);
+          setCurrentPage(1);
+        }}
         categories={categories}
       />
 
       <AdminProductsTable
         currentTab={currentTab}
-        setCurrentTab={setCurrentTab}
+        setCurrentTab={(value) => {
+          setCurrentTab(value);
+          setCurrentPage(1);
+        }}
         isLoadingProducts={isLoadingProducts}
         filteredProducts={filteredProducts}
         totalProducts={totalProducts}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
         handleStatusToggle={handleStatusToggle}
         handleDeleteProduct={handleDeleteProduct}
       />

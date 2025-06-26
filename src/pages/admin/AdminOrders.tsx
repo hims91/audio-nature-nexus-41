@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PaginationAdvanced } from '@/components/ui/pagination-advanced';
 import { 
   ShoppingBag, 
   Search, 
@@ -61,6 +61,8 @@ const AdminOrders: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [paymentFilter, setPaymentFilter] = useState<string>('all');
   const [currentTab, setCurrentTab] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
 
   const { data: orderStats, isLoading: isLoadingStats } = useOrderStats();
   
@@ -68,6 +70,8 @@ const AdminOrders: React.FC = () => {
     search: search || undefined,
     status: statusFilter !== 'all' ? statusFilter : undefined,
     paymentStatus: paymentFilter !== 'all' ? paymentFilter : undefined,
+    page: currentPage,
+    pageSize,
   };
 
   const { data: ordersData, isLoading: isLoadingOrders } = useAdminOrders(filters);
@@ -75,9 +79,19 @@ const AdminOrders: React.FC = () => {
 
   const orders = ordersData?.orders || [];
   const totalOrders = ordersData?.total || 0;
+  const totalPages = ordersData?.totalPages || 1;
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
     updateOrderStatus.mutate({ id: orderId, status: newStatus });
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1); // Reset to first page when changing page size
   };
 
   const filteredOrders = orders.filter(order => {
@@ -201,12 +215,18 @@ const AdminOrders: React.FC = () => {
                 <Input
                   placeholder="Search orders..."
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1); // Reset to first page when searching
+                  }}
                   className="pl-10"
                 />
               </div>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(value) => {
+                setStatusFilter(value);
+                setCurrentPage(1);
+              }}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
@@ -220,7 +240,10 @@ const AdminOrders: React.FC = () => {
                 </SelectContent>
               </Select>
 
-              <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+              <Select value={paymentFilter} onValueChange={(value) => {
+                setPaymentFilter(value);
+                setCurrentPage(1);
+              }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Payment Status" />
                 </SelectTrigger>
@@ -252,7 +275,10 @@ const AdminOrders: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs value={currentTab} onValueChange={setCurrentTab}>
+            <Tabs value={currentTab} onValueChange={(value) => {
+              setCurrentTab(value);
+              setCurrentPage(1);
+            }}>
               <TabsList className="mb-4">
                 <TabsTrigger value="all">All Orders</TabsTrigger>
                 <TabsTrigger value="pending">Pending</TabsTrigger>
@@ -278,104 +304,118 @@ const AdminOrders: React.FC = () => {
                     </p>
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Order</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Payment</TableHead>
-                        <TableHead>Total</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredOrders.map((order) => {
-                        const statusInfo = statusConfig[order.status as keyof typeof statusConfig];
-                        const paymentInfo = paymentStatusConfig[order.payment_status as keyof typeof paymentStatusConfig];
-                        const StatusIcon = statusInfo?.icon || Package;
+                  <>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Order</TableHead>
+                          <TableHead>Customer</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Payment</TableHead>
+                          <TableHead>Total</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredOrders.map((order) => {
+                          const statusInfo = statusConfig[order.status as keyof typeof statusConfig];
+                          const paymentInfo = paymentStatusConfig[order.payment_status as keyof typeof paymentStatusConfig];
+                          const StatusIcon = statusInfo?.icon || Package;
 
-                        return (
-                          <TableRow key={order.id}>
-                            <TableCell>
-                              <div>
-                                <p className="font-medium">{order.order_number}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {order.items?.length || 0} items
-                                </p>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div>
-                                <p className="font-medium">
-                                  {order.shipping_first_name || order.billing_first_name || 'Guest'} {order.shipping_last_name || order.billing_last_name || ''}
-                                </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {order.email}
-                                </p>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={statusInfo?.color || 'bg-gray-100 text-gray-800'}>
-                                <StatusIcon className="h-3 w-3 mr-1" />
-                                {statusInfo?.label || order.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={paymentInfo?.color || 'bg-gray-100 text-gray-800'}>
-                                {paymentInfo?.label || order.payment_status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <p className="font-medium">{formatPrice(order.total_cents)}</p>
-                            </TableCell>
-                            <TableCell>
-                              <p className="text-sm">{formatDate(order.created_at)}</p>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <Link to={`/admin/orders/${order.id}`}>
-                                      <Eye className="h-4 w-4 mr-2" />
-                                      View Details
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  {order.status === 'pending' && (
-                                    <DropdownMenuItem
-                                      onClick={() => handleStatusChange(order.id, 'processing')}
-                                    >
-                                      Mark as Processing
+                          return (
+                            <TableRow key={order.id}>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium">{order.order_number}</p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    {order.items?.length || 0} items
+                                  </p>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium">
+                                    {order.shipping_first_name || order.billing_first_name || 'Guest'} {order.shipping_last_name || order.billing_last_name || ''}
+                                  </p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    {order.email}
+                                  </p>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={statusInfo?.color || 'bg-gray-100 text-gray-800'}>
+                                  <StatusIcon className="h-3 w-3 mr-1" />
+                                  {statusInfo?.label || order.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={paymentInfo?.color || 'bg-gray-100 text-gray-800'}>
+                                  {paymentInfo?.label || order.payment_status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <p className="font-medium">{formatPrice(order.total_cents)}</p>
+                              </TableCell>
+                              <TableCell>
+                                <p className="text-sm">{formatDate(order.created_at)}</p>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem asChild>
+                                      <Link to={`/admin/orders/${order.id}`}>
+                                        <Eye className="h-4 w-4 mr-2" />
+                                        View Details
+                                      </Link>
                                     </DropdownMenuItem>
-                                  )}
-                                  {order.status === 'processing' && (
-                                    <DropdownMenuItem
-                                      onClick={() => handleStatusChange(order.id, 'shipped')}
-                                    >
-                                      Mark as Shipped
-                                    </DropdownMenuItem>
-                                  )}
-                                  {order.status === 'shipped' && (
-                                    <DropdownMenuItem
-                                      onClick={() => handleStatusChange(order.id, 'delivered')}
-                                    >
-                                      Mark as Delivered
-                                    </DropdownMenuItem>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                                    {order.status === 'pending' && (
+                                      <DropdownMenuItem
+                                        onClick={() => handleStatusChange(order.id, 'processing')}
+                                      >
+                                        Mark as Processing
+                                      </DropdownMenuItem>
+                                    )}
+                                    {order.status === 'processing' && (
+                                      <DropdownMenuItem
+                                        onClick={() => handleStatusChange(order.id, 'shipped')}
+                                      >
+                                        Mark as Shipped
+                                      </DropdownMenuItem>
+                                    )}
+                                    {order.status === 'shipped' && (
+                                      <DropdownMenuItem
+                                        onClick={() => handleStatusChange(order.id, 'delivered')}
+                                      >
+                                        Mark as Delivered
+                                      </DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                    
+                    <PaginationAdvanced
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      pageSize={pageSize}
+                      totalItems={totalOrders}
+                      onPageChange={handlePageChange}
+                      onPageSizeChange={handlePageSizeChange}
+                      pageSizeOptions={[10, 15, 25, 50]}
+                      showPageSizeSelector={true}
+                      showItemCount={true}
+                    />
+                  </>
                 )}
               </TabsContent>
             </Tabs>

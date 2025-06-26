@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PaginationAdvanced } from '@/components/ui/pagination-advanced';
 import { 
   Package, 
   MoreHorizontal,
@@ -37,6 +37,11 @@ interface ProductsTableProps {
   isLoadingProducts: boolean;
   filteredProducts: any[];
   totalProducts: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
   handleStatusToggle: (productId: string, currentStatus: boolean) => void;
   handleDeleteProduct: (productId: string) => void;
 }
@@ -47,6 +52,11 @@ const AdminProductsTable: React.FC<ProductsTableProps> = ({
   isLoadingProducts,
   filteredProducts,
   totalProducts,
+  totalPages,
+  currentPage,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
   handleStatusToggle,
   handleDeleteProduct
 }) => {
@@ -89,129 +99,142 @@ const AdminProductsTable: React.FC<ProductsTableProps> = ({
                   </Button>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Stock</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredProducts.map((product) => {
-                      const primaryImage = product.images?.find(img => img.is_primary) || product.images?.[0];
-                      const isLowStock = product.track_inventory && product.inventory_quantity <= 5;
-                      const isOutOfStock = product.track_inventory && product.inventory_quantity <= 0;
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Stock</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredProducts.map((product) => {
+                        const primaryImage = product.images?.find(img => img.is_primary) || product.images?.[0];
+                        const isLowStock = product.track_inventory && product.inventory_quantity <= 5;
+                        const isOutOfStock = product.track_inventory && product.inventory_quantity <= 0;
 
-                      return (
-                        <TableRow key={product.id}>
-                          <TableCell>
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                {primaryImage ? (
-                                  <img
-                                    src={primaryImage.image_url}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center">
-                                    <Package className="h-4 w-4 text-gray-400" />
-                                  </div>
+                        return (
+                          <TableRow key={product.id}>
+                            <TableCell>
+                              <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                  {primaryImage ? (
+                                    <img
+                                      src={primaryImage.image_url}
+                                      alt={product.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <Package className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="font-medium">{product.name}</p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    SKU: {product.sku || 'N/A'}
+                                  </p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {product.category?.name || 'Uncategorized'}
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <p className="font-medium">{formatPrice(product.price_cents)}</p>
+                                {product.compare_at_price_cents && (
+                                  <p className="text-sm text-gray-500 line-through">
+                                    {formatPrice(product.compare_at_price_cents)}
+                                  </p>
                                 )}
                               </div>
-                              <div>
-                                <p className="font-medium">{product.name}</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  SKU: {product.sku || 'N/A'}
-                                </p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {product.category?.name || 'Uncategorized'}
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <p className="font-medium">{formatPrice(product.price_cents)}</p>
-                              {product.compare_at_price_cents && (
-                                <p className="text-sm text-gray-500 line-through">
-                                  {formatPrice(product.compare_at_price_cents)}
-                                </p>
+                            </TableCell>
+                            <TableCell>
+                              {product.track_inventory ? (
+                                <div className="flex items-center space-x-2">
+                                  <span className={`font-medium ${
+                                    isOutOfStock ? 'text-red-600' : 
+                                    isLowStock ? 'text-yellow-600' : 
+                                    'text-green-600'
+                                  }`}>
+                                    {product.inventory_quantity}
+                                  </span>
+                                  {isLowStock && (
+                                    <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-gray-500">Not tracked</span>
                               )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {product.track_inventory ? (
+                            </TableCell>
+                            <TableCell>
                               <div className="flex items-center space-x-2">
-                                <span className={`font-medium ${
-                                  isOutOfStock ? 'text-red-600' : 
-                                  isLowStock ? 'text-yellow-600' : 
-                                  'text-green-600'
-                                }`}>
-                                  {product.inventory_quantity}
-                                </span>
-                                {isLowStock && (
-                                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                                <Badge variant={product.is_active ? 'default' : 'secondary'}>
+                                  {product.is_active ? 'Active' : 'Inactive'}
+                                </Badge>
+                                {product.is_featured && (
+                                  <Badge variant="outline">Featured</Badge>
                                 )}
                               </div>
-                            ) : (
-                              <span className="text-gray-500">Not tracked</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <Badge variant={product.is_active ? 'default' : 'secondary'}>
-                                {product.is_active ? 'Active' : 'Inactive'}
-                              </Badge>
-                              {product.is_featured && (
-                                <Badge variant="outline">Featured</Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem asChild>
-                                  <Link to={`/shop/products/${product.slug}`}>
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    View
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link to={`/admin/products/${product.id}/edit`}>
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Edit
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleStatusToggle(product.id, product.is_active)}
-                                >
-                                  {product.is_active ? 'Deactivate' : 'Activate'}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleDeleteProduct(product.id)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem asChild>
+                                    <Link to={`/shop/products/${product.slug}`}>
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      View
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild>
+                                    <Link to={`/admin/products/${product.id}/edit`}>
+                                      <Edit className="h-4 w-4 mr-2" />
+                                      Edit
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => handleStatusToggle(product.id, product.is_active)}
+                                  >
+                                    {product.is_active ? 'Deactivate' : 'Activate'}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => handleDeleteProduct(product.id)}
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                  <PaginationAdvanced
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    pageSize={pageSize}
+                    totalItems={totalProducts}
+                    onPageChange={onPageChange}
+                    onPageSizeChange={onPageSizeChange}
+                    pageSizeOptions={[15, 20, 25, 50]}
+                    showPageSizeSelector={true}
+                    showItemCount={true}
+                  />
+                </>
               )}
             </TabsContent>
           </Tabs>
