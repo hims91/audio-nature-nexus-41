@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import UnifiedNavbar from '@/components/UnifiedNavbar';
 import Footer from '@/components/Footer';
 import { ArrowLeft } from 'lucide-react';
@@ -16,27 +16,26 @@ const ForgotPassword: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const { toast } = useToast();
+  const { sendPasswordResetEmail } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
+      const { error } = await sendPasswordResetEmail(email);
 
       if (error) {
         toast({
           title: "Error",
-          description: error.message,
+          description: error.message || "Failed to send password reset email.",
           variant: "destructive",
         });
       } else {
         setSent(true);
         toast({
-          title: "Check your email",
-          description: "We've sent you a password reset link.",
+          title: "Email sent successfully",
+          description: "Please check your email for password reset instructions.",
         });
       }
     } catch (error) {
@@ -66,7 +65,7 @@ const ForgotPassword: React.FC = () => {
                   <ArrowLeft className="h-5 w-5" />
                 </Link>
                 <CardTitle className="text-2xl text-nature-forest dark:text-nature-leaf">
-                  Forgot Password
+                  Reset Password
                 </CardTitle>
               </div>
               <CardDescription>
@@ -104,14 +103,14 @@ const ForgotPassword: React.FC = () => {
               ) : (
                 <div className="text-center space-y-4">
                   <div className="text-green-600 dark:text-green-400">
-                    ✓ Password reset link sent successfully
+                    ✓ Password reset email sent successfully
                   </div>
                   <Button 
                     onClick={() => setSent(false)}
                     variant="outline"
                     className="w-full"
                   >
-                    Send another link
+                    Send another email
                   </Button>
                 </div>
               )}

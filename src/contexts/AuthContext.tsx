@@ -7,9 +7,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  sendPasswordResetEmail: (email: string) => Promise<{ error: any }>;
+  resetPassword: (token: string, newPassword: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,10 +32,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Send welcome email for new signups (but not for OAuth or existing users)
+        if (event === 'SIGNED_UP' && session?.user && !session.user.app_metadata?.provider) {
+          console.log('New user signed up, sending welcome email');
+          setTimeout(async () => {
+            try {
+              const { data: profile } = await supabase
+                .from('user_profiles')
+                .select('first_name, last_name')
+                .eq('user_id', session.user.id)
+                .single();
+
+              await supabase.functions.invoke('send-welcome-email', {
+                body: {
+                  email: session.user.email,
+                  firstName: profile?.first_name || 'User',
+                  lastName: profile?.last_name || ''
+                }
+              });
+            } catch (error) {
+              console.error('Failed to send welcome email:', error);
+            }
+          }, 1000);
+        }
       }
     );
 
@@ -47,14 +73,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: redirectUrl,
+        data: {
+          first_name: firstName || '',
+          last_name: lastName || ''
+        }
       }
     });
     return { error };
@@ -72,6 +102,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await supabase.auth.signOut();
   };
 
+  const sendPasswordResetEmail = async (email: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-password-reset-email', {
+        body: { email }
+      });
+      return { error };
+    } catch (error: any) {
+      return { error };
+    }
+  };
+
+  const resetPassword = async (token: string, newPassword: string) => {
+    try {
+      // Verify the token first
+      const { data: tokenData, error: verifyError } = await supabase
+        .rpc('verify_password_reset_token', { reset_token: token });
+
+      if (verifyError || !tokenData?.[0]?.is_valid) {
+        return { error: new Error('Invalid or expired reset token') };
+      }
+
+      // Update the password using Supabase auth
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      return { error };
+    } catch (error: any) {
+      return { error };
+    }
+  };
+
   const value = {
     user,
     session,
@@ -79,6 +141,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signIn,
     signOut,
+    sendPasswordResetEmail,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

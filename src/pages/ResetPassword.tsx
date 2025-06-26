@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import UnifiedNavbar from '@/components/UnifiedNavbar';
 import Footer from '@/components/Footer';
 import { Eye, EyeOff } from 'lucide-react';
@@ -20,21 +20,20 @@ const ResetPassword: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { resetPassword } = useAuth();
+
+  const token = searchParams.get('token');
 
   useEffect(() => {
-    // Check if we have the necessary tokens in the URL
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    
-    if (!accessToken || !refreshToken) {
+    if (!token) {
       toast({
         title: "Invalid reset link",
-        description: "This password reset link is invalid or has expired.",
+        description: "This password reset link is invalid or missing.",
         variant: "destructive",
       });
       navigate('/forgot-password');
     }
-  }, [searchParams, navigate, toast]);
+  }, [token, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,23 +56,23 @@ const ResetPassword: React.FC = () => {
       return;
     }
 
+    if (!token) return;
+
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password
-      });
+      const { error } = await resetPassword(token, password);
 
       if (error) {
         toast({
           title: "Error updating password",
-          description: error.message,
+          description: error.message || "Failed to update password. The reset link may be invalid or expired.",
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Password updated",
-          description: "Your password has been successfully updated.",
+          title: "Password updated successfully",
+          description: "Your password has been updated. You can now sign in with your new password.",
         });
         navigate('/auth');
       }
@@ -88,6 +87,10 @@ const ResetPassword: React.FC = () => {
     }
   };
 
+  if (!token) {
+    return null; // Will redirect in useEffect
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-nature-cream/30 via-white to-nature-sage/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <UnifiedNavbar />
@@ -97,7 +100,7 @@ const ResetPassword: React.FC = () => {
           <Card className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 shadow-2xl">
             <CardHeader>
               <CardTitle className="text-2xl text-center text-nature-forest dark:text-nature-leaf">
-                Reset Password
+                Set New Password
               </CardTitle>
               <CardDescription className="text-center">
                 Enter your new password below
@@ -132,7 +135,7 @@ const ResetPassword: React.FC = () => {
                 
                 <div>
                   <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Confirm Password
+                    Confirm New Password
                   </Label>
                   <div className="relative mt-1">
                     <Input

@@ -22,7 +22,7 @@ export interface AuthSession {
 }
 
 export const useEnhancedAuth = () => {
-  const { signIn, signUp, signOut, user, session, loading } = useAuth();
+  const { signIn, signUp, signOut, user, session, loading, sendPasswordResetEmail, resetPassword } = useAuth();
   const { toast } = useToast();
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
 
@@ -102,7 +102,7 @@ export const useEnhancedAuth = () => {
   };
 
   // Enhanced sign up with validation
-  const enhancedSignUp = async (email: string, password: string) => {
+  const enhancedSignUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     return authRateLimit.attemptAction(async () => {
       // Validate inputs
       const sanitizedEmail = sanitizeText(email);
@@ -115,7 +115,10 @@ export const useEnhancedAuth = () => {
         throw new Error(errors.join(', '));
       }
 
-      return await signUp(sanitizedEmail, password);
+      const sanitizedFirstName = firstName ? sanitizeText(firstName) : '';
+      const sanitizedLastName = lastName ? sanitizeText(lastName) : '';
+
+      return await signUp(sanitizedEmail, password, sanitizedFirstName, sanitizedLastName);
     });
   };
 
@@ -224,13 +227,15 @@ export const useEnhancedAuth = () => {
   };
 
   return {
-    // Original auth methods
+    // Original auth methods with enhancements
     signIn: enhancedSignIn,
     signUp: enhancedSignUp,
     signOut,
     user,
     session,
     loading,
+    sendPasswordResetEmail,
+    resetPassword,
     
     // Enhanced social auth methods
     signInWithGoogle,
