@@ -447,6 +447,33 @@ export type Database = {
           },
         ]
       }
+      password_reset_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          token: string
+          used: boolean | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          token: string
+          used?: boolean | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          used?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_retry_logs: {
         Row: {
           attempted_at: string
@@ -1143,6 +1170,9 @@ export type Database = {
           bio: string | null
           company: string | null
           created_at: string
+          email_verification_expires_at: string | null
+          email_verification_token: string | null
+          email_verified: boolean | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -1166,6 +1196,9 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string
+          email_verification_expires_at?: string | null
+          email_verification_token?: string | null
+          email_verified?: boolean | null
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -1189,6 +1222,9 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string
+          email_verification_expires_at?: string | null
+          email_verification_token?: string | null
+          email_verified?: boolean | null
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -1214,7 +1250,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_password_reset_token: {
+        Args: { user_email: string }
+        Returns: {
+          token: string
+          user_id: string
+          expires_at: string
+        }[]
+      }
       generate_order_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_secure_token: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -1269,6 +1317,13 @@ export type Database = {
           discount_id: string
           discount_amount_cents: number
           error_message: string
+        }[]
+      }
+      verify_password_reset_token: {
+        Args: { reset_token: string }
+        Returns: {
+          user_id: string
+          is_valid: boolean
         }[]
       }
     }
