@@ -14,7 +14,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-nature-mist dark:bg-gray-900">
+    <div className="flex h-screen bg-white">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -33,12 +33,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <BrandContainer variant="glass" className="shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <BrandContainer variant="glass" className="shadow-sm border-b border-gray-200">
           <div className="flex items-center justify-between px-4 py-3">
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden text-nature-forest dark:text-white hover:bg-nature-mist dark:hover:bg-gray-800"
+              className="lg:hidden text-nature-forest hover:bg-nature-mist"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="h-5 w-5" />

@@ -80,7 +80,7 @@ const AdminLayout: React.FC = () => {
 
   return (
     <AdminErrorBoundary>
-      <div className="min-h-screen bg-nature-mist dark:bg-gray-900">
+      <div className="min-h-screen bg-white">
         {/* Mobile sidebar backdrop */}
         {sidebarOpen && (
           <div 
@@ -93,21 +93,21 @@ const AdminLayout: React.FC = () => {
         <BrandContainer 
           variant="glass"
           className={cn(
-            "fixed inset-y-0 left-0 z-50 w-64 shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 border-r border-gray-200 dark:border-gray-700",
+            "fixed inset-y-0 left-0 z-50 w-64 shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 border-r border-gray-200",
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
-          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
             <div className="flex items-center">
               <BrandLogo size="sm" showText={false} />
-              <span className="ml-2 text-lg font-semibold text-nature-forest dark:text-white">
+              <span className="ml-2 text-lg font-semibold text-nature-forest">
                 Admin Panel
               </span>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden text-nature-forest dark:text-white hover:bg-nature-mist dark:hover:bg-gray-800"
+              className="lg:hidden text-nature-forest hover:bg-nature-mist"
               onClick={() => setSidebarOpen(false)}
             >
               <X className="h-4 w-4" />
@@ -126,13 +126,13 @@ const AdminLayout: React.FC = () => {
                         "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
                         itemIsActive
                           ? "bg-nature-forest text-white shadow-sm"
-                          : "text-nature-forest dark:text-gray-200 hover:bg-nature-sage/20 dark:hover:bg-gray-700"
+                          : "text-nature-forest hover:bg-nature-sage/20"
                       )}
                       onClick={() => setSidebarOpen(false)}
                     >
                       <item.icon className={cn(
                         "h-5 w-5 mr-3",
-                        itemIsActive ? "text-white" : "text-nature-leaf dark:text-gray-400"
+                        itemIsActive ? "text-white" : "text-nature-leaf"
                       )} />
                       {item.name}
                     </Link>
@@ -145,7 +145,7 @@ const AdminLayout: React.FC = () => {
           <div className="absolute bottom-4 left-4 right-4">
             <Link
               to="/"
-              className="flex items-center px-4 py-2 text-sm text-nature-bark dark:text-gray-400 hover:text-nature-forest dark:hover:text-white transition-colors"
+              className="flex items-center px-4 py-2 text-sm text-nature-bark hover:text-nature-forest transition-colors"
             >
               ← Back to Website
             </Link>
@@ -157,19 +157,19 @@ const AdminLayout: React.FC = () => {
           {/* Top bar */}
           <BrandContainer 
             variant="glass" 
-            className="h-16 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-6"
+            className="h-16 border-b border-gray-200 flex items-center justify-between px-4 lg:px-6"
           >
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden text-nature-forest dark:text-white hover:bg-nature-mist dark:hover:bg-gray-800"
+              className="lg:hidden text-nature-forest hover:bg-nature-mist"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </Button>
             
             <div className="flex items-center justify-between w-full">
-              <span className="text-sm text-nature-bark dark:text-gray-400">
+              <span className="text-sm text-nature-bark">
                 Terra Echo Studios Admin
               </span>
               

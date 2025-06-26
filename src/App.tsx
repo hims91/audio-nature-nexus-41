@@ -1,7 +1,7 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from './components/theme-provider';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -57,59 +57,57 @@ function App() {
         <HelmetProvider>
           <AuthProvider>
             <EnhancedAuthProvider>
-              <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-                <DatabaseOptimizerProvider queryClient={queryClient}>
-                  <MemoryOptimizer>
-                    <ErrorTrackerProvider>
-                      <Router>
-                        <div className="min-h-screen bg-gradient-to-br from-nature-mist via-white to-nature-sage/10 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-                          <PWAInstallerEnhanced />
-                          <SEOManager />
-                          <Routes>
-                            <Route path="/" element={<Index />} />
-                            <Route path="/shop" element={<ShopPage />} />
-                            <Route path="/shop/products/:slug" element={<ProductDetailPage />} />
-                            <Route path="/cart" element={<CartPage />} />
-                            <Route path="/checkout" element={<CheckoutPage />} />
-                            <Route path="/order-success" element={<OrderSuccessPage />} />
-                            <Route path="/order-cancel" element={<OrderCancelPage />} />
-                            <Route path="/auth" element={<AuthEnhanced />} />
-                            <Route path="/profile" element={
-                              <ProtectedRoute>
-                                <ProfilePage />
-                              </ProtectedRoute>
-                            } />
-                            <Route path="/dashboard/*" element={
-                              <ProtectedRoute>
-                                <DashboardPage />
-                              </ProtectedRoute>
-                            } />
-                            <Route path="/contact" element={<ContactPage />} />
-                            <Route path="/portfolio" element={<PortfolioPage />} />
-                            <Route path="/admin/*" element={
-                              <ProtectedRoute requiredRole="admin">
-                                <AdminLayout />
-                              </ProtectedRoute>
-                            } />
-                            <Route path="/orders" element={
-                              <ProtectedRoute>
-                                <CustomerOrderHistory />
-                              </ProtectedRoute>
-                            } />
-                            <Route path="/orders/:orderId" element={
-                              <ProtectedRoute>
-                                <OrderDetailPage />
-                              </ProtectedRoute>
-                            } />
-                            <Route path="*" element={<NotFound />} />
-                          </Routes>
-                          <Toaster />
-                        </div>
-                      </Router>
-                    </ErrorTrackerProvider>
-                  </MemoryOptimizer>
-                </DatabaseOptimizerProvider>
-              </ThemeProvider>
+              <DatabaseOptimizerProvider queryClient={queryClient}>
+                <MemoryOptimizer>
+                  <ErrorTrackerProvider>
+                    <Router>
+                      <div className="min-h-screen bg-white">
+                        <PWAInstallerEnhanced />
+                        <SEOManager />
+                        <Routes>
+                          <Route path="/" element={<Index />} />
+                          <Route path="/shop" element={<ShopPage />} />
+                          <Route path="/shop/products/:slug" element={<ProductDetailPage />} />
+                          <Route path="/cart" element={<CartPage />} />
+                          <Route path="/checkout" element={<CheckoutPage />} />
+                          <Route path="/order-success" element={<OrderSuccessPage />} />
+                          <Route path="/order-cancel" element={<OrderCancelPage />} />
+                          <Route path="/auth" element={<AuthEnhanced />} />
+                          <Route path="/profile" element={
+                            <ProtectedRoute>
+                              <ProfilePage />
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/dashboard/*" element={
+                            <ProtectedRoute>
+                              <DashboardPage />
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/contact" element={<ContactPage />} />
+                          <Route path="/portfolio" element={<PortfolioPage />} />
+                          <Route path="/admin/*" element={
+                            <ProtectedRoute requiredRole="admin">
+                              <AdminLayout />
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/orders" element={
+                            <ProtectedRoute>
+                              <CustomerOrderHistory />
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/orders/:orderId" element={
+                            <ProtectedRoute>
+                              <OrderDetailPage />
+                            </ProtectedRoute>
+                          } />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                        <Toaster />
+                      </div>
+                    </Router>
+                  </ErrorTrackerProvider>
+                </MemoryOptimizer>
+              </DatabaseOptimizerProvider>
             </EnhancedAuthProvider>
           </AuthProvider>
         </HelmetProvider>

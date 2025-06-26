@@ -22,11 +22,11 @@ const AdminPortfolio: React.FC = () => {
   } = usePortfolioManager();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-white">
       {/* Mobile-first responsive layout */}
       <div className="flex flex-col lg:flex-row h-screen">
         {/* Sidebar - Full width on mobile, fixed width on desktop */}
-        <div className="w-full lg:w-80 bg-white dark:bg-gray-800 shadow-lg overflow-hidden">
+        <div className="w-full lg:w-80 bg-white shadow-lg overflow-hidden">
           <PortfolioHeader 
             userEmail={user?.email}
             onCreateNew={handleCreateNew}
@@ -50,10 +50,10 @@ const AdminPortfolio: React.FC = () => {
             <div className="mb-4 lg:mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div className="mb-4 sm:mb-0">
-                  <h1 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="text-xl lg:text-2xl font-bold text-gray-900">
                     Portfolio Management
                   </h1>
-                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400">
+                  <p className="text-sm lg:text-base text-gray-600">
                     Create and manage your portfolio items
                   </p>
                 </div>
