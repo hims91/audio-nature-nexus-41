@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
@@ -325,7 +324,8 @@ const handler = async (req: Request): Promise<Response> => {
       itemCount: order.items?.length || 0
     });
 
-    const fromEmail = "Terra Echo Studios <noreply@terraechostudio.com>";
+    // Use Resend's verified test domain for now
+    const fromEmail = "Terra Echo Studios <onboarding@resend.dev>";
     const adminEmail = "TerraEchoStudios@gmail.com";
 
     // Send customer confirmation email
