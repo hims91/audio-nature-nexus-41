@@ -63,7 +63,7 @@ export const useEnhancedAuth = () => {
 
       if (error) {
         toast({
-          title: "Google Sign In Error",
+          title: "Gmail Sign In Error",
           description: error.message,
           variant: "destructive",
         });
@@ -73,51 +73,8 @@ export const useEnhancedAuth = () => {
       return { error: null };
     } catch (error: any) {
       toast({
-        title: "Google Sign In Error",
-        description: error.message || "An unexpected error occurred during Google sign in.",
-        variant: "destructive",
-      });
-      return { error };
-    } finally {
-      setSocialLoading(null);
-    }
-  };
-
-  const signInWithTwitter = async () => {
-    if (!authRateLimit.checkRateLimit()) return { error: new Error('Rate limit exceeded') };
-    
-    setSocialLoading('twitter');
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      // Generate CSRF token for OAuth flow
-      const csrfToken = generateCSRFToken();
-      setCSRFToken(csrfToken);
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'twitter',
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            state: csrfToken
-          }
-        },
-      });
-
-      if (error) {
-        toast({
-          title: "X Sign In Error",
-          description: error.message,
-          variant: "destructive",
-        });
-        return { error };
-      }
-
-      return { error: null };
-    } catch (error: any) {
-      toast({
-        title: "X Sign In Error",
-        description: error.message || "An unexpected error occurred during X sign in.",
+        title: "Gmail Sign In Error",
+        description: error.message || "An unexpected error occurred during Gmail sign in.",
         variant: "destructive",
       });
       return { error };
@@ -277,8 +234,7 @@ export const useEnhancedAuth = () => {
     
     // Enhanced social auth methods
     signInWithGoogle,
-    signInWithTwitter,
-    socialLoading,
+    socialLoading: socialLoading === 'google' ? 'google' : null,
     
     // Session management
     trackLoginSession,
