@@ -21,9 +21,6 @@ import CheckoutPage from '@/components/shop/CheckoutPage';
 import OrderSuccessPage from '@/pages/OrderSuccessPage';
 import OrderCancelPage from '@/pages/OrderCancelPage';
 import AuthEnhanced from '@/pages/AuthEnhanced';
-import Auth from '@/pages/Auth';
-import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
 import ProfilePage from '@/pages/ProfilePage';
 import DashboardPage from '@/pages/DashboardPage';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -76,9 +73,6 @@ function App() {
                           <Route path="/order-success" element={<OrderSuccessPage />} />
                           <Route path="/order-cancel" element={<OrderCancelPage />} />
                           <Route path="/auth" element={<AuthEnhanced />} />
-                          <Route path="/auth-legacy" element={<Auth />} />
-                          <Route path="/forgot-password" element={<ForgotPassword />} />
-                          <Route path="/reset-password" element={<ResetPassword />} />
                           <Route path="/profile" element={
                             <ProtectedRoute>
                               <ProfilePage />
