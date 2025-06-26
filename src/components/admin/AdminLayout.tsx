@@ -17,7 +17,7 @@ import {
   TrendingDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BrandLogo } from "@/components/enhanced/BrandConsistencyManager";
+import { BrandLogo, BrandContainer } from "@/components/enhanced/BrandConsistencyManager";
 import UserProfileDropdown from "@/components/auth/UserProfileDropdown";
 import { useState } from "react";
 
@@ -80,7 +80,7 @@ const AdminLayout: React.FC = () => {
 
   return (
     <AdminErrorBoundary>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-nature-mist dark:bg-gray-900">
         {/* Mobile sidebar backdrop */}
         {sidebarOpen && (
           <div 
@@ -90,21 +90,24 @@ const AdminLayout: React.FC = () => {
         )}
 
         {/* Sidebar */}
-        <div className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}>
+        <BrandContainer 
+          variant="glass"
+          className={cn(
+            "fixed inset-y-0 left-0 z-50 w-64 shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 border-r border-gray-200 dark:border-gray-700",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center">
               <BrandLogo size="sm" showText={false} />
-              <span className="ml-2 text-lg font-semibold text-gray-900 dark:text-white">
+              <span className="ml-2 text-lg font-semibold text-nature-forest dark:text-white">
                 Admin Panel
               </span>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden"
+              className="lg:hidden text-nature-forest dark:text-white hover:bg-nature-mist dark:hover:bg-gray-800"
               onClick={() => setSidebarOpen(false)}
             >
               <X className="h-4 w-4" />
@@ -122,14 +125,14 @@ const AdminLayout: React.FC = () => {
                       className={cn(
                         "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
                         itemIsActive
-                          ? "bg-nature-forest text-white"
-                          : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          ? "bg-nature-forest text-white shadow-sm"
+                          : "text-nature-forest dark:text-gray-200 hover:bg-nature-sage/20 dark:hover:bg-gray-700"
                       )}
                       onClick={() => setSidebarOpen(false)}
                     >
                       <item.icon className={cn(
                         "h-5 w-5 mr-3",
-                        itemIsActive ? "text-white" : "text-gray-400"
+                        itemIsActive ? "text-white" : "text-nature-leaf dark:text-gray-400"
                       )} />
                       {item.name}
                     </Link>
@@ -142,35 +145,38 @@ const AdminLayout: React.FC = () => {
           <div className="absolute bottom-4 left-4 right-4">
             <Link
               to="/"
-              className="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              className="flex items-center px-4 py-2 text-sm text-nature-bark dark:text-gray-400 hover:text-nature-forest dark:hover:text-white transition-colors"
             >
               ← Back to Website
             </Link>
           </div>
-        </div>
+        </BrandContainer>
 
         {/* Main content */}
         <div className="lg:pl-64">
           {/* Top bar */}
-          <div className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-6">
+          <BrandContainer 
+            variant="glass" 
+            className="h-16 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-6"
+          >
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden"
+              className="lg:hidden text-nature-forest dark:text-white hover:bg-nature-mist dark:hover:bg-gray-800"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </Button>
             
             <div className="flex items-center justify-between w-full">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-nature-bark dark:text-gray-400">
                 Terra Echo Studios Admin
               </span>
               
               {/* User Profile Dropdown in top bar */}
               <UserProfileDropdown />
             </div>
-          </div>
+          </BrandContainer>
 
           {/* Page content */}
           <main className="p-4 lg:p-6">
