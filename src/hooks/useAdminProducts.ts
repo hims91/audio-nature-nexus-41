@@ -167,7 +167,7 @@ export const useProductMutations = () => {
     mutationFn: async (id: string) => {
       console.log('Attempting to delete product:', id);
       
-      // Use the new database function to safely delete products with order history
+      // Use the updated database function to safely delete products with order history
       const { data, error } = await supabase.rpc('delete_product_with_orders', {
         product_id_param: id
       });
@@ -176,25 +176,27 @@ export const useProductMutations = () => {
       
       if (error) {
         console.error('Database error during deletion:', error);
-        throw error;
+        throw new Error(`Database error: ${error.message}`);
       }
       
       // The function returns true on success, false on failure
       if (data !== true) {
         console.error('Delete function returned false, indicating failure');
-        throw new Error('Product deletion failed - this may be due to database constraints or other issues');
+        throw new Error('Product deletion failed. The product may not exist or there may be database constraints preventing deletion.');
       }
       
+      console.log('Product deleted successfully');
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       queryClient.invalidateQueries({ queryKey: ['product-stats'] });
-      toast.success('Product deleted successfully');
+      toast.success('Product deleted successfully. Order history has been preserved.');
     },
     onError: (error: any) => {
       console.error('Error deleting product:', error);
-      toast.error('Failed to delete product');
+      const errorMessage = error.message || 'Failed to delete product';
+      toast.error(errorMessage);
     },
   });
 

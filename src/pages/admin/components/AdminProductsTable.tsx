@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -62,10 +63,10 @@ const AdminProductsTable: React.FC<ProductsTableProps> = ({
 }) => {
   const handleDeleteWithConfirmation = (productId: string, productName: string) => {
     const isConfirmed = confirm(
-      `Are you sure you want to PERMANENTLY DELETE "${productName}"?\n\n` +
-      'WARNING: This will permanently remove the product from the system.\n' +
-      'This action cannot be undone and may affect order history.\n\n' +
-      'Consider deactivating the product instead if it has existing orders.'
+      `Are you sure you want to DELETE "${productName}"?\n\n` +
+      'This will remove the product from your catalog, but order history will be preserved.\n' +
+      'This action cannot be undone.\n\n' +
+      'Click OK to proceed with deletion.'
     );
     
     if (isConfirmed) {
