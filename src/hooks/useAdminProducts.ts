@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Product, ProductCategory, ProductVariant, ProductImage } from '@/types/ecommerce';
@@ -164,12 +165,18 @@ export const useProductMutations = () => {
 
   const deleteProduct = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
+      // Use the new database function to safely delete products with order history
+      const { data, error } = await supabase.rpc('delete_product_with_orders', {
+        product_id_param: id
+      });
       
       if (error) throw error;
+      
+      if (!data) {
+        throw new Error('Failed to delete product');
+      }
+      
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });

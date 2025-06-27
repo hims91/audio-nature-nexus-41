@@ -1258,6 +1258,10 @@ export type Database = {
           expires_at: string
         }[]
       }
+      delete_product_with_orders: {
+        Args: { product_id_param: string }
+        Returns: boolean
+      }
       generate_order_number: {
         Args: Record<PropertyKey, never>
         Returns: string
