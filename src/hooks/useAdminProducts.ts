@@ -165,15 +165,24 @@ export const useProductMutations = () => {
 
   const deleteProduct = useMutation({
     mutationFn: async (id: string) => {
+      console.log('Attempting to delete product:', id);
+      
       // Use the new database function to safely delete products with order history
       const { data, error } = await supabase.rpc('delete_product_with_orders', {
         product_id_param: id
       });
       
-      if (error) throw error;
+      console.log('Delete function response:', { data, error });
       
-      if (!data) {
-        throw new Error('Failed to delete product');
+      if (error) {
+        console.error('Database error during deletion:', error);
+        throw error;
+      }
+      
+      // The function returns true on success, false on failure
+      if (data !== true) {
+        console.error('Delete function returned false, indicating failure');
+        throw new Error('Product deletion failed - this may be due to database constraints or other issues');
       }
       
       return data;
