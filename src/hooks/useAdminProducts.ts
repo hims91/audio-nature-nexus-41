@@ -167,6 +167,17 @@ export const useProductMutations = () => {
     mutationFn: async (id: string) => {
       console.log('Attempting to delete product:', id);
       
+      // First, let's try to check if the user has admin permissions
+      const { data: userProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+      
+      if (profileError || userProfile?.role !== 'admin') {
+        throw new Error('You do not have permission to delete products. Admin access required.');
+      }
+      
       // Use the updated database function to safely delete products with order history
       const { data, error } = await supabase.rpc('delete_product_with_orders', {
         product_id_param: id
@@ -182,8 +193,19 @@ export const useProductMutations = () => {
       // The function returns true on success, false on failure
       if (data !== true) {
         console.error('Delete function returned false, indicating failure');
+        // Try to get more details about why it failed
+        const { data: productExists } = await supabase
+          .from('products')
+          .select('id')
+          .eq('id', id)
+          .single();
+        
+        if (!productExists) {
+          throw new Error('Product not found or already deleted.');
+        }
+        
         // Check postgres logs for detailed error information
-        throw new Error('Product deletion failed. Check the database logs for more details. The product may be referenced by other records or there may be permission issues.');
+        throw new Error('Product deletion failed. This could be due to database constraints, permissions, or the product being referenced by other records. Check the database logs for more details.');
       }
       
       console.log('Product deleted successfully');

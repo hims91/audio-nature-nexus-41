@@ -186,13 +186,40 @@ const AdminProductForm: React.FC = () => {
         finalSKU = await generateUniqueSKU(data.name);
       }
 
+      // Helper function to convert empty strings to null for optional integer fields
+      const parseOptionalNumber = (value: any): number | null => {
+        if (value === '' || value === undefined || value === null) return null;
+        const parsed = typeof value === 'string' ? parseFloat(value) : value;
+        return isNaN(parsed) ? null : Math.round(parsed * 100); // Convert to cents
+      };
+
+      const parseOptionalInteger = (value: any): number | null => {
+        if (value === '' || value === undefined || value === null) return null;
+        const parsed = typeof value === 'string' ? parseInt(value) : value;
+        return isNaN(parsed) ? null : parsed;
+      };
+
       const formattedData = {
-        ...data,
+        name: data.name,
+        slug: data.slug,
+        description: data.description || null,
+        short_description: data.short_description || null,
         category_id: data.category_id === 'none' ? null : data.category_id,
         price_cents: Math.round(data.price_cents * 100),
-        compare_at_price_cents: data.compare_at_price_cents ? Math.round(data.compare_at_price_cents * 100) : null,
+        compare_at_price_cents: parseOptionalNumber(data.compare_at_price_cents),
         sku: finalSKU || null, // Set to null if empty to avoid unique constraint issues
+        inventory_quantity: data.inventory_quantity || 0,
+        track_inventory: data.track_inventory,
+        allow_backorders: data.allow_backorders,
+        weight_grams: parseOptionalInteger(data.weight_grams),
+        requires_shipping: data.requires_shipping,
+        is_active: data.is_active,
+        is_featured: data.is_featured,
+        meta_title: data.meta_title || null,
+        meta_description: data.meta_description || null,
       };
+
+      console.log('Formatted data before submission:', formattedData);
 
       let productId: string;
 
@@ -215,6 +242,8 @@ const AdminProductForm: React.FC = () => {
       // Handle specific SKU constraint error
       if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
         toast.error('SKU already exists. Please use a different SKU or leave it empty to auto-generate.');
+      } else if (error && typeof error === 'object' && 'code' in error && error.code === '22P02') {
+        toast.error('Invalid data format. Please check that all numeric fields contain valid numbers.');
       } else {
         toast.error(`Failed to ${isEditing ? 'update' : 'create'} product`);
       }
