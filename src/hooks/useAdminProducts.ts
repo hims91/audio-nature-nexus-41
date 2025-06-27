@@ -182,7 +182,8 @@ export const useProductMutations = () => {
       // The function returns true on success, false on failure
       if (data !== true) {
         console.error('Delete function returned false, indicating failure');
-        throw new Error('Product deletion failed. The product may not exist or there may be database constraints preventing deletion.');
+        // Check postgres logs for detailed error information
+        throw new Error('Product deletion failed. Check the database logs for more details. The product may be referenced by other records or there may be permission issues.');
       }
       
       console.log('Product deleted successfully');
@@ -196,7 +197,7 @@ export const useProductMutations = () => {
     onError: (error: any) => {
       console.error('Error deleting product:', error);
       const errorMessage = error.message || 'Failed to delete product';
-      toast.error(errorMessage);
+      toast.error(`Product deletion failed: ${errorMessage}`);
     },
   });
 

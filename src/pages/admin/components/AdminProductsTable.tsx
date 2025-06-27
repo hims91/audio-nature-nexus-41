@@ -64,7 +64,10 @@ const AdminProductsTable: React.FC<ProductsTableProps> = ({
   const handleDeleteWithConfirmation = (productId: string, productName: string) => {
     const isConfirmed = confirm(
       `Are you sure you want to DELETE "${productName}"?\n\n` +
-      'This will remove the product from your catalog, but order history will be preserved.\n' +
+      'This will:\n' +
+      '• Remove the product from your catalog\n' +
+      '• Preserve existing order history (orders will show product as "Deleted Product")\n' +
+      '• Delete all product images and variants\n\n' +
       'This action cannot be undone.\n\n' +
       'Click OK to proceed with deletion.'
     );
