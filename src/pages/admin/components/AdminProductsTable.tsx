@@ -60,6 +60,19 @@ const AdminProductsTable: React.FC<ProductsTableProps> = ({
   handleStatusToggle,
   handleDeleteProduct
 }) => {
+  const handleDeleteWithConfirmation = (productId: string, productName: string) => {
+    const isConfirmed = confirm(
+      `Are you sure you want to delete "${productName}"?\n\n` +
+      'Note: Products that have been ordered cannot be deleted. ' +
+      'Consider deactivating them instead.\n\n' +
+      'This action cannot be undone.'
+    );
+    
+    if (isConfirmed) {
+      handleDeleteProduct(productId);
+    }
+  };
+
   return (
     <FadeInView direction="up" delay={0.6}>
       <Card>
@@ -209,7 +222,7 @@ const AdminProductsTable: React.FC<ProductsTableProps> = ({
                                     {product.is_active ? 'Deactivate' : 'Activate'}
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() => handleDeleteProduct(product.id)}
+                                    onClick={() => handleDeleteWithConfirmation(product.id, product.name)}
                                     className="text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
