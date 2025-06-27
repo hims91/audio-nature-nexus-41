@@ -164,30 +164,12 @@ export const useProductMutations = () => {
 
   const deleteProduct = useMutation({
     mutationFn: async (id: string) => {
-      // First check if product has any order items
-      const { data: orderItems, error: checkError } = await supabase
-        .from('order_items')
-        .select('id')
-        .eq('product_id', id)
-        .limit(1);
-
-      if (checkError) throw checkError;
-
-      if (orderItems && orderItems.length > 0) {
-        throw new Error('Cannot delete product that has been ordered. Consider deactivating it instead.');
-      }
-
       const { error } = await supabase
         .from('products')
         .delete()
         .eq('id', id);
       
-      if (error) {
-        if (error.code === '23503') {
-          throw new Error('Cannot delete product that has been ordered. Consider deactivating it instead.');
-        }
-        throw error;
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
@@ -196,11 +178,7 @@ export const useProductMutations = () => {
     },
     onError: (error: any) => {
       console.error('Error deleting product:', error);
-      if (error.message.includes('Cannot delete product that has been ordered')) {
-        toast.error('Cannot delete product that has been ordered. Consider deactivating it instead.');
-      } else {
-        toast.error('Failed to delete product');
-      }
+      toast.error('Failed to delete product');
     },
   });
 
