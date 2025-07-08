@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface FileUploadResult {
@@ -44,8 +45,9 @@ export class FileUploadService {
       return 'audio/mp4';
     }
     
-    if (originalType === 'audio/x-flac' || originalType === 'application/x-flac' || fileName.endsWith('.flac')) {
-      return 'audio/flac';
+    // Handle FLAC files - Supabase doesn't support audio/flac, so we use application/octet-stream
+    if (originalType === 'audio/flac' || originalType === 'audio/x-flac' || originalType === 'application/x-flac' || fileName.endsWith('.flac')) {
+      return 'application/octet-stream';
     }
     
     // Normalize problematic MIME types for video
@@ -63,7 +65,7 @@ export class FileUploadService {
   private static validateAudioFile(file: File): boolean {
     const normalizedMimeType = this.normalizeMimeType(file);
     
-    // Accept common audio MIME types
+    // Accept common audio MIME types (including normalized ones)
     const validMimeTypes = [
       'audio/mpeg',      // .mp3
       'audio/wav',       // .wav (normalized)
@@ -72,10 +74,8 @@ export class FileUploadService {
       'audio/vorbis',    // .ogg (alternative)
       'audio/mp4',       // .m4a (normalized)
       'audio/aac',       // .aac
-      'audio/flac',      // .flac
-      'audio/x-flac',    // .flac (alternative)
-      'application/x-flac', // .flac (another alternative)
-      'audio/webm'       // .webm audio
+      'audio/webm',      // .webm audio
+      'application/octet-stream' // FLAC files (normalized)
     ];
 
     const validExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.flac', '.webm'];
@@ -221,6 +221,8 @@ export class FileUploadService {
           uploadFile = new File([file], file.name, { type: normalizedType });
         }
       }
+
+      console.log(`📤 Final upload MIME type: ${uploadFile.type}`);
 
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage
