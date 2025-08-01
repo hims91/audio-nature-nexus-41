@@ -25,13 +25,8 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
   const items = showFeaturedOnly ? featuredItems : portfolioItems;
   const displayItems = limit ? items.slice(0, limit) : items;
 
-  const categories = ["All", ...Array.from(new Set(portfolioItems.map(item => item.category)))];
-
-  const filteredItems = selectedCategory === "All" 
-    ? displayItems 
-    : displayItems.filter(item => item.category === selectedCategory);
-
-  if (isLoading) {
+  // Always show loading spinner initially or when there's no data yet
+  if (isLoading && items.length === 0) {
     return (
       <div className="flex items-center justify-center py-8 sm:py-16 min-h-[40vh]">
         <div className="text-center px-4">
@@ -71,6 +66,11 @@ const PortfolioGridEnhanced: React.FC<PortfolioGridEnhancedProps> = ({
       </div>
     );
   }
+
+  const categories = ["All", ...Array.from(new Set(portfolioItems.map(item => item.category)))];
+  const filteredItems = selectedCategory === "All" 
+    ? displayItems 
+    : displayItems.filter(item => item.category === selectedCategory);
 
   return (
     <div className="w-full min-h-[50vh]">

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapDBToPortfolioItem, type PortfolioItem, type PortfolioItemDB } from "@/types/portfolio";
 
 export const usePortfolioQueries = () => {
-  const { data: portfolioItems = [], isLoading, error, refetch } = useQuery({
+  const { data: portfolioItems = [], isLoading, error, refetch, isFetched } = useQuery({
     queryKey: ['portfolio-items'],
     queryFn: async (): Promise<PortfolioItem[]> => {
       console.log('🔍 Fetching portfolio items from Supabase...');
@@ -21,14 +21,14 @@ export const usePortfolioQueries = () => {
       console.log(`✅ Successfully fetched ${data.length} portfolio items`);
       return data.map(mapDBToPortfolioItem);
     },
-    retry: 3,
+    retry: 2,
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: false,
-    refetchOnMount: 'always',
+    refetchOnMount: true,
   });
 
-  const { data: featuredItems = [] } = useQuery({
+  const { data: featuredItems = [], isLoading: isFeaturedLoading } = useQuery({
     queryKey: ['featured-portfolio-items'],
     queryFn: async (): Promise<PortfolioItem[]> => {
       console.log('🔍 Fetching featured portfolio items...');
@@ -47,16 +47,20 @@ export const usePortfolioQueries = () => {
       console.log(`✅ Successfully fetched ${data.length} featured items`);
       return data.map(mapDBToPortfolioItem);
     },
-    enabled: !isLoading,
-    retry: 3,
+    enabled: !isLoading && isFetched, // Only fetch featured items after main items are fetched
+    retry: 2,
     staleTime: 1000 * 60 * 3, // 3 minutes for featured items
     gcTime: 1000 * 60 * 8, // 8 minutes
   });
 
+  const isInitialLoading = isLoading && !isFetched;
+  const isAnyLoading = isLoading || isFeaturedLoading;
+
   return {
     portfolioItems,
     featuredItems,
-    isLoading,
+    isLoading: isAnyLoading,
+    isInitialLoading,
     error,
     refetch
   };

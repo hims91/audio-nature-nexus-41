@@ -8,18 +8,20 @@ export const usePortfolioRealtime = () => {
   const queryClient = useQueryClient();
   const channelRef = useRef<any>(null);
   const isSubscribedRef = useRef(false);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
-    // Prevent multiple subscriptions
-    if (isSubscribedRef.current || channelRef.current) {
-      console.log('🔄 Portfolio realtime already subscribed, skipping...');
+    // Prevent multiple subscriptions and ensure single initialization
+    if (isInitializedRef.current) {
+      console.log('🔄 Portfolio realtime already initialized, skipping...');
       return;
     }
 
+    isInitializedRef.current = true;
     console.log('🔄 Setting up real-time subscription for portfolio items...');
     
     // Create unique channel name to avoid conflicts
-    const channelName = `portfolio-realtime-${Math.random().toString(36).substr(2, 9)}`;
+    const channelName = `portfolio-realtime-${Date.now()}`;
     
     const channel = supabase
       .channel(channelName)
@@ -32,6 +34,13 @@ export const usePortfolioRealtime = () => {
         },
         (payload) => {
           console.log('📡 Real-time update received:', payload.eventType, payload);
+          
+          // Only update if we have data in cache already
+          const hasExistingData = queryClient.getQueryData(['portfolio-items']);
+          if (!hasExistingData) {
+            console.log('📡 No existing data in cache, skipping optimistic update');
+            return;
+          }
           
           // Optimistic updates for better UX
           switch (payload.eventType) {
@@ -91,6 +100,7 @@ export const usePortfolioRealtime = () => {
         channelRef.current = null;
       }
       isSubscribedRef.current = false;
+      isInitializedRef.current = false;
     };
   }, [queryClient]);
 };
